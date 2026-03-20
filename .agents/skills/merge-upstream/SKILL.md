@@ -1,6 +1,6 @@
 ---
 name: merge-upstream
-description: Guides agents on how to merge updates from the upstream oh-my-openagent repository into this GPT-slim fork without undoing fork-specific decisions.
+description: Guides agents on how to merge updates from the upstream oh-my-openagent repository into this opencode-codex-orch fork without undoing fork-specific decisions.
 ---
 
 # Merge Upstream
@@ -18,7 +18,7 @@ Current fork identity:
 - user config: `~/.config/opencode/opencode-codex-orch.jsonc`
 - upstream source of truth for comparison: `code-yeongyu/oh-my-openagent`
 
-This fork keeps the GPT/Codex-oriented workflow and aggressively avoids reintroducing heavy or redundant upstream behavior unless it clearly improves the slim fork.
+This fork keeps the GPT/Codex-oriented workflow and aggressively avoids reintroducing heavy or redundant upstream behavior unless it clearly improves this project.
 
 ## Merge Contract
 
