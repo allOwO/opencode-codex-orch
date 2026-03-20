@@ -1,7 +1,7 @@
 {
   "name": "opencode-codex-orch",
   "version": "0.1.11",
-  "description": "GPT-optimized lean fork of oh-my-openagent — 33 hooks removed, 5 tools removed, Sisyphus prompt rewritten based on OpenAI Codex prompt.md",
+  "description": "Built on OMO's lean oh-my-openagent fork with new skills, stronger engineering workflows, and GPT-specific optimizations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",

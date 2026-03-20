@@ -103,7 +103,7 @@ After making changes, you can test your local build in OpenCode:
 
 3. **Restart OpenCode** to load the changes.
 
-4. **Verify** the plugin is loaded by checking for OmO agent availability or startup messages.
+4. **Verify** the plugin is loaded by checking for opencode-codex-orch agent availability or startup messages.
 
 ## Project Structure
 
