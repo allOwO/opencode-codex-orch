@@ -1,52 +1,26 @@
 # opencode-codex-orch
 
-> Lean GPT-optimized fork of [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent).  
-> Sisyphus prompt rewritten based on [OpenAI Codex CLI](https://github.com/openai/codex) `prompt.md`.
+> Multi-agent orchestration plugin for [OpenCode](https://opencode.ai). Multiple models, multiple agents, one coordinated team.
 
-## What changed
+## What it does
 
-```diff
-- 38+ hooks   → 11 hooks (error recovery, fallback, injectors, guards)
-- 16+ tools   → leaner toolset (restored ast_grep_search; removed call-oco-agent, interactive-bash, look-at, skill-mcp)
-- 9 agents    → 8 agents (removed Hephaestus)
-- ~2000 line Sisyphus prompt → ~180 line Codex-style prompt
-- 388 files changed, 41,610 deletions
-```
+opencode-codex-orch turns a single AI agent session into a coordinated development team. Sisyphus orchestrates, specialized agents handle research, planning, code search, and execution in parallel across multiple model providers.
 
-### Kept
+**Key capabilities:**
 
-- `ultrawork` / `ulw`
-- Delegation 6-section protocol
-- Verification loop (lsp_diagnostics + tests + build)
-- Explore / Librarian parallel background agents
-- Explicit skill loading through `skill(name="...")`
-- Hashline edit (LINE#ID content hash)
-- LSP tools (rename, diagnostics, goto_definition, find_references)
-- Session manager
-- Background task (parallel sub-agents)
-- Model fallback
-
-## New in this fork
-
-- Built-in `skill-creator` skill for creating and refining `SKILL.md`-based skills
-- New CLI helpers for the local skill workflow:
-  - `bunx opencode-codex-orch validate-skill <skill-dir>`
-  - `bunx opencode-codex-orch eval-skill <skill-dir> --eval-file <path>`
-  - `bunx opencode-codex-orch grade-skill-eval <report.json>`
-- Official examples and docs under `docs/examples/skill-creator/` and `docs/guide/skill-creator-evals.md`
-
-### Removed
-
-- 33 hooks (todo-continuation-enforcer, think-mode, anthropic-*, session-notification, comment-checker, ralph-loop, etc.)
-- 4 tools (call-oco-agent, interactive-bash, look-at, skill-mcp)
-- Hephaestus agent
-- Gemini / Anthropic prompt patches
+- **Multi-agent orchestration** with 10 specialized agents (Sisyphus, Atlas, Oracle, Prometheus, Librarian, Explore, Metis, Momus, Multimodal-Looker, Sisyphus-Junior)
+- **Multi-model routing** across Claude, GPT, Kimi, Gemini, GLM and more
+- **`ultrawork` / `ulw`** prefix for autonomous, execution-biased operation
+- **Hash-anchored edits** (`LINE#ID` content hashing) for reliable file modifications
+- **Background agents** running 5+ tasks in parallel
+- **Built-in MCPs** (web search, Context7, Grep.app)
+- **LSP + AST-Grep** for IDE-level precision
+- **Skill system** with embedded per-skill MCP servers
+- **13 lifecycle hooks** for error recovery, model fallback, context injection, etc.
 
 ## Install
 
-OpenCode only supports plugin entries as npm package names or `file://` paths. It does not natively load GitHub repo specs like `github:user/repo`.
-
-Use this fork by package name once you publish it to npm/GitHub Packages:
+Add to your OpenCode config (`~/.config/opencode/opencode.json`):
 
 ```json
 {
@@ -54,9 +28,7 @@ Use this fork by package name once you publish it to npm/GitHub Packages:
 }
 ```
 
-Bare package name also works and resolves to the same npm `latest` dist-tag.
-
-For local development, keep using a file reference:
+For local development:
 
 ```json
 {
@@ -64,13 +36,14 @@ For local development, keep using a file reference:
 }
 ```
 
-CLI package name after publish:
+Interactive setup:
 
 ```bash
 bunx opencode-codex-orch install
 ```
 
-Config files same as upstream:
+### Config files
+
 - Project: `.opencode/opencode-codex-orch.json`
 - User: `~/.config/opencode/opencode-codex-orch.json`
 
@@ -82,18 +55,20 @@ opencode
 ulw fix the failing tests
 ```
 
-`ulw` is a lightweight execution-bias prefix for Sisyphus in this fork: when it appears at the start of your message to Sisyphus, it raises model precision and nudges that turn toward more autonomous exploration and delegation.
+`ulw` triggers autonomous execution mode. The agent explores, plans, implements, and verifies on its own.
 
-To load the built-in skill explicitly:
+## Documentation
 
-```text
-skill(name="skill-creator")
-```
+- [Overview](docs/guide/overview.md)
+- [Installation Guide](docs/guide/installation.md)
+- [Orchestration Guide](docs/guide/orchestration.md)
+- [Agent-Model Matching](docs/guide/agent-model-matching.md)
+- [Configuration Reference](docs/reference/configuration.md)
+- [Features Reference](docs/reference/features.md)
 
 ## Credits
 
-Fork of [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) by [@code-yeongyu](https://github.com/code-yeongyu).  
-Prompt design referenced [OpenAI Codex CLI](https://github.com/openai/codex) `prompt.md`.
+Prompt design referenced [OpenAI Codex CLI](https://github.com/openai/codex) `prompt.md`. Hash-anchored editing inspired by [oh-my-pi](https://github.com/can1357/oh-my-pi).
 
 ## License
 
