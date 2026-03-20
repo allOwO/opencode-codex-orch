@@ -1,4 +1,4 @@
-# src/hooks/ — 13 Kept Lifecycle Hooks (GPT-slim fork)
+# src/hooks/ — 13 Kept Lifecycle Hooks (opencode-codex-orch)
 
 **Generated:** 2026-03-10
 

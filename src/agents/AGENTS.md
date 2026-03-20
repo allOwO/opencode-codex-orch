@@ -1,4 +1,4 @@
-# src/agents/ — 8 Agent Definitions (GPT-slim fork)
+# src/agents/ — 8 Agent Definitions (opencode-codex-orch)
 
 **Generated:** 2026-03-06
 

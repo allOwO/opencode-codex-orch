@@ -4,7 +4,7 @@
 
 ## OVERVIEW
 
-GPT-optimized lean fork of oh-my-openagent. OpenCode plugin (npm: `opencode-codex-orch`) with multi-agent orchestration, 13 lifecycle hooks, ~18 tools, skill/command/MCP systems. Sisyphus prompt rewritten based on OpenAI Codex prompt.md.
+Multi-agent orchestration plugin for OpenCode (npm: `opencode-codex-orch`) with 13 lifecycle hooks, ~18 tools, skill/command/MCP systems. Developed with new skills, stronger engineering workflows, and GPT-specific optimizations. Sisyphus prompt rewritten based on OpenAI Codex prompt.md.
 
 ## STRUCTURE
 
