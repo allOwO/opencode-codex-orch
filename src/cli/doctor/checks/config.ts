@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { getCacheDir } from "../../../shared/data-path";
+import { detectConfigFormat } from "../../config-manager/opencode-config-format";
+import { parseOpenCodeConfigFileWithError } from "../../config-manager/parse-opencode-config-file";
 import { CHECK_IDS, CHECK_NAMES } from "../constants";
 import type { CheckResult, DoctorIssue } from "../types";
 import { validateConfig } from "./config-validation";
@@ -17,10 +19,33 @@ interface ProviderModelsCache {
 	models?: Record<string, unknown>;
 }
 
+interface OpenCodeCoreConfig {
+	provider?: Record<string, unknown>;
+}
+
+function loadConfiguredProviderIds(): string[] {
+	const { format, path } = detectConfigFormat();
+	if (format === "none") {
+		return [];
+	}
+
+	const result = parseOpenCodeConfigFileWithError(path);
+	if (!result.config) {
+		return [];
+	}
+
+	const coreConfig = result.config as OpenCodeCoreConfig;
+	return Object.keys(coreConfig.provider ?? {});
+}
+
 function loadKnownProviderIds(): Set<string> {
 	const availableModels = loadAvailableModelsFromCache();
 	const providers = new Set(availableModels.providers);
 	const cacheDirs = [join(getCacheDir(), "opencode-codex-orch")];
+
+	for (const providerId of loadConfiguredProviderIds()) {
+		providers.add(providerId);
+	}
 
 	for (const cacheDir of cacheDirs) {
 		const providerModelsPath = join(cacheDir, "provider-models.json");
