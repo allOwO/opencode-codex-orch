@@ -1,0 +1,6 @@
+export { findPluginEntry } from "./checker/plugin-entry"
+export { getCachedVersion } from "./checker/cached-version"
+export { getLatestVersion } from "./checker/latest-version"
+export { getLocalDevVersion } from "./checker/local-dev-version"
+export { getLocalDevPath, isLocalDevMode } from "./checker/local-dev-path"
+export { checkForUpdate } from "./checker/check-for-update"

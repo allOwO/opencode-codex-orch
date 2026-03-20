@@ -1,0 +1,108 @@
+import { describe, expect, test, beforeEach, afterEach } from "bun:test"
+
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { shouldRetryError, selectFallbackProvider } from "./model-error-classifier"
+
+describe("model-error-classifier", () => {
+  let tempDir: string
+  let originalXdgCacheHome: string | undefined
+  let testCacheDir: string
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), "oco-model-error-"))
+    originalXdgCacheHome = process.env.XDG_CACHE_HOME
+    process.env.XDG_CACHE_HOME = tempDir
+    testCacheDir = join(tempDir, "opencode-codex-orch")
+    mkdirSync(testCacheDir, { recursive: true })
+  })
+
+  afterEach(() => {
+    if (originalXdgCacheHome !== undefined) {
+      process.env.XDG_CACHE_HOME = originalXdgCacheHome
+    } else {
+      delete process.env.XDG_CACHE_HOME
+    }
+    if (existsSync(tempDir)) {
+      rmSync(tempDir, { recursive: true, force: true })
+    }
+  })
+
+  test("treats overloaded retry messages as retryable", () => {
+    //#given
+    const error = { message: "Provider is overloaded" }
+
+    //#when
+    const result = shouldRetryError(error)
+
+    //#then
+    expect(result).toBe(true)
+  })
+
+  test("treats cooling-down auto-retry messages as retryable", () => {
+    //#given
+    const error = {
+      message:
+        "All credentials for model claude-opus-4-6-thinking are cooling down [retrying in ~5 days attempt #1]",
+    }
+
+    //#when
+    const result = shouldRetryError(error)
+
+    //#then
+    expect(result).toBe(true)
+  })
+
+  test("selectFallbackProvider prefers first connected provider in preference order", () => {
+    //#given
+    writeFileSync(
+      join(testCacheDir, "connected-providers.json"),
+      JSON.stringify({ connected: ["anthropic", "nvidia"], updatedAt: new Date().toISOString() }, null, 2),
+    )
+
+    //#when
+    const provider = selectFallbackProvider(["anthropic", "nvidia"], "nvidia")
+
+    //#then
+    expect(provider).toBe("anthropic")
+  })
+
+  test("selectFallbackProvider falls back to next connected provider when first is disconnected", () => {
+    //#given
+    writeFileSync(
+      join(testCacheDir, "connected-providers.json"),
+      JSON.stringify({ connected: ["nvidia"], updatedAt: new Date().toISOString() }, null, 2),
+    )
+
+    //#when
+    const provider = selectFallbackProvider(["anthropic", "nvidia"])
+
+    //#then
+    expect(provider).toBe("nvidia")
+  })
+
+  test("selectFallbackProvider uses provider preference order when cache is missing", () => {
+    //#given - no cache file
+
+    //#when
+    const provider = selectFallbackProvider(["anthropic", "nvidia"], "nvidia")
+
+    //#then
+    expect(provider).toBe("anthropic")
+  })
+
+  test("selectFallbackProvider uses connected preferred provider when fallback providers are unavailable", () => {
+    //#given
+    writeFileSync(
+      join(testCacheDir, "connected-providers.json"),
+      JSON.stringify({ connected: ["provider-x"], updatedAt: new Date().toISOString() }, null, 2),
+    )
+
+    //#when
+    const provider = selectFallbackProvider(["provider-y"], "provider-x")
+
+    //#then
+    expect(provider).toBe("provider-x")
+  })
+})

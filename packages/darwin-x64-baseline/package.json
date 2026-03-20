@@ -1,0 +1,22 @@
+{
+  "name": "opencode-codex-orch-darwin-x64-baseline",
+  "version": "0.1.11",
+  "description": "Platform-specific binary for opencode-codex-orch (darwin-x64-baseline, no AVX2)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/allOwO/opencode-codex-orch"
+  },
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "bin"
+  ],
+  "bin": {
+    "opencode-codex-orch": "./bin/opencode-codex-orch"
+  }
+}

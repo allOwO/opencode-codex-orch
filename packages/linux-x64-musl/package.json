@@ -1,0 +1,25 @@
+{
+  "name": "opencode-codex-orch-linux-x64-musl",
+  "version": "0.1.11",
+  "description": "Platform-specific binary for opencode-codex-orch (linux-x64-musl)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/allOwO/opencode-codex-orch"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "libc": [
+    "musl"
+  ],
+  "files": [
+    "bin"
+  ],
+  "bin": {
+    "opencode-codex-orch": "./bin/opencode-codex-orch"
+  }
+}

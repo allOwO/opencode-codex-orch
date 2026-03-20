@@ -1,0 +1,22 @@
+{
+  "name": "opencode-codex-orch-windows-x64-baseline",
+  "version": "0.1.8",
+  "description": "Platform-specific binary for opencode-codex-orch (windows-x64-baseline, no AVX2)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/allOwO/opencode-codex-orch"
+  },
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "bin"
+  ],
+  "bin": {
+    "opencode-codex-orch": "./bin/opencode-codex-orch.exe"
+  }
+}
