@@ -1,12 +1,17 @@
-import { resolve } from "path"
+import { extname, resolve } from "path"
 
 import { tool, type ToolDefinition } from "@opencode-ai/plugin/tool"
 
 import { DEFAULT_MAX_DIAGNOSTICS } from "./constants"
+import { findServerForExtension } from "./config"
 import { aggregateDiagnosticsForDirectory } from "./directory-diagnostics"
 import { filterDiagnosticsBySeverity, formatDiagnostic } from "./lsp-formatters"
 import { isDirectoryPath, withLspClient } from "./lsp-client-wrapper"
 import type { Diagnostic } from "./types"
+
+function formatUnsupportedDiagnosticsMessage(extension: string): string {
+  return `No diagnostics found: no LSP server configured for extension ${extension || "<none>"}`
+}
 
 export const lsp_diagnostics: ToolDefinition = tool({
   description:
@@ -34,7 +39,19 @@ export const lsp_diagnostics: ToolDefinition = tool({
               `Supported extensions: .ts, .tsx, .js, .py, .go, etc.`
           )
         }
+
+        const serverResult = findServerForExtension(args.extension)
+        if (serverResult.status === "not_configured") {
+          return formatUnsupportedDiagnosticsMessage(args.extension)
+        }
+
         return await aggregateDiagnosticsForDirectory(absPath, args.extension, args.severity)
+      }
+
+      const extension = extname(absPath)
+      const serverResult = findServerForExtension(extension)
+      if (serverResult.status === "not_configured") {
+        return formatUnsupportedDiagnosticsMessage(extension)
       }
 
       const result = await withLspClient(args.filePath, async (client) => {
