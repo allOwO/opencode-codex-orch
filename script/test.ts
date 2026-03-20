@@ -19,6 +19,7 @@ const ISOLATED_TEST_SPECS = [
   "src/features/opencode-skill-loader/loader.test.ts",
   "src/hooks/anthropic-context-window-limit-recovery/recovery-hook.test.ts",
   "src/hooks/anthropic-context-window-limit-recovery/executor.test.ts",
+  "src/tools/lsp/diagnostics-tool.test.ts",
   "src/shared/model-error-classifier.test.ts",
   "src/shared/connected-providers-cache.test.ts",
   "src/shared/model-availability.test.ts",
