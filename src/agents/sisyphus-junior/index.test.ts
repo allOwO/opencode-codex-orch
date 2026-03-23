@@ -290,7 +290,8 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
 
       // then
       expect(result.prompt).toContain("Sisyphus-Junior")
-      expect(result.prompt).toContain("Execute tasks directly")
+      expect(result.prompt).toContain("focused task executor")
+      expect(result.prompt).toContain("Senior Engineer")
     })
 
     test("Claude model uses default prompt with discipline section", () => {
@@ -351,7 +352,7 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
 
       // then
       const prompt = result.prompt ?? ""
-      const baseEndIndex = prompt.indexOf("</Style>")
+      const baseEndIndex = prompt.indexOf("After 3 DIFFERENT approaches fail")
       const appendIndex = prompt.indexOf("CUSTOM_MARKER_FOR_TEST")
       expect(baseEndIndex).not.toBe(-1)
       expect(appendIndex).toBeGreaterThan(baseEndIndex)
