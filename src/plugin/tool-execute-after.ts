@@ -20,6 +20,8 @@ export function createToolExecuteAfterHandler(args: {
     input: { tool: string; sessionID: string; callID: string },
     output: { title: string; output: string; metadata: Record<string, unknown> } | undefined,
   ): Promise<void> => {
+    await hooks.writeExistingFileGuard?.["tool.execute.after"]?.(input as never, output as never)
+
     if (!output) return
 
     const stored = consumeToolMetadata(input.sessionID, input.callID)

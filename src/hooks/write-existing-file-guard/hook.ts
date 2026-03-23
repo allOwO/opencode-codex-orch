@@ -1,165 +1,61 @@
 import type { Hooks, PluginInput } from "@opencode-ai/plugin"
 
-import { existsSync, realpathSync } from "fs"
-import { basename, dirname, isAbsolute, join, normalize, relative, resolve } from "path"
-
 import { log } from "../../shared"
+import {
+  MAX_TRACKED_PATHS_PER_SESSION,
+  MAX_TRACKED_SESSIONS,
+  READ_REQUIRED_MESSAGE,
+  STALE_SNAPSHOT_MESSAGE,
+} from "./constants"
+import { readFileSnapshot, snapshotsMatch, type FileSnapshot } from "./file-snapshot"
+import { asRecord, getPathFromArgs, isOverwriteEnabled, type GuardArgs } from "./guard-args"
+import { isPathInsideDirectory, resolveInputPath, toCanonicalPath } from "./path-utils"
+import { createSessionSnapshotStore } from "./session-snapshot-store"
 
-type GuardArgs = {
-  filePath?: string
-  path?: string
-  file_path?: string
-  overwrite?: boolean | string
+type PendingModification = {
+  sessionID: string
+  resolvedPath: string
+  snapshotBeforeCall?: FileSnapshot
 }
 
-const MAX_TRACKED_SESSIONS = 256
-export const MAX_TRACKED_PATHS_PER_SESSION = 1024
-const BLOCK_MESSAGE = "File already exists. Use edit tool instead."
+export { MAX_TRACKED_PATHS_PER_SESSION } from "./constants"
 
-function asRecord(value: unknown): Record<string, unknown> | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return undefined
-  }
-
-  return value as Record<string, unknown>
+function isModificationTool(toolName: string | undefined): boolean {
+  return toolName === "write" || toolName === "edit" || toolName === "multiedit"
 }
 
-function getPathFromArgs(args: GuardArgs | undefined): string | undefined {
-  return args?.filePath ?? args?.path ?? args?.file_path
-}
-
-function resolveInputPath(ctx: PluginInput, inputPath: string): string {
-  return normalize(isAbsolute(inputPath) ? inputPath : resolve(ctx.directory, inputPath))
-}
-
-function isPathInsideDirectory(pathToCheck: string, directory: string): boolean {
-  const relativePath = relative(directory, pathToCheck)
-  return relativePath === "" || (!relativePath.startsWith("..") && !isAbsolute(relativePath))
-}
-
-
-
-function toCanonicalPath(absolutePath: string): string {
-  let canonicalPath = absolutePath
-
-  if (existsSync(absolutePath)) {
-    try {
-      canonicalPath = realpathSync.native(absolutePath)
-    } catch {
-      canonicalPath = absolutePath
-    }
-  } else {
-    const absoluteDir = dirname(absolutePath)
-    const resolvedDir = existsSync(absoluteDir) ? realpathSync.native(absoluteDir) : absoluteDir
-    canonicalPath = join(resolvedDir, basename(absolutePath))
-  }
-
-  // Preserve canonical casing from the filesystem to avoid collapsing distinct
-  // files on case-sensitive volumes (supported on all major OSes).
-  return normalize(canonicalPath)
-}
-
-function isOverwriteEnabled(value: boolean | string | undefined): boolean {
-  if (value === true) {
-    return true
-  }
-
-  if (typeof value === "string") {
-    return value.toLowerCase() === "true"
-  }
-
-  return false
+function isTrackedTool(toolName: string | undefined): boolean {
+  return toolName === "read" || isModificationTool(toolName)
 }
 
 export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
-  const readPermissionsBySession = new Map<string, Set<string>>()
-  const sessionLastAccess = new Map<string, number>()
+  const snapshots = createSessionSnapshotStore({
+    maxSessions: MAX_TRACKED_SESSIONS,
+    maxPathsPerSession: MAX_TRACKED_PATHS_PER_SESSION,
+  })
+  const pendingByCall = new Map<string, PendingModification>()
   const canonicalSessionRoot = toCanonicalPath(resolveInputPath(ctx, ctx.directory))
 
-  const touchSession = (sessionID: string): void => {
-    sessionLastAccess.set(sessionID, Date.now())
-  }
-
-  const evictLeastRecentlyUsedSession = (): void => {
-    let oldestSessionID: string | undefined
-    let oldestSeen = Number.POSITIVE_INFINITY
-
-    for (const [sessionID, lastSeen] of sessionLastAccess.entries()) {
-      if (lastSeen < oldestSeen) {
-        oldestSeen = lastSeen
-        oldestSessionID = sessionID
-      }
-    }
-
-    if (!oldestSessionID) {
+  const queuePendingModification = (
+    input: { callID?: string; sessionID?: string },
+    resolvedPath: string,
+    snapshotBeforeCall?: FileSnapshot
+  ): void => {
+    if (!input.callID || !input.sessionID) {
       return
     }
 
-    readPermissionsBySession.delete(oldestSessionID)
-    sessionLastAccess.delete(oldestSessionID)
-  }
-
-  const ensureSessionReadSet = (sessionID: string): Set<string> => {
-    let readSet = readPermissionsBySession.get(sessionID)
-    if (!readSet) {
-      if (readPermissionsBySession.size >= MAX_TRACKED_SESSIONS) {
-        evictLeastRecentlyUsedSession()
-      }
-
-      readSet = new Set<string>()
-      readPermissionsBySession.set(sessionID, readSet)
-    }
-
-    touchSession(sessionID)
-    return readSet
-  }
-
-  const trimSessionReadSet = (readSet: Set<string>): void => {
-    while (readSet.size > MAX_TRACKED_PATHS_PER_SESSION) {
-      const oldestPath = readSet.values().next().value
-      if (!oldestPath) {
-        return
-      }
-
-      readSet.delete(oldestPath)
-    }
-  }
-
-  const registerReadPermission = (sessionID: string, canonicalPath: string): void => {
-    const readSet = ensureSessionReadSet(sessionID)
-    if (readSet.has(canonicalPath)) {
-      readSet.delete(canonicalPath)
-    }
-
-    readSet.add(canonicalPath)
-    trimSessionReadSet(readSet)
-  }
-
-  const consumeReadPermission = (sessionID: string, canonicalPath: string): boolean => {
-    const readSet = readPermissionsBySession.get(sessionID)
-    if (!readSet || !readSet.has(canonicalPath)) {
-      return false
-    }
-
-    readSet.delete(canonicalPath)
-    touchSession(sessionID)
-    return true
-  }
-
-  const invalidateOtherSessions = (canonicalPath: string, writingSessionID?: string): void => {
-    for (const [sessionID, readSet] of readPermissionsBySession.entries()) {
-      if (writingSessionID && sessionID === writingSessionID) {
-        continue
-      }
-
-      readSet.delete(canonicalPath)
-    }
+    pendingByCall.set(input.callID, {
+      sessionID: input.sessionID,
+      resolvedPath,
+      snapshotBeforeCall,
+    })
   }
 
   return {
     "tool.execute.before": async (input, output) => {
       const toolName = input.tool?.toLowerCase()
-      if (toolName !== "write" && toolName !== "read") {
+      if (!isTrackedTool(toolName)) {
         return
       }
 
@@ -179,11 +75,16 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
       }
 
       if (toolName === "read") {
-        if (!existsSync(resolvedPath) || !input.sessionID) {
+        if (!input.sessionID) {
           return
         }
 
-        registerReadPermission(input.sessionID, canonicalPath)
+        const currentSnapshot = readFileSnapshot(resolvedPath)
+        if (!currentSnapshot) {
+          return
+        }
+
+        snapshots.remember(input.sessionID, canonicalPath, currentSnapshot)
         return
       }
 
@@ -194,7 +95,9 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
         delete argsRecord.overwrite
       }
 
-      if (!existsSync(resolvedPath)) {
+      const currentSnapshot = readFileSnapshot(resolvedPath)
+      if (!currentSnapshot) {
+        queuePendingModification(input, resolvedPath, currentSnapshot)
         return
       }
 
@@ -204,7 +107,7 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
           sessionID: input.sessionID,
           filePath,
         })
-        invalidateOtherSessions(canonicalPath, input.sessionID)
+        queuePendingModification(input, resolvedPath, currentSnapshot)
         return
       }
 
@@ -214,27 +117,75 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
           filePath,
           resolvedPath,
         })
-        invalidateOtherSessions(canonicalPath, input.sessionID)
+        queuePendingModification(input, resolvedPath)
         return
       }
 
-      if (input.sessionID && consumeReadPermission(input.sessionID, canonicalPath)) {
-        log("[write-existing-file-guard] Allowing overwrite after read", {
+      if (!input.sessionID) {
+        throw new Error(READ_REQUIRED_MESSAGE)
+      }
+
+      const previousSnapshot = snapshots.get(input.sessionID, canonicalPath)
+      if (!previousSnapshot) {
+        log("[write-existing-file-guard] Blocking modification without snapshot", {
           sessionID: input.sessionID,
           filePath,
           resolvedPath,
+          toolName,
         })
-        invalidateOtherSessions(canonicalPath, input.sessionID)
-        return
+        throw new Error(READ_REQUIRED_MESSAGE)
       }
 
-      log("[write-existing-file-guard] Blocking write to existing file", {
+      if (!snapshotsMatch(previousSnapshot, currentSnapshot)) {
+        snapshots.delete(input.sessionID, canonicalPath)
+        log("[write-existing-file-guard] Blocking modification with stale snapshot", {
+          sessionID: input.sessionID,
+          filePath,
+          resolvedPath,
+          toolName,
+        })
+        throw new Error(STALE_SNAPSHOT_MESSAGE)
+      }
+
+      snapshots.delete(input.sessionID, canonicalPath)
+      queuePendingModification(input, resolvedPath, currentSnapshot)
+      log("[write-existing-file-guard] Allowing modification after snapshot match", {
         sessionID: input.sessionID,
         filePath,
         resolvedPath,
+        toolName,
       })
+    },
+    "tool.execute.after": async (input) => {
+      const toolName = input.tool?.toLowerCase()
+      if (!isModificationTool(toolName) || !input.callID || !input.sessionID) {
+        return
+      }
 
-      throw new Error("File already exists. Use edit tool instead.")
+      const pending = pendingByCall.get(input.callID)
+      if (!pending || pending.sessionID !== input.sessionID) {
+        return
+      }
+
+      pendingByCall.delete(input.callID)
+
+      const canonicalPath = toCanonicalPath(pending.resolvedPath)
+      const nextSnapshot = readFileSnapshot(pending.resolvedPath)
+      if (!nextSnapshot) {
+        if (pending.snapshotBeforeCall) {
+          snapshots.remember(input.sessionID, canonicalPath, pending.snapshotBeforeCall)
+        } else {
+          snapshots.delete(input.sessionID, canonicalPath)
+        }
+        return
+      }
+
+      if (pending.snapshotBeforeCall && snapshotsMatch(pending.snapshotBeforeCall, nextSnapshot)) {
+        snapshots.remember(input.sessionID, canonicalPath, pending.snapshotBeforeCall)
+        return
+      }
+
+      snapshots.remember(input.sessionID, canonicalPath, nextSnapshot)
     },
     event: async ({ event }: { event: { type: string; properties?: unknown } }) => {
       if (event.type !== "session.deleted") {
@@ -247,8 +198,12 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
         return
       }
 
-      readPermissionsBySession.delete(sessionID)
-      sessionLastAccess.delete(sessionID)
+      snapshots.removeSession(sessionID)
+      for (const [callID, pending] of pendingByCall.entries()) {
+        if (pending.sessionID === sessionID) {
+          pendingByCall.delete(callID)
+        }
+      }
     },
   }
 }
