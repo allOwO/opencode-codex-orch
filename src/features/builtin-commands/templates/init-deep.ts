@@ -187,7 +187,7 @@ AGENTS_LOCATIONS = [
 
 <critical>
 **File Writing Rule**: If AGENTS.md already exists at the target path → use \`Edit\` tool. If it does NOT exist → use \`Write\` tool.
-NEVER use Write to overwrite an existing file. ALWAYS check existence first via \`Read\` or discovery results.
+Never blindly overwrite an existing file with \`Write\`. If you must rewrite one, establish a current file baseline first (for example via \`Read\`), or rely on a fresh in-session baseline from a prior successful write/edit.
 </critical>
 
 ### Root AGENTS.md (Full Treatment)

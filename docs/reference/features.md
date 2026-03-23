@@ -686,7 +686,7 @@ Hooks intercept and modify behavior at key points in the agent lifecycle across 
 | **comment-checker**             | PostToolUse              | Reminds agents to reduce excessive comments. Smartly ignores BDD, directives, docstrings. |
 | **thinking-block-validator**    | Transform                | Validates thinking blocks to prevent API errors.                                          |
 | **edit-error-recovery**         | PostToolUse + Event      | Recovers from edit tool failures.                                                         |
-| **write-existing-file-guard**   | PreToolUse               | Prevents accidental overwrites of existing files without reading them first.              |
+| **write-existing-file-guard**   | PreToolUse + PostToolUse | Prevents stale overwrites by requiring a current file snapshot before editing or writing existing files, then refreshes that snapshot after successful changes. |
 | **hashline-read-enhancer**      | PostToolUse              | Enhances read output with hash-anchored line markers for the hashline edit tool.          |
 | **hashline-edit-diff-enhancer** | PreToolUse + PostToolUse | Enhances edit operations with diff markers for the hashline edit tool.                    |
 

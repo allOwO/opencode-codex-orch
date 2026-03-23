@@ -23,7 +23,7 @@ Exported from `src/hooks/index.ts`:
 | hashlineReadEnhancer | Enhance Read output with LINE#ID hashes |
 | hashlineEditDiffEnhancer | Enhanced diff output for hashline edits |
 | toolOutputTruncator | Truncate oversized tool output |
-| writeExistingFileGuard | Require Read before Write on existing files |
+| writeExistingFileGuard | Require a current file snapshot before editing or overwriting existing files |
 
 ## STRUCTURE
 
@@ -41,7 +41,7 @@ hooks/
 ├── session-recovery/           # Auto-recovers from crashes
 ├── shared/                     # Shared hook utilities
 ├── tool-output-truncator.ts    # Truncate tool output
-├── write-existing-file-guard/  # Require Read before Write
+├── write-existing-file-guard/  # Snapshot guard for existing-file edits/writes
 └── index.ts                    # Hook exports
 ```
 

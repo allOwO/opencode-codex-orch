@@ -1,157 +1,174 @@
-# opencode-codex-orch — O P E N C O D E Plugin
+# opencode-codex-orch AGENTS Guide
 
-**Generated:** 2026-03-10 | **Branch:** main
+## Purpose
 
-## OVERVIEW
+This file is for coding agents working in this repository.
+It summarizes how to build, test, edit, and extend the project safely.
 
-Multi-agent orchestration plugin for OpenCode (npm: `opencode-codex-orch`) with 13 lifecycle hooks, ~18 tools, skill/command/MCP systems. Developed with new skills, stronger engineering workflows, and GPT-specific optimizations. Sisyphus prompt rewritten based on OpenAI Codex prompt.md.
+## Key Directories
 
-## STRUCTURE
-
-```
-opencode-codex-orch/
-├── src/
-│   ├── index.ts              # Plugin entry: loadConfig → createManagers → createTools → createHooks → createPluginInterface
-│   ├── plugin-config.ts      # JSON multi-level config: user → project → defaults (Zod v4)
-│   ├── agents/               # 8 agents (Sisyphus, Oracle, Librarian, Explore, Atlas, Prometheus, Metis, Momus, Multimodal-Looker, Sisyphus-Junior)
-│   ├── hooks/                # 13 hooks (error recovery, fallback, injectors, guards, truncator, hashline)
-│   ├── tools/                # ~18 tools across 12 directories
-│   ├── features/             # 19 feature modules (background-agent, skill-loader, tmux, MCP-OAuth, etc.)
-│   ├── shared/               # 95+ utility files in 13 categories
-│   ├── config/               # Zod v4 schema system (24 files)
-│   ├── cli/                  # CLI: install, run, doctor, mcp-oauth (Commander.js)
-│   ├── mcp/                  # 3 built-in remote MCPs (websearch, context7, grep_app)
-│   ├── plugin/               # 9 OpenCode hook handlers + hook composition
-│   └── plugin-handlers/      # 6-phase config loading pipeline
-├── packages/                 # Monorepo: cli-runner, 11 platform binaries
-└── .agents/                  # Skills: github-triage, merge-upstream
+```text
+src/
+  agents/            Agent factories and prompt builders
+  hooks/             Hook implementations and guard logic
+  tools/             Tool factories and tool implementations
+  features/          Standalone feature modules
+  plugin/            Hook composition and plugin wiring
+  config/            Zod schema and config loading
+  cli/               CLI entrypoints and doctor commands
+  mcp/               Built-in MCP integrations
+  shared/            Focused cross-cutting helpers
+packages/            Platform/binary packages
+script/              Build/test helper scripts
 ```
 
-## INITIALIZATION FLOW
+## External Rule Files
 
-```
-OpenCodeCodexOrchPlugin(ctx)
-├─→ loadPluginConfig()         # JSON parse → project/user merge → Zod validate → migrate
-  ├─→ createManagers()           # TmuxSessionManager, BackgroundManager, SkillMcpManager, ConfigHandler
-  ├─→ createTools()              # SkillContext + AvailableCategories + ToolRegistry (~18 tools)
-  ├─→ createHooks()              # 3-tier: Core + Continuation + Skill = 13 kept hooks + null shims
-  └─→ createPluginInterface()    # 9 OpenCode hook handlers → PluginInterface
-```
+- No `.cursor/rules/` directory found
+- No `.cursorrules` file found
+- No `.github/copilot-instructions.md` file found
 
-## 8 OPENCODE HOOK HANDLERS
+## Build, Typecheck, and Test Commands
 
-| Handler | Purpose |
-|---------|---------|
-| `config` | 6-phase: provider → plugin-components → agents → tools → MCPs → commands |
-| `tool` | ~18 registered tools |
-| `chat.message` | First-message variant, session setup, keyword detection |
-| `chat.params` | Anthropic effort level adjustment |
-| `chat.headers` | Copilot x-initiator header injection |
-| `event` | Session lifecycle (created, deleted, idle, error) |
-| `tool.execute.before` | Pre-tool hooks (file guard, label truncator, rules injector) |
-| `tool.execute.after` | Post-tool hooks (output truncation, metadata store) |
-| `experimental.chat.messages.transform` | Context injection, thinking block validation |
-
-## WHERE TO LOOK
-
-| Task | Location | Notes |
-|------|----------|-------|
-| Add new agent | `src/agents/` + `src/agents/builtin-agents/` | Follow createXXXAgent factory pattern |
-| Add new hook | `src/hooks/{name}/` + register in `src/plugin/hooks/create-*-hooks.ts` | Match event type to tier |
-| Add new tool | `src/tools/{name}/` + register in `src/plugin/tool-registry.ts` | Follow createXXXTool factory |
-| Add new feature module | `src/features/{name}/` | Standalone module, wire in plugin/ |
-| Add new MCP | `src/mcp/` + register in `createBuiltinMcps()` | Remote HTTP only |
-| Add new skill | `src/features/builtin-skills/skills/` | Implement BuiltinSkill interface |
-| Add new command | `src/features/builtin-commands/` | Template in templates/ |
-| Add new CLI command | `src/cli/cli-program.ts` | Commander.js subcommand |
-| Add new doctor check | `src/cli/doctor/checks/` | Register in checks/index.ts |
-| Modify config schema | `src/config/schema/` + update root schema | Zod v4, add to OpenCodeCodexOrchConfigSchema |
-| Add new category | `src/tools/delegate-task/constants.ts` | DEFAULT_CATEGORIES + CATEGORY_MODEL_REQUIREMENTS |
-
-## MULTI-LEVEL CONFIG
-
-```
-Project (.opencode/opencode-codex-orch.json)  →  User (~/.config/opencode/opencode-codex-orch.json)  →  Defaults
-```
-
-- `agents`, `categories`, `claude_code`: deep merged recursively
-- `disabled_*` arrays: Set union (concatenated + deduplicated)
-- All other fields: override replaces base value
-- Zod `safeParse()` fills defaults for omitted fields
-- `migrateConfigFile()` transforms legacy keys automatically
-
-Fields: agents (14 overridable, 21 fields each), categories (4 built-in + custom), disabled_* arrays (agents, hooks, mcps, skills, commands, tools), 19 feature-specific configs.
-
-## THREE-TIER MCP SYSTEM
-
-| Tier | Source | Mechanism |
-|------|--------|-----------|
-| Built-in | `src/mcp/` | 3 remote HTTP: websearch (Exa/Tavily), context7, grep_app |
-| Claude Code | `.mcp.json` | `${VAR}` env expansion via claude-code-mcp-loader |
-| Skill-embedded | SKILL.md YAML | Managed by SkillMcpManager (stdio + HTTP) |
-
-## CONVENTIONS
-
-- **Runtime**: Bun only — never use npm/yarn
-- **TypeScript**: strict mode, ESNext, bundler moduleResolution, `bun-types` (never `@types/node`)
-- **Test pattern**: Bun test (`bun:test`), co-located `*.test.ts`, given/when/then style (nested describe with `#given`/`#when`/`#then` prefixes)
-- **CI test split**: mock-heavy tests run in isolation (separate `bun test` processes), rest in batch
-- **Factory pattern**: `createXXX()` for all tools, hooks, agents
-- **Hook tiers**: 13 kept hooks across Core + Continuation + Skill tiers (33 removed hooks shimmed as null)
-- **Agent modes**: `primary` (respects UI model) vs `subagent` (own fallback chain) vs `all`
-- **Model resolution**: 4-step: override → category-default → provider-fallback → system-default
-- **Config format**: Plugin config uses strict JSON, OpenCode core config still supports JSONC, snake_case keys
-- **File naming**: kebab-case for all files/directories
-- **Module structure**: index.ts barrel exports, no catch-all files (utils.ts, helpers.ts banned), 200 LOC soft limit
-- **Imports**: relative within module, barrel imports across modules (`import { log } from "./shared"`)
-- **No path aliases**: no `@/` — relative imports only
-
-## ANTI-PATTERNS
-
-- Never use `as any`, `@ts-ignore`, `@ts-expect-error`
-- Never suppress lint/type errors
-- Never add emojis to code/comments unless user explicitly asks
-- Never commit unless explicitly requested
-- Never run `bun publish` directly — use GitHub Actions
-- Never modify `package.json` version locally
-- Test: given/when/then — never use Arrange-Act-Assert comments
-- Comments: avoid AI-generated comment patterns (enforced by comment-checker hook)
-- Never create catch-all files (`utils.ts`, `helpers.ts`, `service.ts`)
-- Empty catch blocks `catch(e) {}` — always handle errors
-- Never use em dashes (—), en dashes (–), or AI filler phrases in generated content
-- index.ts is entry point ONLY — never dump business logic there
-
-## COMMANDS
+Use Bun for everything. Do not use npm or yarn.
 
 ```bash
-bun test                    # Bun test suite
-bun run build              # Build plugin (ESM + declarations + schema)
-bun run build:all          # Build + platform binaries
-bun run typecheck           # tsc --noEmit
-bunx opencode-codex-orch install # Interactive setup
-bunx opencode-codex-orch doctor  # Health diagnostics
-bunx opencode-codex-orch run     # Non-interactive session
+# install deps
+bun install
+
+# full test suite via repo script
+bun run test
+
+# run a single test file directly
+bun test src/hooks/write-existing-file-guard/snapshot-behavior.test.ts
+
+# run one isolated directory or one spec directly
+bun test src/plugin-handlers
+bun test src/cli/doctor/formatter.test.ts
+
+# typecheck only
+bun run typecheck
+
+# build plugin, declarations, CLI, and schema
+bun run build
+
+# build everything including platform binaries
+bun run build:all
+
+# rebuild from scratch
+bun run clean && bun run build
+
+# regenerate schema only
+bun run build:schema
 ```
 
-## CI/CD
+## Test Runner Notes
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| ci.yml | push/PR to master/dev | Tests (split: mock-heavy isolated + batch), typecheck, build, schema auto-commit |
-| publish.yml | manual dispatch | Version bump, npm publish, platform binaries, GitHub release, merge to master |
-| publish-platform.yml | called by publish | 12 platform binaries via bun compile (darwin/linux/windows) |
-| sisyphus-agent.yml | @mention / dispatch | AI agent handles issues/PRs |
-| cla.yml | issue_comment/PR | CLA assistant for contributors |
-| lint-workflows.yml | push to .github/ | actionlint + shellcheck on workflow files |
+- `bun run test` executes `script/test.ts`
+- That script runs selected heavy specs in isolated Bun processes first
+- Remaining test files are then batched together
+- For local work, prefer `bun test path/to/file.test.ts`
+- Bun preloads `test-setup.ts` via `bunfig.toml`
 
-## NOTES
+## Recommended Verification Flow
 
-- Logger writes to `/tmp/opencode-codex-orch.log` — check there for debugging
-- Background tasks: 5 concurrent per model/provider (configurable)
-- Plugin load timeout: 10s for Claude Code plugins
-- Model fallback priority: Claude > OpenAI > Gemini > Copilot > OpenCode Zen > Z.ai > Kimi
-- Config migration runs automatically on legacy keys (agent names, hook names, model versions)
-- Build: bun build (ESM) + tsc --emitDeclarationOnly, externals: @ast-grep/napi
-- Test setup: `test-setup.ts` preloaded via bunfig.toml, mock-heavy tests run in isolation in CI
-- 98 barrel export files (index.ts) establish module boundaries
-- Architecture rules enforced via `.sisyphus/rules/modular-code-enforcement.md`
+After changing code, usually run:
+
+```bash
+bun test path/to/changed.test.ts
+bun run typecheck
+bun run build
+```
+
+If you touched broad shared infrastructure, run `bun run test` too.
+
+## Coding Standards
+
+### Runtime and Types
+
+- Bun is the only supported runtime and package manager
+- Use `bun-types`, never `@types/node`
+- TypeScript is `strict: true`
+- Prefer explicit types when they clarify boundaries or return values
+- Do not suppress type errors with `as any`, `@ts-ignore`, or `@ts-expect-error`
+
+### Imports
+
+- Use relative imports inside a module area
+- Use barrel imports across module boundaries when that pattern already exists
+- Do not add path aliases like `@/`
+- Keep imports specific and local to the file's responsibility
+
+### File and Module Structure
+
+- Use kebab-case for file and directory names
+- Follow `createXXX()` factory naming for tools, hooks, and agents
+- Keep `index.ts` as an entrypoint or barrel only
+- Avoid catch-all filenames such as `utils.ts`, `helpers.ts`, `service.ts`, or `common.ts`
+- Prefer one responsibility per file
+- Treat 200 logical lines as the splitting threshold for `.ts` and `.tsx` files unless the extra size is mostly prompt text
+
+### Error Handling
+
+- Never use empty catch blocks
+- Handle errors explicitly or rethrow with context
+- Prefer deterministic error messages for tool-facing behavior
+- Do not hide failures just to make tests pass
+
+### Formatting
+
+- Follow the existing style in nearby files
+- Preserve quote style, semicolon usage, and spacing conventions already present in the module
+- Favor small focused functions over dense inline logic
+
+## Testing Conventions
+
+- Tests use `bun:test`
+- Test files are co-located as `*.test.ts`
+- Prefer `describe` and `test` names in given/when/then style
+- Add or update the nearest relevant test when changing behavior
+
+## Architecture Rules from `.sisyphus/rules/modular-code-enforcement.md`
+
+- `index.ts` may only re-export, compose, or register modules
+- No catch-all utility files
+- Split files that mix unrelated responsibilities
+- Separate I/O-heavy code from pure logic when practical
+- If a touched file is too large or has multiple jobs, refactor first
+
+## Project-Specific Guidance
+
+- Plugin config is strict JSON, while OpenCode core config may still be JSONC
+- Config keys in plugin config are snake_case
+- Schema changes should be followed by `bun run build:schema`
+- Built-in MCPs live in `src/mcp/`
+- Hook registration lives under `src/plugin/hooks/`
+- Tool registration lives in `src/plugin/tool-registry.ts`
+- The logger writes to `/tmp/opencode-codex-orch.log`
+
+## Safe Change Patterns
+
+- Prefer minimal, local edits that match surrounding architecture
+- Fix root causes, not superficial symptoms
+- Do not modify `package.json` version locally
+- Do not run `bun publish`; publishing is handled by GitHub Actions
+- Do not commit unless explicitly asked
+
+## Where to Start for Common Tasks
+
+- Add a tool: `src/tools/` plus `src/plugin/tool-registry.ts`
+- Add a hook: `src/hooks/` plus `src/plugin/hooks/create-*-hooks.ts`
+- Add an agent: `src/agents/` and built-in agent registration
+- Add config fields: `src/config/schema/` and root config schema wiring
+- Add CLI behavior: `src/cli/`
+
+## Final Checklist for Agents
+
+Before finishing:
+
+1. Read the files you are changing
+2. Keep the design modular
+3. Run targeted tests
+4. Run `bun run typecheck`
+5. Run `bun run build` if behavior or public types changed
+6. Mention any pre-existing issues separately from your own changes

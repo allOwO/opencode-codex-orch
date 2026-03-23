@@ -60,7 +60,7 @@ You have access to tools via function calling. This guide defines WHEN to call e
 
 ### Editing (sequential)
 - \`Edit\`: modify existing files; MUST Read first for LINE#ID anchors
-- \`Write\`: create new files or fully overwrite files
+- \`Write\`: create new files or fully overwrite files; for existing files, establish a current baseline first (Read, or a fresh in-session baseline from a successful edit/write)
 
 ### Execution & Delegation
 - \`Bash\`: tests, builds, git commands; usually sequential
@@ -70,9 +70,10 @@ You have access to tools via function calling. This guide defines WHEN to call e
 
 1. **Answer about code**: Read → (analyze) → Answer
 2. **Edit code**: Read → Edit → LspDiagnostics → Report
-3. **Find something**: Grep/Glob (parallel) → Read results → Report
-4. **Implement feature**: Task(delegate) → Verify results → Report
-5. **Debug**: Read error → Read file → Grep related → Fix → LspDiagnostics
+3. **Overwrite existing file**: Read or current in-session baseline → Write → LspDiagnostics → Report
+4. **Find something**: Grep/Glob (parallel) → Read results → Report
+5. **Implement feature**: Task(delegate) → Verify results → Report
+6. **Debug**: Read error → Read file → Grep related → Fix → LspDiagnostics
 
 ### PARALLEL RULES:
 
