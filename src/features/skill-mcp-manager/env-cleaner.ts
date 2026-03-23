@@ -1,3 +1,5 @@
+import { sanitizeShellPath } from "../../shared/command-executor/shell-path"
+
 // Filters npm/pnpm/yarn config env vars that break MCP servers in pnpm projects (#456)
 export const EXCLUDED_ENV_PATTERNS: RegExp[] = [
   /^NPM_CONFIG_/i,
@@ -11,17 +13,23 @@ export function createCleanMcpEnvironment(
   customEnv: Record<string, string> = {}
 ): Record<string, string> {
   const cleanEnv: Record<string, string> = {}
+  const sanitizedCustomEnv = Object.fromEntries(
+    Object.entries(customEnv).map(([key, value]) => [
+      key,
+      key === "SHELL" ? sanitizeShellPath(value) ?? value : value,
+    ])
+  )
 
   for (const [key, value] of Object.entries(process.env)) {
     if (value === undefined) continue
 
     const shouldExclude = EXCLUDED_ENV_PATTERNS.some((pattern) => pattern.test(key))
     if (!shouldExclude) {
-      cleanEnv[key] = value
+      cleanEnv[key] = key === "SHELL" ? sanitizeShellPath(value) ?? value : value
     }
   }
 
-  Object.assign(cleanEnv, customEnv)
+  Object.assign(cleanEnv, sanitizedCustomEnv)
 
   return cleanEnv
 }

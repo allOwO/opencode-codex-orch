@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, describe, expect, it } from "bun:test"
 import { createCleanMcpEnvironment, EXCLUDED_ENV_PATTERNS } from "./env-cleaner"
 
 describe("createCleanMcpEnvironment", () => {
@@ -138,6 +138,19 @@ describe("createCleanMcpEnvironment", () => {
 
       // then
       expect(cleanEnv.NODE_ENV).toBe("production")
+    })
+
+    it("sanitizes custom SHELL env values before merging", () => {
+      // given
+      const customEnv = {
+        SHELL: "'/bin/zsh’",
+      }
+
+      // when
+      const cleanEnv = createCleanMcpEnvironment(customEnv)
+
+      // then
+      expect(cleanEnv.SHELL).toBe("/bin/zsh")
     })
   })
 
