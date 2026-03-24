@@ -326,15 +326,15 @@ describe("sisyphus-task", () => {
         prompt: "Load skill parsing test",
         category: "quick",
         run_in_background: true,
-        load_skills: '["playwright", "git-master"]',
+        load_skills: '["playwright", "git-commit"]',
       }
 
       //#when
       await tool.execute(args as unknown as DelegateTaskArgs, toolContext)
 
       //#then
-      expect(args.load_skills).toEqual(["playwright", "git-master"])
-      expect(resolveSkillContentSpy).toHaveBeenCalledWith(["playwright", "git-master"], expect.any(Object))
+      expect(args.load_skills).toEqual(["playwright", "git-commit"])
+      expect(resolveSkillContentSpy).toHaveBeenCalledWith(["playwright", "git-commit"], expect.any(Object))
     }, { timeout: 10000 })
 
     test("defaults to [] when load_skills is malformed JSON", async () => {
@@ -389,7 +389,7 @@ describe("sisyphus-task", () => {
         prompt: "Load skill parsing test",
         category: "quick",
         run_in_background: true,
-        load_skills: '["playwright", "git-master"',
+        load_skills: '["playwright", "git-commit"',
       }
 
       //#when
@@ -978,7 +978,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something",
           category: "deep",
           run_in_background: true,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -1043,7 +1043,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something",
           category: "deep",
           run_in_background: true,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -1104,7 +1104,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something",
           category: "deep",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -1349,7 +1349,7 @@ describe("sisyphus-task", () => {
          prompt: "Continue the task",
          session_id: "ses_continue_test",
          run_in_background: false,
-         load_skills: ["git-master"],
+         load_skills: ["git-commit"],
        },
        toolContext
      )
@@ -1505,7 +1505,7 @@ describe("sisyphus-task", () => {
          prompt: "Continue in background",
          session_id: "ses_bg_continue",
          run_in_background: true,
-         load_skills: ["git-master"],
+         load_skills: ["git-commit"],
        },
        toolContext
      )
@@ -1563,7 +1563,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something",
           category: "deep",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -1628,7 +1628,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something",
           category: "deep",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -1684,7 +1684,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something",
           category: "deep",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -1742,7 +1742,7 @@ describe("sisyphus-task", () => {
         prompt: "test",
         category: "custom-cat",
         run_in_background: false,
-        load_skills: ["git-master"]
+        load_skills: ["git-commit"]
       }, toolContext)
 
       // then
@@ -1811,7 +1811,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something visual",
           category: "visual-engineering",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -1870,7 +1870,7 @@ describe("sisyphus-task", () => {
            prompt: "Do something visual",
            category: "visual-engineering",
            run_in_background: true,  // User explicitly says true - normal background
-           load_skills: ["git-master"],
+           load_skills: ["git-commit"],
          },
          toolContext
        )
@@ -1942,7 +1942,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something with minimax",
           category: "minimax-cat",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -2006,7 +2006,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something smart",
           category: "deep",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -2074,7 +2074,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something visual",
           category: "visual-engineering",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -2142,7 +2142,7 @@ describe("sisyphus-task", () => {
           prompt: "Write something",
           category: "writing",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )
@@ -2215,7 +2215,7 @@ describe("sisyphus-task", () => {
           prompt: "Do something",
           category: "my-unstable-cat",
           run_in_background: false,
-          load_skills: ["git-master"],
+          load_skills: ["git-commit"],
         },
         toolContext
       )

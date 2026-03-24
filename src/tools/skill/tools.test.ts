@@ -85,7 +85,7 @@ describe("skill tool - synchronous description", () => {
     const loadedSkills = [
       createMockSkill("playwright"),
       createMockSkill("frontend-ui-ux"),
-      createMockSkill("git-master"),
+      createMockSkill("git-commit"),
     ]
 
     // when
@@ -95,7 +95,7 @@ describe("skill tool - synchronous description", () => {
     expect(tool.description).toContain("<available_items>")
     expect(tool.description).toContain("playwright")
     expect(tool.description).toContain("frontend-ui-ux")
-    expect(tool.description).toContain("git-master")
+    expect(tool.description).toContain("git-commit")
   })
 
   it("shows no-skills message immediately when empty skills are pre-provided", () => {
