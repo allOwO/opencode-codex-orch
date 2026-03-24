@@ -1,4 +1,4 @@
-import type { DelegateTaskArgs, OpencodeClient } from "./types"
+import type { DelegateTaskArgs, DelegatedTaskModelConfig, OpencodeClient } from "./types"
 import { isPlanFamily } from "./constants"
 import { buildTaskPrompt } from "./prompt-builder"
 import {
@@ -37,7 +37,7 @@ export async function sendSyncPrompt(
     agentToUse: string
     args: DelegateTaskArgs
     systemContent: string | undefined
-    categoryModel: { providerID: string; modelID: string; variant?: string } | undefined
+    categoryModel: DelegatedTaskModelConfig | undefined
     toastManager: { removeTask: (id: string) => void } | null | undefined
     taskId: string | undefined
   },
@@ -64,6 +64,12 @@ export async function sendSyncPrompt(
         ? { model: { providerID: input.categoryModel.providerID, modelID: input.categoryModel.modelID } }
         : {}),
       ...(input.categoryModel?.variant ? { variant: input.categoryModel.variant } : {}),
+      ...(input.categoryModel?.temperature !== undefined ? { temperature: input.categoryModel.temperature } : {}),
+      ...(input.categoryModel?.top_p !== undefined ? { top_p: input.categoryModel.top_p } : {}),
+      ...(input.categoryModel?.maxTokens !== undefined ? { maxTokens: input.categoryModel.maxTokens } : {}),
+      ...(input.categoryModel?.thinking !== undefined ? { thinking: input.categoryModel.thinking } : {}),
+      ...(input.categoryModel?.reasoningEffort !== undefined ? { reasoningEffort: input.categoryModel.reasoningEffort } : {}),
+      ...(input.categoryModel?.textVerbosity !== undefined ? { textVerbosity: input.categoryModel.textVerbosity } : {}),
     },
   }
 
