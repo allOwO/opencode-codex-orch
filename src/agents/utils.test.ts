@@ -879,9 +879,9 @@ describe("buildAgent with category and skills", () => {
     const agent = buildAgent(source["test-agent"], TEST_MODEL)
 
     // #then
-    expect(agent.prompt).toContain("Role: Designer-Turned-Developer")
+    expect(agent.prompt).toContain("# Frontend Skill")
     expect(agent.prompt).toContain("Original prompt content")
-    expect(agent.prompt).toMatch(/Designer-Turned-Developer[\s\S]*Original prompt content/s)
+    expect(agent.prompt).toMatch(/Frontend Skill[\s\S]*Original prompt content/s)
   })
 
   test("agent with multiple skills has all content prepended", () => {
@@ -899,7 +899,7 @@ describe("buildAgent with category and skills", () => {
     const agent = buildAgent(source["test-agent"], TEST_MODEL)
 
     // #then
-    expect(agent.prompt).toContain("Role: Designer-Turned-Developer")
+    expect(agent.prompt).toContain("# Frontend Skill")
     expect(agent.prompt).toContain("Agent prompt")
   })
 
@@ -942,7 +942,7 @@ describe("buildAgent with category and skills", () => {
     // #then - category's built-in model and skills are applied
     expect(agent.model).toBe("openai/gpt-5.3-codex")
     expect(agent.variant).toBe("medium")
-    expect(agent.prompt).toContain("Role: Designer-Turned-Developer")
+    expect(agent.prompt).toContain("# Frontend Skill")
     expect(agent.prompt).toContain("Task description")
   })
 
@@ -982,7 +982,7 @@ describe("buildAgent with category and skills", () => {
     const agent = buildAgent(source["test-agent"], TEST_MODEL)
 
     // #then
-    expect(agent.prompt).toContain("Role: Designer-Turned-Developer")
+    expect(agent.prompt).toContain("# Frontend Skill")
     expect(agent.prompt).toContain("Base prompt")
   })
 

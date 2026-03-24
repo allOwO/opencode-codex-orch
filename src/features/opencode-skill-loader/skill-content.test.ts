@@ -38,7 +38,7 @@ describe("resolveSkillContent", () => {
 		// then: returns template string
 		expect(result).not.toBeNull()
 		expect(typeof result).toBe("string")
-		expect(result).toContain("Role: Designer-Turned-Developer")
+		expect(result).toContain("# Frontend Skill")
 	})
 
 	it("should return template for 'playwright' skill", () => {
@@ -84,7 +84,7 @@ describe("resolveMultipleSkills", () => {
 		// then: all skills resolved, none not found
 		expect(result.resolved.size).toBe(2)
 		expect(result.notFound).toEqual([])
-		expect(result.resolved.get("frontend-ui-ux")).toContain("Designer-Turned-Developer")
+		expect(result.resolved.get("frontend-ui-ux")).toContain("Frontend Skill")
 		expect(result.resolved.get("playwright")).toContain("Playwright Browser Automation")
 	})
 
@@ -98,7 +98,7 @@ describe("resolveMultipleSkills", () => {
 		// then: resolves existing skills, lists not found skills
 		expect(result.resolved.size).toBe(2)
 		expect(result.notFound).toEqual(["nonexistent", "another-missing"])
-		expect(result.resolved.get("frontend-ui-ux")).toContain("Designer-Turned-Developer")
+		expect(result.resolved.get("frontend-ui-ux")).toContain("Frontend Skill")
 		expect(result.resolved.get("playwright")).toContain("Playwright Browser Automation")
 	})
 

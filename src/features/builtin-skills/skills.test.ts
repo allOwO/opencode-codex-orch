@@ -1,5 +1,14 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { createBuiltinSkills } from "./skills"
+
+function getRequiredSkill(skills: ReturnType<typeof createBuiltinSkills>, skillName: string) {
+	const skill = skills.find((candidate) => candidate.name === skillName)
+	if (!skill) {
+		throw new Error(`${skillName} skill should be defined`)
+	}
+
+	return skill
+}
 
 describe("createBuiltinSkills", () => {
 	test("returns playwright skill by default", () => {
@@ -9,10 +18,9 @@ describe("createBuiltinSkills", () => {
 		const skills = createBuiltinSkills()
 
 		// then
-		const browserSkill = skills.find((s) => s.name === "playwright")
-		expect(browserSkill).toBeDefined()
-		expect(browserSkill!.description).toContain("browser")
-		expect(browserSkill!.mcpConfig).toHaveProperty("playwright")
+		const browserSkill = getRequiredSkill(skills, "playwright")
+		expect(browserSkill.description).toContain("browser")
+		expect(browserSkill.mcpConfig).toHaveProperty("playwright")
 	})
 
 	test("returns playwright skill when browserProvider is 'playwright'", () => {
@@ -37,12 +45,11 @@ describe("createBuiltinSkills", () => {
 		const skills = createBuiltinSkills(options)
 
 		// then
-		const agentBrowserSkill = skills.find((s) => s.name === "agent-browser")
+		const agentBrowserSkill = getRequiredSkill(skills, "agent-browser")
 		const playwrightSkill = skills.find((s) => s.name === "playwright")
-		expect(agentBrowserSkill).toBeDefined()
-		expect(agentBrowserSkill!.description).toContain("browser")
-		expect(agentBrowserSkill!.allowedTools).toContain("Bash(agent-browser:*)")
-		expect(agentBrowserSkill!.template).toContain("agent-browser")
+		expect(agentBrowserSkill.description).toContain("browser")
+		expect(agentBrowserSkill.allowedTools).toContain("Bash(agent-browser:*)")
+		expect(agentBrowserSkill.template).toContain("agent-browser")
 		expect(playwrightSkill).toBeUndefined()
 	})
 
@@ -52,13 +59,13 @@ describe("createBuiltinSkills", () => {
 
 		// when
 		const skills = createBuiltinSkills(options)
-		const agentBrowserSkill = skills.find((s) => s.name === "agent-browser")
+		const agentBrowserSkill = getRequiredSkill(skills, "agent-browser")
 
 		// then - template should contain substantial content (inlined, not fallback)
-		expect(agentBrowserSkill!.template).toContain("## Quick start")
-		expect(agentBrowserSkill!.template).toContain("## Commands")
-		expect(agentBrowserSkill!.template).toContain("agent-browser open")
-		expect(agentBrowserSkill!.template).toContain("agent-browser snapshot")
+		expect(agentBrowserSkill.template).toContain("## Quick start")
+		expect(agentBrowserSkill.template).toContain("## Commands")
+		expect(agentBrowserSkill.template).toContain("agent-browser open")
+		expect(agentBrowserSkill.template).toContain("agent-browser snapshot")
 	})
 
 	test("always includes frontend-ui-ux and git-master skills", () => {
@@ -122,7 +129,13 @@ describe("createBuiltinSkills", () => {
 	test("should return an empty array when all skills are disabled", () => {
 		// #given
 		const options = {
-			disabledSkills: new Set(["playwright", "frontend-ui-ux", "git-master", "dev-browser", "skill-creator"]),
+			disabledSkills: new Set([
+				"playwright",
+				"frontend-ui-ux",
+				"git-master",
+				"dev-browser",
+				"skill-creator",
+			]),
 		}
 
 		// #when
@@ -143,6 +156,20 @@ describe("createBuiltinSkills", () => {
 		expect(skills.length).toBe(5)
 	})
 
+	test("includes frontend-ui-ux skill with restrained composition and brand-forward guidance", () => {
+		// given
+		const options = {}
+
+		// when
+		const skills = createBuiltinSkills(options)
+		const skill = getRequiredSkill(skills, "frontend-ui-ux")
+
+		// then
+		expect(skill.template).toContain("Brand first, headline second")
+		expect(skill.template).toContain("Full-bleed image or dominant visual plane")
+		expect(skill.template).toContain("Litmus Checks")
+	})
+
 	test("returns playwright-cli skill when browserProvider is 'playwright-cli'", () => {
 		// given
 		const options = { browserProvider: "playwright-cli" as const }
@@ -151,12 +178,11 @@ describe("createBuiltinSkills", () => {
 		const skills = createBuiltinSkills(options)
 
 		// then
-		const playwrightSkill = skills.find((s) => s.name === "playwright")
+		const playwrightSkill = getRequiredSkill(skills, "playwright")
 		const agentBrowserSkill = skills.find((s) => s.name === "agent-browser")
-		expect(playwrightSkill).toBeDefined()
-		expect(playwrightSkill!.description).toContain("browser")
-		expect(playwrightSkill!.allowedTools).toContain("Bash(playwright-cli:*)")
-		expect(playwrightSkill!.mcpConfig).toBeUndefined()
+		expect(playwrightSkill.description).toContain("browser")
+		expect(playwrightSkill.allowedTools).toContain("Bash(playwright-cli:*)")
+		expect(playwrightSkill.mcpConfig).toBeUndefined()
 		expect(agentBrowserSkill).toBeUndefined()
 	})
 
@@ -166,12 +192,12 @@ describe("createBuiltinSkills", () => {
 
 		// when
 		const skills = createBuiltinSkills(options)
-		const skill = skills.find((s) => s.name === "playwright")
+		const skill = getRequiredSkill(skills, "playwright")
 
 		// then
-		expect(skill!.template).toContain("playwright-cli open")
-		expect(skill!.template).toContain("playwright-cli snapshot")
-		expect(skill!.template).toContain("playwright-cli click")
+		expect(skill.template).toContain("playwright-cli open")
+		expect(skill.template).toContain("playwright-cli snapshot")
+		expect(skill.template).toContain("playwright-cli click")
 	})
 
 	test("includes skill-creator skill and its template contains explicit invocation guidance", () => {
@@ -180,13 +206,9 @@ describe("createBuiltinSkills", () => {
 
 		// when
 		const skills = createBuiltinSkills(options)
-		const skill = skills.find((s) => s.name === "skill-creator")
+		const skill = getRequiredSkill(skills, "skill-creator")
 
 		// then
-		expect(skill).toBeDefined()
-		if (!skill) {
-			throw new Error("skill-creator skill should be defined")
-		}
 		expect(skill.template).toContain("skill(name=")
 		expect(skill.template).toContain("SKILL.md")
 	})
