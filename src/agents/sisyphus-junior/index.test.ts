@@ -74,6 +74,17 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
       expect(result.prompt).toContain("Sisyphus-Junior")
       expect(result.prompt).toContain("Extra instructions here")
     })
+
+    test("applies reasoningEffort override for GPT models", () => {
+      // given
+      const override = { model: "openai/gpt-5.4", reasoningEffort: "high" as const }
+
+      // when
+      const result = createSisyphusJuniorAgentWithOverrides(override)
+
+      // then
+      expect(result.reasoningEffort).toBe("high")
+    })
   })
 
   describe("defaults", () => {
@@ -97,6 +108,17 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
 
       // then
       expect(result.temperature).toBe(SISYPHUS_JUNIOR_DEFAULTS.temperature)
+    })
+
+    test("uses medium reasoningEffort for GPT models when no override is provided", () => {
+      // given
+      const override = { model: "openai/gpt-5.4" }
+
+      // when
+      const result = createSisyphusJuniorAgentWithOverrides(override)
+
+      // then
+      expect(result.reasoningEffort).toBe("medium")
     })
   })
 
