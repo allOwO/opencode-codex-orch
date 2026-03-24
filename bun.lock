@@ -17,6 +17,7 @@
         "diff": "^8.0.3",
         "js-yaml": "^4.1.1",
         "jsonc-parser": "^3.3.1",
+        "opencode-codex-orch": "^0.0.6",
         "picocolors": "^1.1.1",
         "picomatch": "^4.0.2",
         "vscode-jsonrpc": "^8.2.0",
@@ -29,20 +30,21 @@
         "typescript": "^5.7.3",
       },
       "optionalDependencies": {
-        "opencode-codex-orch-darwin-arm64": "0.1.11",
-        "opencode-codex-orch-darwin-x64": "0.1.11",
-        "opencode-codex-orch-darwin-x64-baseline": "0.1.11",
-        "opencode-codex-orch-linux-arm64": "0.1.11",
-        "opencode-codex-orch-linux-arm64-musl": "0.1.11",
-        "opencode-codex-orch-linux-x64": "0.1.11",
-        "opencode-codex-orch-linux-x64-baseline": "0.1.11",
-        "opencode-codex-orch-linux-x64-musl": "0.1.11",
-        "opencode-codex-orch-linux-x64-musl-baseline": "0.1.11",
+        "opencode-codex-orch-darwin-arm64": "0.0.6",
+        "opencode-codex-orch-darwin-x64": "0.0.6",
+        "opencode-codex-orch-darwin-x64-baseline": "0.0.6",
+        "opencode-codex-orch-linux-arm64": "0.0.6",
+        "opencode-codex-orch-linux-arm64-musl": "0.0.6",
+        "opencode-codex-orch-linux-x64": "0.0.6",
+        "opencode-codex-orch-linux-x64-baseline": "0.0.6",
+        "opencode-codex-orch-linux-x64-musl": "0.0.6",
+        "opencode-codex-orch-linux-x64-musl-baseline": "0.0.6",
       },
     },
   },
   "trustedDependencies": [
     "@ast-grep/cli",
+    "opencode-codex-orch",
     "@ast-grep/napi",
     "@code-yeongyu/comment-checker",
   ],
@@ -240,23 +242,25 @@
 
     "once": ["once@1.4.0", "", { "dependencies": { "wrappy": "1" } }, "sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w=="],
 
-    "opencode-codex-orch-darwin-arm64": ["opencode-codex-orch-darwin-arm64@0.1.11", "", { "os": "darwin", "cpu": "arm64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-Gvx01aU6ymn1ZYnXHND44KZQ3dzK1JQB1PLvonjIYRICiY9WsAqJkrkltmIyZYPX4afiEtwJ8jJf7lBaesf4ow=="],
+    "opencode-codex-orch": ["opencode-codex-orch@0.0.6", "", { "dependencies": { "@ast-grep/cli": "^0.40.0", "@ast-grep/napi": "^0.40.0", "@clack/prompts": "^0.11.0", "@code-yeongyu/comment-checker": "^0.7.0", "@modelcontextprotocol/sdk": "^1.25.2", "@opencode-ai/plugin": "^1.2.16", "@opencode-ai/sdk": "^1.2.17", "commander": "^14.0.2", "detect-libc": "^2.0.0", "diff": "^8.0.3", "js-yaml": "^4.1.1", "jsonc-parser": "^3.3.1", "picocolors": "^1.1.1", "picomatch": "^4.0.2", "vscode-jsonrpc": "^8.2.0", "zod": "^4.1.8" }, "optionalDependencies": { "opencode-codex-orch-darwin-arm64": "0.0.6", "opencode-codex-orch-darwin-x64": "0.0.6", "opencode-codex-orch-darwin-x64-baseline": "0.0.6", "opencode-codex-orch-linux-arm64": "0.0.6", "opencode-codex-orch-linux-arm64-musl": "0.0.6", "opencode-codex-orch-linux-x64": "0.0.6", "opencode-codex-orch-linux-x64-baseline": "0.0.6", "opencode-codex-orch-linux-x64-musl": "0.0.6", "opencode-codex-orch-linux-x64-musl-baseline": "0.0.6" }, "bin": { "opencode-codex-orch": "bin/opencode-codex-orch.js" } }, "sha512-23jOCAvaEFvgrM5ZfllZv+UYINW4CvHfNMsOxvhd1ISOmjOE8hNUmn4GIg+96l46+asZZVtdCfo7y3H/0TfQ5A=="],
 
-    "opencode-codex-orch-darwin-x64": ["opencode-codex-orch-darwin-x64@0.1.11", "", { "os": "darwin", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-FPgj14zwTrvabs1rV74npurK1LKQAEn74QuzCLZLydfo9uCnwNrrPcUlLQ3yYVCIra2ccpiwZLq2rjExhwzTkQ=="],
+    "opencode-codex-orch-darwin-arm64": ["opencode-codex-orch-darwin-arm64@0.0.6", "", { "os": "darwin", "cpu": "arm64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-AetC71GStYU0oXYwKZw3Triuiu/EUB4VEQsawh2G3vTWjKcBJQ2qcMrxO9X799QSHFalfoIrROnWuObcVWWl2w=="],
 
-    "opencode-codex-orch-darwin-x64-baseline": ["opencode-codex-orch-darwin-x64-baseline@0.1.11", "", { "os": "darwin", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-Ot3kAfodWvFg2mXqo+fSWYYKEyFOqyzlSeyKmvI8HOV6dWYnWCcywxW9mMAeL+f4uCnJhzb5iScSzdBBLHH2Ng=="],
+    "opencode-codex-orch-darwin-x64": ["opencode-codex-orch-darwin-x64@0.0.6", "", { "os": "darwin", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-+ojN914k/FHtTAJ2wHyyCzq+wxzqcrHDAgFbSyflT9QNYwjnvH0ncZI2Z9ToZYZZtwJTnxbP6zelEn03sEgc8w=="],
 
-    "opencode-codex-orch-linux-arm64": ["opencode-codex-orch-linux-arm64@0.1.11", "", { "os": "linux", "cpu": "arm64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-jq6es/8omPM4xUEs9fA5ksmjkb/R9f2ffiQWLtIYH/nhDmcLJg24w4+idewUGTK7+qB9Bf9OTpjhFV0+4ZkNkw=="],
+    "opencode-codex-orch-darwin-x64-baseline": ["opencode-codex-orch-darwin-x64-baseline@0.0.6", "", { "os": "darwin", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-RvzN2WURleWsur9komy3jPWfB49FrT8Ft2fAGBLCYGtl74igjv01QIaVrXVxDpP3SDYkryUGCTAoWsCouSVJvA=="],
 
-    "opencode-codex-orch-linux-arm64-musl": ["opencode-codex-orch-linux-arm64-musl@0.1.11", "", { "os": "linux", "cpu": "arm64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-tNBT7JDkJ/ay76K29HPYLBIwjwEb4IzIXlywfLoFu5ggoq3nP4Y58NzRJY7Dtxfkqu5W2Xhqqwui01p17ghpKw=="],
+    "opencode-codex-orch-linux-arm64": ["opencode-codex-orch-linux-arm64@0.0.6", "", { "os": "linux", "cpu": "arm64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-70olRD9BO5xtREYaxzJESVC7wMwp45Trg3cCnLRCZK/sTZTo1XVlIdfvyJJYbmxOcFMGe0hpCRPIhTx+2fr3Ug=="],
 
-    "opencode-codex-orch-linux-x64": ["opencode-codex-orch-linux-x64@0.1.11", "", { "os": "linux", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-OcW19jczvPUv2428UyKygsYVAAO8K8E41F2H0F34Pke1wINGvimgkdf1TwKR7pmX0niBYwR16oE5hqNjxjbiDA=="],
+    "opencode-codex-orch-linux-arm64-musl": ["opencode-codex-orch-linux-arm64-musl@0.0.6", "", { "os": "linux", "cpu": "arm64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-j59FKYt5SDo6A7Q1NE1xS5eVRwD+Nec5secFq7BIcJJVYclf82DVJmNexD1aQZHph+VLSGPJ53w2pr7h0F4AeQ=="],
 
-    "opencode-codex-orch-linux-x64-baseline": ["opencode-codex-orch-linux-x64-baseline@0.1.11", "", { "os": "linux", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-djScE3bjJdR9jSfWQXM62Ht26aUXzUM+vcuYh5oFCL4iXg/WD7bTtPpSrfPQzzeKhtV0mDa4ukGrODa9XDIVFg=="],
+    "opencode-codex-orch-linux-x64": ["opencode-codex-orch-linux-x64@0.0.6", "", { "os": "linux", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-43h+5twJ/sF2dQgB0DHTrL+d67bhYUWbspXNELIrSKLXB4fYNUMHidffGpdaJ/eP1/kilFhgsLLTAWobC2rakA=="],
 
-    "opencode-codex-orch-linux-x64-musl": ["opencode-codex-orch-linux-x64-musl@0.1.11", "", { "os": "linux", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-UrX5aRMGv4uaVICEFYFoTr7Ds1pi9p0Y/XDQ8YK/tziNkrBUAD1Ti3LSI0tryeUcxEuVyh8GIUi2PXV+V8q7zw=="],
+    "opencode-codex-orch-linux-x64-baseline": ["opencode-codex-orch-linux-x64-baseline@0.0.6", "", { "os": "linux", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-Eo8ociEcuwbph3k/TdkXX1FRsrwTF6l/xTqGkjrt+Yorm3NBx9gVsQbIdISx38/Fa9Vcr2dcBGSKOcbo6dDB7g=="],
 
-    "opencode-codex-orch-linux-x64-musl-baseline": ["opencode-codex-orch-linux-x64-musl-baseline@0.1.11", "", { "os": "linux", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-tzmzSMsUbwQy1SEcxFcWgBnLEsBpkoU3Uq8RwvAMTUqJ4D3z53jKZXN88Gji+MAhntS0RTK1ojofDX/SEjA+rA=="],
+    "opencode-codex-orch-linux-x64-musl": ["opencode-codex-orch-linux-x64-musl@0.0.6", "", { "os": "linux", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-AmuKl47i5itfen0bnu/NHNg511tFnHDszAWC5Kwvm5+3B6SVY9Uy91sW3J8IyxQySTD9YyWIkPI02smmSJdclw=="],
+
+    "opencode-codex-orch-linux-x64-musl-baseline": ["opencode-codex-orch-linux-x64-musl-baseline@0.0.6", "", { "os": "linux", "cpu": "x64", "bin": { "opencode-codex-orch": "bin/opencode-codex-orch" } }, "sha512-a+5wWKkuillAMfDQftuUkrJvRZqfM0rHoPUIhaYzGKMFzzBhODgDa+KPVPCkGRUD7TQ76/ZUZ/I346LGvrlvKQ=="],
 
     "parseurl": ["parseurl@1.3.3", "", {}, "sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ=="],
 
