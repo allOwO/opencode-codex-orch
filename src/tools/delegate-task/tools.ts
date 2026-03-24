@@ -143,7 +143,6 @@ export function createDelegateTask(options: DelegateTaskToolOptions): ToolDefini
       const runInBackground = args.run_in_background === true
 
       const { content: skillContent, contents: skillContents, error: skillError } = await resolveSkillContent(args.load_skills, {
-        gitMasterConfig: options.gitMasterConfig,
         browserProvider: options.browserProvider,
         disabledSkills: options.disabledSkills,
         directory: options.directory,

@@ -23,7 +23,6 @@ Complete reference for `opencode-codex-orch.json` configuration. This document c
   - [Commands](#commands)
   - [Browser Automation](#browser-automation)
   - [Tmux Integration](#tmux-integration)
-  - [Git Master](#git-master)
   - [Comment Checker](#comment-checker)
   - [Notification](#notification)
   - [MCPs](#mcps)
@@ -450,14 +449,6 @@ Run background subagents in separate tmux panes. Requires running inside tmux wi
 | `main_pane_size`       | `60`            | Main pane % (20–80)                                                                 |
 | `main_pane_min_width`  | `120`           | Min main pane columns                                                               |
 | `agent_pane_min_width` | `40`            | Min agent pane columns                                                              |
-
-### Git Master
-
-Configure git commit behavior:
-
-```json
-{ "git_master": { "commit_footer": true, "include_co_authored_by": true } }
-```
 
 ### Comment Checker
 

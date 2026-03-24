@@ -3499,31 +3499,6 @@
       ],
       "additionalProperties": false
     },
-    "git_master": {
-      "type": "object",
-      "properties": {
-        "commit_footer": {
-          "default": true,
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "string"
-            }
-          ]
-        },
-        "include_co_authored_by": {
-          "default": true,
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "commit_footer",
-        "include_co_authored_by"
-      ],
-      "additionalProperties": false
-    },
     "browser_automation_engine": {
       "type": "object",
       "properties": {

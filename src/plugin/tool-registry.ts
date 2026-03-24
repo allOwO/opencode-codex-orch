@@ -51,7 +51,6 @@ export function createToolRegistry(args: {
     directory: ctx.directory,
     userCategories: pluginConfig.categories,
     agentOverrides: pluginConfig.agents,
-    gitMasterConfig: pluginConfig.git_master,
     sisyphusJuniorModel: pluginConfig.agents?.["sisyphus-junior"]?.model,
     browserProvider: skillContext.browserProvider,
     disabledSkills: skillContext.disabledSkills,
@@ -88,7 +87,6 @@ export function createToolRegistry(args: {
     skills: skillContext.mergedSkills,
     mcpManager: managers.skillMcpManager,
     getSessionID: getSessionIDForMcp,
-    gitMasterConfig: pluginConfig.git_master,
   })
 
   const taskSystemEnabled = pluginConfig.experimental?.task_system ?? false

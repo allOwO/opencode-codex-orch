@@ -87,7 +87,6 @@ export async function applyAgentConfig(params: {
     params.ctx.directory,
     currentModel,
     params.pluginConfig.categories,
-    params.pluginConfig.git_master,
     allDiscoveredSkills,
     params.ctx.client,
     browserProvider,

@@ -500,7 +500,8 @@ git add <file1> <file2> ...
 # Verify staging
 git diff --staged --stat
 
-# Commit with detected style
+# Commit with detected style using local git user.name/user.email
+# Do not add extra Sisyphus footers or co-author trailers unless the repo already requires them
 git commit -m "<message-matching-COMMIT_CONFIG>"
 
 # Verify

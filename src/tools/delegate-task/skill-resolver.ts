@@ -1,10 +1,10 @@
-import type { GitMasterConfig, BrowserAutomationProvider } from "../../config/schema"
+import type { BrowserAutomationProvider } from "../../config/schema"
 import { resolveMultipleSkillsAsync } from "../../features/opencode-skill-loader/skill-content"
 import { discoverSkills } from "../../features/opencode-skill-loader"
 
 export async function resolveSkillContent(
   skills: string[],
-  options: { gitMasterConfig?: GitMasterConfig; browserProvider?: BrowserAutomationProvider, disabledSkills?: Set<string>, directory?: string }
+  options: { browserProvider?: BrowserAutomationProvider, disabledSkills?: Set<string>, directory?: string }
 ): Promise<{ content: string | undefined; contents: string[]; error: string | null }> {
   if (skills.length === 0) {
     return { content: undefined, contents: [], error: null }

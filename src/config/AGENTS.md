@@ -26,7 +26,6 @@ config/schema/
 ├── claude-code.ts              # CC compatibility settings
 ├── comment-checker.ts          # AI comment detection config
 ├── notification.ts             # OS notification settings
-├── git-master.ts               # commit_footer: boolean | string
 ├── browser-automation.ts       # provider: playwright | agent-browser | playwright-cli
 ├── background-task.ts          # Concurrency limits per model/provider
 ├── fallback-models.ts          # FallbackModelsConfigSchema
@@ -38,9 +37,9 @@ config/schema/
 
 ```
 
-## ROOT SCHEMA FIELDS (28)
+## ROOT SCHEMA FIELDS (27)
 
-`$schema`, `new_task_system_enabled`, `default_run_agent`, `disabled_mcps`, `disabled_agents`, `disabled_skills`, `disabled_hooks`, `disabled_commands`, `disabled_tools`, `hashline_edit`, `agents`, `categories`, `claude_code`, `sisyphus_agent`, `comment_checker`, `experimental`, `auto_update`, `skills`, `ralph_loop`, `background_task`, `notification`, `babysitting`, `git_master`, `browser_automation_engine`, `websearch`, `tmux`, `sisyphus`, `start_work`, `_migrations`
+`$schema`, `new_task_system_enabled`, `default_run_agent`, `disabled_mcps`, `disabled_agents`, `disabled_skills`, `disabled_hooks`, `disabled_commands`, `disabled_tools`, `hashline_edit`, `agents`, `categories`, `claude_code`, `sisyphus_agent`, `comment_checker`, `experimental`, `auto_update`, `skills`, `ralph_loop`, `background_task`, `notification`, `babysitting`, `browser_automation_engine`, `websearch`, `tmux`, `sisyphus`, `start_work`, `_migrations`
 
 ## AGENT OVERRIDE FIELDS (21)
 
