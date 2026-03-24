@@ -1,5 +1,5 @@
 import type { ModelFallbackInfo } from "../../features/task-toast-manager/types"
-import type { DelegateTaskArgs } from "./types"
+import type { DelegateTaskArgs, DelegatedTaskModelConfig } from "./types"
 import type { ExecutorContext } from "./executor-types"
 import type { FallbackEntry } from "../../shared/model-requirements"
 import { mergeCategories } from "../../shared/merge-categories"
@@ -14,7 +14,7 @@ import { resolveModelForDelegateTask } from "./model-selection"
 
 export interface CategoryResolutionResult {
   agentToUse: string
-  categoryModel: { providerID: string; modelID: string; variant?: string } | undefined
+  categoryModel: DelegatedTaskModelConfig | undefined
   categoryPromptAppend: string | undefined
   maxPromptTokens?: number
   modelInfo: ModelFallbackInfo | undefined
@@ -22,6 +22,34 @@ export interface CategoryResolutionResult {
   isUnstableAgent: boolean
   fallbackChain?: FallbackEntry[]  // For runtime retry on model errors
   error?: string
+}
+
+function buildDelegatedTaskModelConfig(
+  parsedModel: { providerID: string; modelID: string } | undefined,
+  variant: string | undefined,
+  config: {
+    temperature?: number
+    top_p?: number
+    maxTokens?: number
+    thinking?: { type: "enabled" | "disabled"; budgetTokens?: number }
+    reasoningEffort?: "low" | "medium" | "high" | "xhigh"
+    textVerbosity?: "low" | "medium" | "high"
+  }
+): DelegatedTaskModelConfig | undefined {
+  if (!parsedModel) {
+    return undefined
+  }
+
+  return {
+    ...parsedModel,
+    ...(variant ? { variant } : {}),
+    ...(config.temperature !== undefined ? { temperature: config.temperature } : {}),
+    ...(config.top_p !== undefined ? { top_p: config.top_p } : {}),
+    ...(config.maxTokens !== undefined ? { maxTokens: config.maxTokens } : {}),
+    ...(config.thinking !== undefined ? { thinking: config.thinking } : {}),
+    ...(config.reasoningEffort !== undefined ? { reasoningEffort: config.reasoningEffort } : {}),
+    ...(config.textVerbosity !== undefined ? { textVerbosity: config.textVerbosity } : {}),
+  }
 }
 
 export async function resolveCategoryExecution(
@@ -84,7 +112,7 @@ Available categories: ${allCategoryNames}`,
   const normalizedConfiguredFallbackModels = normalizeFallbackModels(resolved.config.fallback_models)
   let actualModel: string | undefined
   let modelInfo: ModelFallbackInfo | undefined
-  let categoryModel: { providerID: string; modelID: string; variant?: string } | undefined
+  let categoryModel: DelegatedTaskModelConfig | undefined
 
   const overrideModel = sisyphusJuniorModel
   const explicitCategoryModel = userCategories?.[args.category!]?.model
@@ -144,15 +172,14 @@ Available categories: ${allCategoryNames}`,
 
       const parsedModel = parseModelString(actualModel)
       const variantToUse = userCategories?.[args.category!]?.variant ?? resolvedVariant ?? resolved.config.variant
-      categoryModel = parsedModel
-        ? (variantToUse ? { ...parsedModel, variant: variantToUse } : parsedModel)
-        : undefined
+      categoryModel = buildDelegatedTaskModelConfig(parsedModel ?? undefined, variantToUse, resolved.config)
     }
   }
 
   if (!categoryModel && actualModel) {
     const parsedModel = parseModelString(actualModel)
-    categoryModel = parsedModel ?? undefined
+    const variantToUse = userCategories?.[args.category!]?.variant ?? resolved.config.variant
+    categoryModel = buildDelegatedTaskModelConfig(parsedModel ?? undefined, variantToUse, resolved.config)
   }
   const categoryPromptAppend = resolved.promptAppend || undefined
 

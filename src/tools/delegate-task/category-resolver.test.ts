@@ -105,4 +105,47 @@ describe("resolveCategoryExecution", () => {
 			{ providers: ["openai"], model: "gpt-5.2", variant: "high" },
 		])
 	})
+
+	test("preserves user category runtime model settings over defaults", async () => {
+		//#given
+		const args = {
+			category: "deep",
+			prompt: "test prompt",
+			description: "Test task",
+			run_in_background: false,
+			load_skills: [],
+			blockedBy: undefined,
+			enableSkillTools: false,
+		}
+		const executorCtx = createMockExecutorContext()
+		executorCtx.userCategories = {
+			deep: {
+				model: "openai/gpt-5.3-codex",
+				variant: "high",
+				temperature: 0.2,
+				top_p: 0.7,
+				maxTokens: 12345,
+				thinking: { type: "enabled", budgetTokens: 2222 },
+				reasoningEffort: "high",
+				textVerbosity: "high",
+			},
+		}
+
+		//#when
+		const result = await resolveCategoryExecution(args, executorCtx, undefined, "anthropic/claude-sonnet-4-6")
+
+		//#then
+		expect(result.error).toBeUndefined()
+		expect(result.categoryModel).toEqual({
+			providerID: "openai",
+			modelID: "gpt-5.3-codex",
+			variant: "high",
+			temperature: 0.2,
+			top_p: 0.7,
+			maxTokens: 12345,
+			thinking: { type: "enabled", budgetTokens: 2222 },
+			reasoningEffort: "high",
+			textVerbosity: "high",
+		})
+	})
 })
