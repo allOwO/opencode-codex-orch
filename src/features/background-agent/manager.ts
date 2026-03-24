@@ -356,6 +356,12 @@ export class BackgroundManager {
         agent: input.agent,
         ...(launchModel ? { model: launchModel } : {}),
         ...(launchVariant ? { variant: launchVariant } : {}),
+        ...(input.model?.temperature !== undefined ? { temperature: input.model.temperature } : {}),
+        ...(input.model?.top_p !== undefined ? { top_p: input.model.top_p } : {}),
+        ...(input.model?.maxTokens !== undefined ? { maxTokens: input.model.maxTokens } : {}),
+        ...(input.model?.thinking !== undefined ? { thinking: input.model.thinking } : {}),
+        ...(input.model?.reasoningEffort !== undefined ? { reasoningEffort: input.model.reasoningEffort } : {}),
+        ...(input.model?.textVerbosity !== undefined ? { textVerbosity: input.model.textVerbosity } : {}),
         system: input.skillContent,
         tools: (() => {
           const tools = {
@@ -632,6 +638,12 @@ export class BackgroundManager {
         agent: existingTask.agent,
         ...(resumeModel ? { model: resumeModel } : {}),
         ...(resumeVariant ? { variant: resumeVariant } : {}),
+        ...(existingTask.model?.temperature !== undefined ? { temperature: existingTask.model.temperature } : {}),
+        ...(existingTask.model?.top_p !== undefined ? { top_p: existingTask.model.top_p } : {}),
+        ...(existingTask.model?.maxTokens !== undefined ? { maxTokens: existingTask.model.maxTokens } : {}),
+        ...(existingTask.model?.thinking !== undefined ? { thinking: existingTask.model.thinking } : {}),
+        ...(existingTask.model?.reasoningEffort !== undefined ? { reasoningEffort: existingTask.model.reasoningEffort } : {}),
+        ...(existingTask.model?.textVerbosity !== undefined ? { textVerbosity: existingTask.model.textVerbosity } : {}),
         tools: (() => {
           const tools = {
             task: false,
