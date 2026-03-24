@@ -5,7 +5,9 @@ import {
   agentBrowserSkill,
   devBrowserSkill,
   frontendUiUxSkill,
-  gitMasterSkill,
+  gitCommitSkill,
+  gitRebaseSkill,
+  gitSearchSkill,
   playwrightSkill,
   playwrightCliSkill,
   skillCreatorSkill,
@@ -31,7 +33,9 @@ export function createBuiltinSkills(options: CreateBuiltinSkillsOptions = {}): B
   const skills = [
     browserSkill,
     frontendUiUxSkill,
-    gitMasterSkill,
+    gitCommitSkill,
+    gitRebaseSkill,
+    gitSearchSkill,
     devBrowserSkill,
     skillCreatorSkill,
   ]

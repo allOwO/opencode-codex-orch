@@ -17,7 +17,9 @@ export const BuiltinSkillNameSchema = z.enum([
   "agent-browser",
   "dev-browser",
   "frontend-ui-ux",
-  "git-master",
+  "git-commit",
+  "git-rebase",
+  "git-search",
   "skill-creator",
 ])
 

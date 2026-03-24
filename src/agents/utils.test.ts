@@ -282,7 +282,7 @@ describe("createBuiltinAgents with model overrides", () => {
     // #then
     expect(agents.sisyphus.prompt).not.toContain("playwright")
     expect(agents.sisyphus.prompt).toContain("frontend-ui-ux")
-    expect(agents.sisyphus.prompt).toContain("git-master")
+    expect(agents.sisyphus.prompt).toContain("git-commit")
   })
 
   test("includes custom agents in orchestrator prompts when provided via config", async () => {

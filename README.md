@@ -30,8 +30,8 @@ The plugin ships with these built-in skills:
 
 - **playwright** / **agent-browser** — browser automation, page inspection, screenshots, and web testing (provider-dependent)
 - **dev-browser** — persistent browser workflows for navigation, extraction, and app testing
-- **frontend-ui-ux** — broad UI/UX design skill for visually strong frontend work, including restrained, brand-forward landing pages and consumer UI
-- **git-master** — git-focused workflow for commits, rebases, history search, and branch hygiene
+- **frontend-ui-ux** — broad UI/UX design skill for visually strong frontend work, including restrained, brand-forward landing pages and consumer UI *(GPT-optimized prompt)*
+- **git-commit / git-rebase / git-search** — git workflow skills covering atomic commits, history rewriting, and code archaeology *(GPT-optimized; split from the old monolithic git-master to save ~85% tokens per invocation)*
 - **skill-creator** — create and refine reusable `SKILL.md`-based skills for this plugin
 
 ### Fork-specific skills
