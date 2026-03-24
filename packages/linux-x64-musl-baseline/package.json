@@ -1,6 +1,6 @@
 {
   "name": "opencode-codex-orch-linux-x64-musl-baseline",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Platform-specific binary for opencode-codex-orch (linux-x64-musl-baseline, no AVX2)",
   "license": "MIT",
   "repository": {
