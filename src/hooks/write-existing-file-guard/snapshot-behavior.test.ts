@@ -1,6 +1,7 @@
+import { writeFileSync } from "node:fs"
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
 
-import { READ_REQUIRED_MESSAGE } from "./constants"
+import { READ_REQUIRED_MESSAGE, STALE_SNAPSHOT_MESSAGE } from "./constants"
 import { createHookHarness } from "./test-helpers"
 
 describe("createWriteExistingFileGuardHook snapshot behavior", () => {
@@ -23,6 +24,31 @@ describe("createWriteExistingFileGuardHook snapshot behavior", () => {
         outputArgs: { filePath: existingFile, content: "new content" },
       })
     ).rejects.toThrow(READ_REQUIRED_MESSAGE)
+  })
+
+  test("#given existing file without baseline #when apply_patch executes #then blocks", async () => {
+    const existingFile = harness.createFile("existing-apply-patch.txt")
+
+    await expect(
+      harness.runBefore({
+        tool: "apply_patch",
+        outputArgs: { filePath: existingFile, patch: "*** Begin Patch\n*** End Patch" },
+      })
+    ).rejects.toThrow(READ_REQUIRED_MESSAGE)
+  })
+
+  test("#given read baseline #when patch executes #then allows", async () => {
+    const existingFile = harness.createFile("patch-after-read.txt")
+    const sessionID = "ses_patch_after_read"
+
+    await harness.invoke({ tool: "read", sessionID, outputArgs: { path: existingFile } })
+    await expect(
+      harness.invoke({
+        tool: "patch",
+        sessionID,
+        outputArgs: { file_path: existingFile, patch: "@@\n-old\n+new" },
+      })
+    ).resolves.toBeDefined()
   })
 
   test("#given read baseline #when repeated writes execute #then they succeed without reread", async () => {
@@ -114,6 +140,22 @@ describe("createWriteExistingFileGuardHook snapshot behavior", () => {
       (result): result is PromiseRejectedResult => result.status === "rejected"
     )
     expect(String(failures[0]?.reason)).toContain(READ_REQUIRED_MESSAGE)
+  })
+
+  test("#given stale snapshot #when apply_patch executes #then blocks with stale message", async () => {
+    const existingFile = harness.createFile("stale-apply-patch.txt", "before")
+    const sessionID = "ses_stale_apply_patch"
+
+    await harness.invoke({ tool: "read", sessionID, outputArgs: { filePath: existingFile } })
+    writeFileSync(existingFile, "changed externally")
+
+    await expect(
+      harness.runBefore({
+        tool: "apply_patch",
+        sessionID,
+        outputArgs: { filePath: existingFile, patch: "@@\n-before\n+after" },
+      })
+    ).rejects.toThrow(STALE_SNAPSHOT_MESSAGE)
   })
 
   test("#given failed write #when later write executes #then previous baseline is restored", async () => {

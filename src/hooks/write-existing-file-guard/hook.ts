@@ -21,7 +21,13 @@ type PendingModification = {
 export { MAX_TRACKED_PATHS_PER_SESSION } from "./constants"
 
 function isModificationTool(toolName: string | undefined): boolean {
-  return toolName === "write" || toolName === "edit" || toolName === "multiedit"
+  return (
+    toolName === "write" ||
+    toolName === "edit" ||
+    toolName === "multiedit" ||
+    toolName === "patch" ||
+    toolName === "apply_patch"
+  )
 }
 
 function isTrackedTool(toolName: string | undefined): boolean {
