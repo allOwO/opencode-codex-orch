@@ -1,14 +1,47 @@
 /// <reference types="bun-types" />
 
 import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test"
-import { createBuiltinAgents } from "./builtin-agents"
+import { createBuiltinAgents as createBuiltinAgentsImpl } from "./builtin-agents"
 import type { AgentConfig } from "@opencode-ai/sdk"
+import type { AgentOverrides, BrowserAutomationProvider, CategoriesConfig } from "../config/schema"
 import { clearSkillCache } from "../features/opencode-skill-loader/skill-content"
+import type { LoadedSkill } from "../features/opencode-skill-loader/types"
 import * as connectedProvidersCache from "../shared/connected-providers-cache"
 import * as modelAvailability from "../shared/model-availability"
 import * as shared from "../shared"
 
 const TEST_DEFAULT_MODEL = "anthropic/claude-opus-4-6"
+
+function createBuiltinAgents(
+  disabledAgents: string[] = [],
+  agentOverrides: AgentOverrides = {},
+  directory?: string,
+  systemDefaultModel?: string,
+  categories?: CategoriesConfig,
+  _gitMasterConfigIgnored?: unknown,
+  discoveredSkills: LoadedSkill[] = [],
+  customAgentSummaries?: unknown,
+  browserProvider?: BrowserAutomationProvider,
+  uiSelectedModel?: string,
+  disabledSkills?: Set<string>,
+  useTaskSystem = false,
+  disableOcoEnv = false
+): ReturnType<typeof createBuiltinAgentsImpl> {
+  return createBuiltinAgentsImpl(
+    disabledAgents,
+    agentOverrides,
+    directory,
+    systemDefaultModel,
+    categories,
+    discoveredSkills,
+    customAgentSummaries,
+    browserProvider,
+    uiSelectedModel,
+    disabledSkills,
+    useTaskSystem,
+    disableOcoEnv
+  )
+}
 
 describe("createBuiltinAgents with model overrides", () => {
   test("Sisyphus with default model has thinking config when all models available", async () => {
@@ -983,7 +1016,7 @@ describe("buildAgent with category and skills", () => {
     }
 
     // #when - browserProvider is "agent-browser"
-    const agent = buildAgent(source["test-agent"], TEST_MODEL, undefined, undefined, "agent-browser")
+    const agent = buildAgent(source["test-agent"], TEST_MODEL, undefined, "agent-browser")
 
     // #then - agent-browser skill content should be in prompt
     expect(agent.prompt).toContain("agent-browser")
