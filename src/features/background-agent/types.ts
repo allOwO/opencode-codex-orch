@@ -32,7 +32,17 @@ export interface BackgroundTask {
   error?: string
   progress?: TaskProgress
   parentModel?: { providerID: string; modelID: string }
-  model?: { providerID: string; modelID: string; variant?: string }
+  model?: {
+    providerID: string
+    modelID: string
+    variant?: string
+    temperature?: number
+    top_p?: number
+    maxTokens?: number
+    thinking?: { type: "enabled" | "disabled"; budgetTokens?: number }
+    reasoningEffort?: "low" | "medium" | "high" | "xhigh"
+    textVerbosity?: "low" | "medium" | "high"
+  }
   /** Fallback chain for runtime retry on model errors */
   fallbackChain?: FallbackEntry[]
   /** Number of fallback retry attempts made */
@@ -65,7 +75,17 @@ export interface LaunchInput {
   parentModel?: { providerID: string; modelID: string }
   parentAgent?: string
   parentTools?: Record<string, boolean>
-  model?: { providerID: string; modelID: string; variant?: string }
+  model?: {
+    providerID: string
+    modelID: string
+    variant?: string
+    temperature?: number
+    top_p?: number
+    maxTokens?: number
+    thinking?: { type: "enabled" | "disabled"; budgetTokens?: number }
+    reasoningEffort?: "low" | "medium" | "high" | "xhigh"
+    textVerbosity?: "low" | "medium" | "high"
+  }
   /** Fallback chain for runtime retry on model errors */
   fallbackChain?: FallbackEntry[]
   isUnstableAgent?: boolean

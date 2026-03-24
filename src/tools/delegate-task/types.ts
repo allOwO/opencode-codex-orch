@@ -46,6 +46,18 @@ export interface SyncSessionCreatedEvent {
   title: string
 }
 
+export interface DelegatedTaskModelConfig {
+  providerID: string
+  modelID: string
+  variant?: string
+  temperature?: number
+  top_p?: number
+  maxTokens?: number
+  thinking?: { type: "enabled" | "disabled"; budgetTokens?: number }
+  reasoningEffort?: "low" | "medium" | "high" | "xhigh"
+  textVerbosity?: "low" | "medium" | "high"
+}
+
 export interface DelegateTaskToolOptions {
   manager: BackgroundManager
   client: OpencodeClient
