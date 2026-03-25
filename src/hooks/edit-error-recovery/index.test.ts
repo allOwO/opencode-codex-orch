@@ -1,11 +1,21 @@
 import { describe, it, expect, beforeEach } from "bun:test"
-import { createEditErrorRecoveryHook, EDIT_ERROR_REMINDER, EDIT_ERROR_PATTERNS } from "./index"
+import {
+  createEditErrorRecoveryHook,
+  EDIT_ERROR_REMINDER,
+  EDIT_ERROR_PATTERNS,
+  MODIFICATION_CONFLICT_REMINDER,
+} from "./index"
+import {
+  FILE_MUTATION_BUSY_MESSAGE,
+  READ_REQUIRED_MESSAGE,
+  STALE_SNAPSHOT_MESSAGE,
+} from "../write-existing-file-guard/constants"
 
 describe("createEditErrorRecoveryHook", () => {
   let hook: ReturnType<typeof createEditErrorRecoveryHook>
 
   beforeEach(() => {
-    hook = createEditErrorRecoveryHook({} as any)
+    hook = createEditErrorRecoveryHook({} as never)
   })
 
   describe("tool.execute.after", () => {
@@ -98,6 +108,45 @@ describe("createEditErrorRecoveryHook", () => {
           await hook["tool.execute.after"](input, output)
 
           expect(output.output).toBe(originalOutput)
+        })
+      })
+    })
+
+    describe("#given Edit tool blocked by stale snapshot", () => {
+      describe("#when stale snapshot message appears", () => {
+        it("#then should append modification conflict reminder", async () => {
+          const input = createInput("Edit")
+          const output = createOutput(`Error: ${STALE_SNAPSHOT_MESSAGE}`)
+
+          await hook["tool.execute.after"](input, output)
+
+          expect(output.output).toContain(MODIFICATION_CONFLICT_REMINDER)
+        })
+      })
+    })
+
+    describe("#given Edit tool blocked without prior read", () => {
+      describe("#when read-required message appears", () => {
+        it("#then should append modification conflict reminder", async () => {
+          const input = createInput("Edit")
+          const output = createOutput(`Error: ${READ_REQUIRED_MESSAGE}`)
+
+          await hook["tool.execute.after"](input, output)
+
+          expect(output.output).toContain(MODIFICATION_CONFLICT_REMINDER)
+        })
+      })
+    })
+
+    describe("#given Write tool blocked by in-flight modification", () => {
+      describe("#when busy message appears", () => {
+        it("#then should append modification conflict reminder", async () => {
+          const input = createInput("write")
+          const output = createOutput(`Error: ${FILE_MUTATION_BUSY_MESSAGE}`)
+
+          await hook["tool.execute.after"](input, output)
+
+          expect(output.output).toContain(MODIFICATION_CONFLICT_REMINDER)
         })
       })
     })

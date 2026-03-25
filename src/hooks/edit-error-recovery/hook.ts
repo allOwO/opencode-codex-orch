@@ -1,5 +1,12 @@
 import type { PluginInput } from "@opencode-ai/plugin"
 
+import { isModificationTool } from "../shared/modification-tools"
+import {
+  FILE_MUTATION_BUSY_MESSAGE,
+  READ_REQUIRED_MESSAGE,
+  STALE_SNAPSHOT_MESSAGE,
+} from "../write-existing-file-guard/constants"
+
 /**
  * Known Edit tool error patterns that indicate the AI made a mistake
  */
@@ -26,6 +33,24 @@ You made an Edit mistake. STOP and do this NOW:
 DO NOT attempt another edit until you've read and verified the file state.
 `
 
+export const MODIFICATION_CONFLICT_REMINDER = `
+[MODIFICATION CONFLICT - IMMEDIATE ACTION REQUIRED]
+
+Your edit/write request was blocked because the file state is stale.
+
+1. READ the file immediately to refresh your snapshot
+2. RECHECK your intended change against the new content
+3. RETRY the edit/write only after confirming the current state
+
+Do not retry the same edit blindly with a stale snapshot.
+`
+
+const MODIFICATION_CONFLICT_PATTERNS = [
+  FILE_MUTATION_BUSY_MESSAGE,
+  READ_REQUIRED_MESSAGE,
+  STALE_SNAPSHOT_MESSAGE,
+] as const
+
 /**
  * Detects Edit tool errors caused by AI mistakes and injects a recovery reminder
  *
@@ -42,16 +67,26 @@ export function createEditErrorRecoveryHook(_ctx: PluginInput) {
       input: { tool: string; sessionID: string; callID: string },
       output: { title: string; output: string; metadata: unknown }
     ) => {
-      if (input.tool.toLowerCase() !== "edit") return
+      const toolName = input.tool.toLowerCase()
+      if (!isModificationTool(toolName)) return
       if (typeof output.output !== "string") return
 
       const outputLower = (output.output ?? "").toLowerCase()
-      const hasEditError = EDIT_ERROR_PATTERNS.some((pattern) =>
+      const hasEditError =
+        toolName === "edit"
+        && EDIT_ERROR_PATTERNS.some((pattern) => outputLower.includes(pattern.toLowerCase()))
+
+      const hasModificationConflict = MODIFICATION_CONFLICT_PATTERNS.some((pattern) =>
         outputLower.includes(pattern.toLowerCase())
       )
 
       if (hasEditError) {
         output.output += `\n${EDIT_ERROR_REMINDER}`
+        return
+      }
+
+      if (hasModificationConflict) {
+        output.output += `\n${MODIFICATION_CONFLICT_REMINDER}`
       }
     },
   }
