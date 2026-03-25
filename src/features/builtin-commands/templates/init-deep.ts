@@ -204,7 +204,7 @@ Never blindly overwrite an existing file with \`Write\`. If you must rewrite one
 
 ## STRUCTURE
 \\\`\\\`\\\`
-{root}/
+./
 ├── {dir}/    # {non-obvious purpose only}
 └── {entry}
 \\\`\\\`\\\`
@@ -238,6 +238,11 @@ Never blindly overwrite an existing file with \`Write\`. If you must rewrite one
 \`\`\`
 
 **Quality gates**: 50-150 lines, no generic advice, no obvious info.
+
+<critical>
+**Path Rule**: NEVER write absolute paths (e.g. \`/Users/xxx/...\`, \`/home/xxx/...\`, \`C:\\Users\\...\`) into AGENTS.md.
+Use relative paths (\`./src/\`, \`src/hooks/\`) or project name only. AGENTS.md must be portable across machines.
+</critical>
 
 ### Subdirectory AGENTS.md (Parallel)
 
@@ -302,4 +307,5 @@ Hierarchy:
 - **Over-documenting**: Not every dir needs AGENTS.md
 - **Redundancy**: Child never repeats parent
 - **Generic content**: Remove anything that applies to ALL projects
+- **Absolute paths**: NEVER write /Users/xxx or /home/xxx — use relative paths only
 - **Verbose style**: Telegraphic or die`
