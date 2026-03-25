@@ -1,18 +1,23 @@
 import type { Hooks, PluginInput } from "@opencode-ai/plugin"
 
 import { log } from "../../shared"
+import { isModificationTool, isTrackedFileStateTool } from "../shared/modification-tools"
 import {
+  FILE_MUTATION_BUSY_MESSAGE,
+  FILE_MUTATION_LEASE_WAIT_TIMEOUT_MS,
   MAX_TRACKED_PATHS_PER_SESSION,
   MAX_TRACKED_SESSIONS,
   READ_REQUIRED_MESSAGE,
   STALE_SNAPSHOT_MESSAGE,
 } from "./constants"
+import { createFileMutationLeaseStore } from "./file-mutation-lease-store"
 import { readFileSnapshot, snapshotsMatch, type FileSnapshot } from "./file-snapshot"
 import { asRecord, getPathFromArgs, isOverwriteEnabled, type GuardArgs } from "./guard-args"
 import { isPathInsideDirectory, resolveInputPath, toCanonicalPath } from "./path-utils"
 import { createSessionSnapshotStore } from "./session-snapshot-store"
 
 type PendingModification = {
+  canonicalPath: string
   sessionID: string
   resolvedPath: string
   snapshotBeforeCall?: FileSnapshot
@@ -20,48 +25,21 @@ type PendingModification = {
 
 export { MAX_TRACKED_PATHS_PER_SESSION } from "./constants"
 
-function isModificationTool(toolName: string | undefined): boolean {
-  return (
-    toolName === "write" ||
-    toolName === "edit" ||
-    toolName === "multiedit" ||
-    toolName === "patch" ||
-    toolName === "apply_patch"
-  )
-}
-
-function isTrackedTool(toolName: string | undefined): boolean {
-  return toolName === "read" || isModificationTool(toolName)
-}
-
 export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
   const snapshots = createSessionSnapshotStore({
     maxSessions: MAX_TRACKED_SESSIONS,
     maxPathsPerSession: MAX_TRACKED_PATHS_PER_SESSION,
   })
+  const fileMutationLeases = createFileMutationLeaseStore({
+    waitTimeoutMs: FILE_MUTATION_LEASE_WAIT_TIMEOUT_MS,
+  })
   const pendingByCall = new Map<string, PendingModification>()
   const canonicalSessionRoot = toCanonicalPath(resolveInputPath(ctx, ctx.directory))
-
-  const queuePendingModification = (
-    input: { callID?: string; sessionID?: string },
-    resolvedPath: string,
-    snapshotBeforeCall?: FileSnapshot
-  ): void => {
-    if (!input.callID || !input.sessionID) {
-      return
-    }
-
-    pendingByCall.set(input.callID, {
-      sessionID: input.sessionID,
-      resolvedPath,
-      snapshotBeforeCall,
-    })
-  }
 
   return {
     "tool.execute.before": async (input, output) => {
       const toolName = input.tool?.toLowerCase()
-      if (!isTrackedTool(toolName)) {
+      if (!isTrackedFileStateTool(toolName)) {
         return
       }
 
@@ -94,73 +72,105 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
         return
       }
 
-      const overwriteEnabled = isOverwriteEnabled(args?.overwrite)
-
-      if (argsRecord && "overwrite" in argsRecord) {
-        // Intentionally mutate output args so overwrite bypass remains hook-only.
-        delete argsRecord.overwrite
+      const leaseOwnerID = input.callID
+      if (leaseOwnerID) {
+        const acquiredLease = await fileMutationLeases.acquire(canonicalPath, leaseOwnerID)
+        if (!acquiredLease) {
+          throw new Error(FILE_MUTATION_BUSY_MESSAGE)
+        }
       }
 
-      const currentSnapshot = readFileSnapshot(resolvedPath)
-      if (!currentSnapshot) {
-        queuePendingModification(input, resolvedPath, currentSnapshot)
-        return
-      }
+      const queuePendingModification = (snapshotBeforeCall?: FileSnapshot): void => {
+        if (!input.callID || !input.sessionID) {
+          return
+        }
 
-      const isSisyphusPath = canonicalPath.includes("/.sisyphus/")
-      if (isSisyphusPath) {
-        log("[write-existing-file-guard] Allowing .sisyphus/** overwrite", {
+        pendingByCall.set(input.callID, {
+          canonicalPath,
           sessionID: input.sessionID,
-          filePath,
-        })
-        queuePendingModification(input, resolvedPath, currentSnapshot)
-        return
-      }
-
-      if (overwriteEnabled) {
-        log("[write-existing-file-guard] Allowing overwrite flag bypass", {
-          sessionID: input.sessionID,
-          filePath,
           resolvedPath,
+          snapshotBeforeCall,
         })
-        queuePendingModification(input, resolvedPath)
-        return
       }
 
-      if (!input.sessionID) {
-        throw new Error(READ_REQUIRED_MESSAGE)
+      const releaseLeaseIfHeld = (): void => {
+        if (leaseOwnerID) {
+          fileMutationLeases.release(canonicalPath, leaseOwnerID)
+        }
       }
 
-      const previousSnapshot = snapshots.get(input.sessionID, canonicalPath)
-      if (!previousSnapshot) {
-        log("[write-existing-file-guard] Blocking modification without snapshot", {
-          sessionID: input.sessionID,
-          filePath,
-          resolvedPath,
-          toolName,
-        })
-        throw new Error(READ_REQUIRED_MESSAGE)
-      }
+      try {
+        const overwriteEnabled = isOverwriteEnabled(args?.overwrite)
 
-      if (!snapshotsMatch(previousSnapshot, currentSnapshot)) {
+        if (argsRecord && "overwrite" in argsRecord) {
+          // Intentionally mutate output args so overwrite bypass remains hook-only.
+          delete argsRecord.overwrite
+        }
+
+        const currentSnapshot = readFileSnapshot(resolvedPath)
+        if (!currentSnapshot) {
+          queuePendingModification(currentSnapshot)
+          return
+        }
+
+        const isSisyphusPath = canonicalPath.includes("/.sisyphus/")
+        if (isSisyphusPath) {
+          log("[write-existing-file-guard] Allowing .sisyphus/** overwrite", {
+            sessionID: input.sessionID,
+            filePath,
+          })
+          queuePendingModification(currentSnapshot)
+          return
+        }
+
+        if (overwriteEnabled) {
+          log("[write-existing-file-guard] Allowing overwrite flag bypass", {
+            sessionID: input.sessionID,
+            filePath,
+            resolvedPath,
+          })
+          queuePendingModification()
+          return
+        }
+
+        if (!input.sessionID) {
+          throw new Error(READ_REQUIRED_MESSAGE)
+        }
+
+        const previousSnapshot = snapshots.get(input.sessionID, canonicalPath)
+        if (!previousSnapshot) {
+          log("[write-existing-file-guard] Blocking modification without snapshot", {
+            sessionID: input.sessionID,
+            filePath,
+            resolvedPath,
+            toolName,
+          })
+          throw new Error(READ_REQUIRED_MESSAGE)
+        }
+
+        if (!snapshotsMatch(previousSnapshot, currentSnapshot)) {
+          snapshots.delete(input.sessionID, canonicalPath)
+          log("[write-existing-file-guard] Blocking modification with stale snapshot", {
+            sessionID: input.sessionID,
+            filePath,
+            resolvedPath,
+            toolName,
+          })
+          throw new Error(STALE_SNAPSHOT_MESSAGE)
+        }
+
         snapshots.delete(input.sessionID, canonicalPath)
-        log("[write-existing-file-guard] Blocking modification with stale snapshot", {
+        queuePendingModification(currentSnapshot)
+        log("[write-existing-file-guard] Allowing modification after snapshot match", {
           sessionID: input.sessionID,
           filePath,
           resolvedPath,
           toolName,
         })
-        throw new Error(STALE_SNAPSHOT_MESSAGE)
+      } catch (error) {
+        releaseLeaseIfHeld()
+        throw error
       }
-
-      snapshots.delete(input.sessionID, canonicalPath)
-      queuePendingModification(input, resolvedPath, currentSnapshot)
-      log("[write-existing-file-guard] Allowing modification after snapshot match", {
-        sessionID: input.sessionID,
-        filePath,
-        resolvedPath,
-        toolName,
-      })
     },
     "tool.execute.after": async (input) => {
       const toolName = input.tool?.toLowerCase()
@@ -175,23 +185,26 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
 
       pendingByCall.delete(input.callID)
 
-      const canonicalPath = toCanonicalPath(pending.resolvedPath)
-      const nextSnapshot = readFileSnapshot(pending.resolvedPath)
-      if (!nextSnapshot) {
-        if (pending.snapshotBeforeCall) {
-          snapshots.remember(input.sessionID, canonicalPath, pending.snapshotBeforeCall)
-        } else {
-          snapshots.delete(input.sessionID, canonicalPath)
+      try {
+        const nextSnapshot = readFileSnapshot(pending.resolvedPath)
+        if (!nextSnapshot) {
+          if (pending.snapshotBeforeCall) {
+            snapshots.remember(input.sessionID, pending.canonicalPath, pending.snapshotBeforeCall)
+          } else {
+            snapshots.delete(input.sessionID, pending.canonicalPath)
+          }
+          return
         }
-        return
-      }
 
-      if (pending.snapshotBeforeCall && snapshotsMatch(pending.snapshotBeforeCall, nextSnapshot)) {
-        snapshots.remember(input.sessionID, canonicalPath, pending.snapshotBeforeCall)
-        return
-      }
+        if (pending.snapshotBeforeCall && snapshotsMatch(pending.snapshotBeforeCall, nextSnapshot)) {
+          snapshots.remember(input.sessionID, pending.canonicalPath, pending.snapshotBeforeCall)
+          return
+        }
 
-      snapshots.remember(input.sessionID, canonicalPath, nextSnapshot)
+        snapshots.remember(input.sessionID, pending.canonicalPath, nextSnapshot)
+      } finally {
+        fileMutationLeases.release(pending.canonicalPath, input.callID)
+      }
     },
     event: async ({ event }: { event: { type: string; properties?: unknown } }) => {
       if (event.type !== "session.deleted") {
@@ -207,6 +220,7 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
       snapshots.removeSession(sessionID)
       for (const [callID, pending] of pendingByCall.entries()) {
         if (pending.sessionID === sessionID) {
+          fileMutationLeases.release(pending.canonicalPath, callID)
           pendingByCall.delete(callID)
         }
       }

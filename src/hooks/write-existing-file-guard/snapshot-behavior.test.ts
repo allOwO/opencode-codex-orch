@@ -1,7 +1,11 @@
 import { writeFileSync } from "node:fs"
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
 
-import { READ_REQUIRED_MESSAGE, STALE_SNAPSHOT_MESSAGE } from "./constants"
+import {
+  FILE_MUTATION_BUSY_MESSAGE,
+  READ_REQUIRED_MESSAGE,
+  STALE_SNAPSHOT_MESSAGE,
+} from "./constants"
 import { createHookHarness } from "./test-helpers"
 
 describe("createWriteExistingFileGuardHook snapshot behavior", () => {
@@ -139,7 +143,30 @@ describe("createWriteExistingFileGuardHook snapshot behavior", () => {
     const failures = results.filter(
       (result): result is PromiseRejectedResult => result.status === "rejected"
     )
-    expect(String(failures[0]?.reason)).toContain(READ_REQUIRED_MESSAGE)
+    expect(String(failures[0]?.reason)).toContain(FILE_MUTATION_BUSY_MESSAGE)
+  })
+
+  test("#given queued same-file write #when first write completes quickly #then second write reuses refreshed baseline", async () => {
+    const existingFile = harness.createFile("queued-write.txt")
+    const sessionID = "ses_queued_write"
+
+    await harness.invoke({ tool: "read", sessionID, outputArgs: { filePath: existingFile } })
+    const firstWrite = await harness.runBefore({
+      tool: "write",
+      sessionID,
+      outputArgs: { filePath: existingFile, content: "first overwrite" },
+    })
+
+    const queuedWrite = harness.runBefore({
+      tool: "write",
+      sessionID,
+      outputArgs: { filePath: existingFile, content: "second overwrite" },
+    })
+
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 50))
+    await harness.runAfter(firstWrite, "write success")
+
+    await expect(queuedWrite).resolves.toBeDefined()
   })
 
   test("#given stale snapshot #when apply_patch executes #then blocks with stale message", async () => {
