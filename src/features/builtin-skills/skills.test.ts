@@ -219,5 +219,8 @@ describe("createBuiltinSkills", () => {
 		// then
 		expect(skill.template).toContain("skill(name=")
 		expect(skill.template).toContain("SKILL.md")
+		expect(skill.template).toContain(".agents/skills/<skill-name>/SKILL.md")
+		expect(skill.template).toContain("recommended organizational default for generic project-level skills")
+		expect(skill.template).toContain("OpenCode will load the `.opencode` version first")
 	})
 })

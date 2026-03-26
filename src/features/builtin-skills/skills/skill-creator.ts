@@ -13,7 +13,7 @@ Create small, reusable skills for this plugin's skill system. Keep them focused,
 - Built-in skills here are TypeScript metadata plus a prompt template, not giant always-on instructions.
 - They are listed by metadata and loaded on demand through the \`skill\` tool, rather than injected into every chat.
 - Explicit invocation matters: use \`skill(name="skill-creator")\` to load this guidance, then call other skills the same way.
-- Local skills are usually directory-based and loaded from \`.opencode/skills/\`, \`~/.config/opencode/skills/\`, legacy Claude paths like \`.claude/skills/\` and \`~/.claude/skills/\`, plus the project's \`.agents/skills/\` paths when present.
+- Local skills are usually directory-based and loaded from \`.agents/skills/\`, \`.opencode/skills/\`, \`~/.agents/skills/\`, \`~/.config/opencode/skills/\`, and legacy Claude paths like \`.claude/skills/\` and \`~/.claude/skills/\`.
 
 ## When To Use This Skill
 
@@ -69,10 +69,11 @@ Avoid: \`Helpful skill for skills.\`
 
 ## Choosing A Scope
 
-- \`.opencode/skills/<skill-name>/SKILL.md\`: project-specific OpenCode skill
-- \`~/.config/opencode/skills/<skill-name>/SKILL.md\`: reusable OpenCode user skill
+- \`.agents/skills/<skill-name>/SKILL.md\`: recommended organizational default for generic project-level skills you want to keep repo-local without making them OpenCode-specific; if the same skill name also exists under \`.opencode/skills/\`, OpenCode will load the \`.opencode\` version first
+- \`.opencode/skills/<skill-name>/SKILL.md\`: project-level location for OpenCode-specific skills and workflows
+- \`~/.agents/skills/<skill-name>/SKILL.md\`: recommended organizational default for cross-tool reusable user skills; if the same skill name also exists under \`~/.config/opencode/skills/\`, OpenCode will load the OpenCode-specific version first
+- \`~/.config/opencode/skills/<skill-name>/SKILL.md\`: user-level location for OpenCode-specific personal skills
 - \`.claude/skills/<skill-name>/SKILL.md\` or \`~/.claude/skills/<skill-name>/SKILL.md\`: Claude-compatible local skill locations that this loader can still discover
-- \`.agents/skills/<skill-name>/SKILL.md\` or \`~/.agents/skills/<skill-name>/SKILL.md\`: additional compatible local sources
 - Built-in TypeScript skill: use when the plugin itself should ship the skill metadata and prompt
 
 Prefer the narrowest scope that matches who should reuse it.

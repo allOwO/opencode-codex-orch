@@ -280,9 +280,9 @@ Use agent-browser to navigate to example.com and extract the main heading
 
 ### Custom Skill Creation (SKILL.md)
 
-You can add custom skills directly to `.opencode/skills/` in your project root or `~/.claude/skills/` in your home directory.
+You can add custom skills directly to `.agents/skills/` in your project root for generic repo-local reuse, or `~/.agents/skills/` in your home directory for generic user-level reuse. Use `.opencode/skills/` and `~/.config/opencode/skills/` when the skill is specifically tied to OpenCode.
 
-**Example: `.opencode/skills/my-skill/SKILL.md`**
+**Example: `.agents/skills/my-skill/SKILL.md`**
 
 ```markdown
 ---
@@ -302,11 +302,12 @@ This content will be injected into the agent's system prompt.
 
 **Skill Load Locations** (priority order, highest first):
 
-- `.opencode/skills/*/SKILL.md` (project, OpenCode native)
+- `.opencode/skills/*/SKILL.md` (project, OpenCode native; highest priority)
 - `~/.config/opencode/skills/*/SKILL.md` (user, OpenCode native)
-- `.claude/skills/*/SKILL.md` (project, Claude Code compat)
-- `.agents/skills/*/SKILL.md` (project, Agents convention)
-- `~/.agents/skills/*/SKILL.md` (user, Agents convention)
+- `.claude/skills/*/SKILL.md` and `.agents/skills/*/SKILL.md` (project, compatibility paths)
+- `~/.claude/skills/*/SKILL.md` and `~/.agents/skills/*/SKILL.md` (user, compatibility paths)
+
+For organization, prefer `.agents/skills/` and `~/.agents/skills/` when the skill is meant to stay generic and reusable across tools. Prefer the OpenCode paths when the skill is specifically tied to OpenCode behavior.
 
 Same-named skill at higher priority overrides lower.
 
