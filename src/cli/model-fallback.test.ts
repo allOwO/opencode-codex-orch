@@ -133,6 +133,18 @@ describe("generateModelConfig", () => {
   })
 
   describe("fallback providers", () => {
+    test("uses Kimi models for oracle and visual-engineering when only Kimi For Coding is available", () => {
+      // #given only Kimi For Coding is available
+      const config = createConfig({ hasKimiForCoding: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then oracle and visual-engineering should resolve to Kimi
+      expect(result.agents?.oracle?.model).toBe("kimi-for-coding/k2p5")
+      expect(result.categories?.["visual-engineering"]?.model).toBe("kimi-for-coding/k2p5")
+    })
+
     test("uses OpenCode Zen models when only OpenCode Zen is available", () => {
       // #given only OpenCode Zen is available
       const config = createConfig({ hasOpencodeZen: true })

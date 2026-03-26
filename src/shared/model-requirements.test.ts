@@ -7,7 +7,7 @@ import {
 } from "./model-requirements"
 
 describe("AGENT_MODEL_REQUIREMENTS", () => {
-  test("oracle has valid fallbackChain with gpt-5.4 as primary", () => {
+  test("oracle has valid fallbackChain with gpt-5.4 as primary and Kimi fallback", () => {
     // given - oracle agent requirement
     const oracle = AGENT_MODEL_REQUIREMENTS["oracle"]
 
@@ -21,6 +21,9 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(primary.providers).toContain("openai")
     expect(primary.model).toBe("gpt-5.4")
     expect(primary.variant).toBe("high")
+
+    const second = oracle.fallbackChain[1]
+    expect(second).toEqual({ providers: ["kimi-for-coding"], model: "k2p5" })
   })
 
   test("sisyphus has claude-opus-4-6 as primary with Kimi and GPT/GLM fallbacks", () => {
@@ -281,15 +284,15 @@ describe("CATEGORY_MODEL_REQUIREMENTS", () => {
     expect(primary.providers[0]).toBe("openai")
   })
 
-  test("visual-engineering has valid fallbackChain with gemini-3.1-pro high as primary", () => {
+  test("visual-engineering has valid fallbackChain with gemini-3.1-pro high as primary and Kimi fallback", () => {
     // given - visual-engineering category requirement
     const visualEngineering = CATEGORY_MODEL_REQUIREMENTS["visual-engineering"]
 
     // when - accessing visual-engineering requirement
-    // then - fallbackChain: gemini-3.1-pro(high) → glm-5 → opus-4-6(max)
+    // then - fallbackChain: gemini-3.1-pro(high) → glm-5 → k2p5 → opus-4-6(max)
     expect(visualEngineering).toBeDefined()
     expect(visualEngineering.fallbackChain).toBeArray()
-    expect(visualEngineering.fallbackChain).toHaveLength(3)
+    expect(visualEngineering.fallbackChain).toHaveLength(4)
 
     const primary = visualEngineering.fallbackChain[0]
     expect(primary.providers[0]).toBe("google")
@@ -301,8 +304,11 @@ describe("CATEGORY_MODEL_REQUIREMENTS", () => {
     expect(second.model).toBe("glm-5")
 
     const third = visualEngineering.fallbackChain[2]
-    expect(third.model).toBe("claude-opus-4-6")
-    expect(third.variant).toBe("max")
+    expect(third).toEqual({ providers: ["kimi-for-coding"], model: "k2p5" })
+
+    const fourth = visualEngineering.fallbackChain[3]
+    expect(fourth.model).toBe("claude-opus-4-6")
+    expect(fourth.variant).toBe("max")
 
   })
 

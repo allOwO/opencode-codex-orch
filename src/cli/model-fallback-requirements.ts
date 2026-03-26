@@ -25,6 +25,7 @@ export const CLI_AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         model: "gpt-5.4",
         variant: "high",
       },
+      { providers: ["kimi-for-coding"], model: "k2p5" },
       {
         providers: ["google", "github-copilot", "opencode"],
         model: "gemini-3.1-pro",

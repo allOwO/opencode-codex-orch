@@ -3,7 +3,7 @@ import type { BuiltinSkill } from "../types"
 export const skillCreatorSkill: BuiltinSkill = {
   name: "skill-creator",
   description:
-    "Creates concise SKILL.md-based skills for this plugin, with explicit invocation guidance, local scope placement, and an iteration workflow adapted from Anthropic's skill-authoring style.",
+    "Creates and refines SKILL.md-based skills for this plugin, with explicit invocation, scope selection, and eval/testing guidance.",
   template: `# Skill Creator
 
 Create small, reusable skills for this plugin's skill system. Keep them focused, explicit, and easy to invoke.

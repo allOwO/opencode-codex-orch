@@ -45,6 +45,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         model: "gpt-5.4",
         variant: "high",
       },
+      { providers: ["kimi-for-coding"], model: "k2p5" },
       {
         providers: ["google", "github-copilot", "opencode"],
         model: "gemini-3.1-pro",
@@ -186,6 +187,7 @@ export const CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         variant: "high",
       },
       { providers: ["zai-coding-plan", "opencode"], model: "glm-5" },
+      { providers: ["kimi-for-coding"], model: "k2p5" },
       {
         providers: ["anthropic", "github-copilot", "opencode"],
         model: "claude-opus-4-6",
