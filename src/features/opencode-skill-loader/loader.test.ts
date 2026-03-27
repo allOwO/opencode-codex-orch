@@ -616,4 +616,134 @@ Skill body.
       expect(skill?.scope).toBe("project")
     })
   })
+
+  describe("runtime-configured skill paths", () => {
+    it("discovers skills from runtime config object skills.paths", async () => {
+      const runtimeSkillsDir = join(TEST_DIR, "runtime-object-skills")
+      const runtimeSkillDir = join(runtimeSkillsDir, "runtime-object-skill")
+      mkdirSync(runtimeSkillDir, { recursive: true })
+      writeFileSync(
+        join(runtimeSkillDir, "SKILL.md"),
+        `---
+name: runtime-object-skill
+description: Loaded from runtime config object skills.paths
+---
+runtime object skill body
+`
+      )
+
+      const { discoverRuntimeConfiguredSkills } = await import("./loader")
+      const skills = await discoverRuntimeConfiguredSkills({
+        directory: TEST_DIR,
+        runtimeConfig: {
+          skills: {
+            paths: [runtimeSkillsDir],
+          },
+        },
+      })
+      const runtimeSkill = skills.find((skill) => skill.name === "runtime-object-skill")
+
+      expect(runtimeSkill).toBeDefined()
+      expect(runtimeSkill?.scope).toBe("opencode")
+    })
+
+    it("discovers skills from OPENCODE_CONFIG_CONTENT skills.paths", async () => {
+      const originalConfigContent = process.env.OPENCODE_CONFIG_CONTENT
+
+      const runtimeSkillsDir = join(TEST_DIR, "runtime-skills")
+      const runtimeSkillDir = join(runtimeSkillsDir, "runtime-config-skill")
+      mkdirSync(runtimeSkillDir, { recursive: true })
+      writeFileSync(
+        join(runtimeSkillDir, "SKILL.md"),
+        `---
+name: runtime-config-skill
+description: Loaded from runtime config skills.paths
+---
+runtime skill body
+`
+      )
+
+      process.env.OPENCODE_CONFIG_CONTENT = JSON.stringify({
+        skills: {
+          paths: [runtimeSkillsDir],
+        },
+      })
+
+      try {
+        const { discoverRuntimeConfiguredSkills } = await import("./loader")
+        const skills = await discoverRuntimeConfiguredSkills({ directory: TEST_DIR })
+        const runtimeSkill = skills.find((skill) => skill.name === "runtime-config-skill")
+
+        expect(runtimeSkill).toBeDefined()
+        expect(runtimeSkill?.scope).toBe("opencode")
+      } finally {
+        if (originalConfigContent === undefined) {
+          delete process.env.OPENCODE_CONFIG_CONTENT
+        } else {
+          process.env.OPENCODE_CONFIG_CONTENT = originalConfigContent
+        }
+      }
+    })
+
+    it("adds runtime-configured paths without replacing fixed OpenCode skills directory", async () => {
+      const originalCwd = process.cwd()
+      const originalOpenCodeConfigDir = process.env.OPENCODE_CONFIG_DIR
+      const originalConfigContent = process.env.OPENCODE_CONFIG_CONTENT
+
+      const opencodeConfigDir = join(TEST_DIR, "opencode-global")
+      const fixedSkillsDir = join(opencodeConfigDir, "skills", "fixed-opencode-skill")
+      mkdirSync(fixedSkillsDir, { recursive: true })
+      writeFileSync(
+        join(fixedSkillsDir, "SKILL.md"),
+        `---
+name: fixed-opencode-skill
+description: Fixed opencode config dir skill
+---
+fixed skill body
+`
+      )
+
+      const runtimeSkillsDir = join(TEST_DIR, "runtime-path-skills")
+      const runtimeSkillDir = join(runtimeSkillsDir, "runtime-added-skill")
+      mkdirSync(runtimeSkillDir, { recursive: true })
+      writeFileSync(
+        join(runtimeSkillDir, "SKILL.md"),
+        `---
+name: runtime-added-skill
+description: Runtime configured path skill
+---
+runtime-added body
+`
+      )
+
+      process.env.OPENCODE_CONFIG_DIR = opencodeConfigDir
+      process.env.OPENCODE_CONFIG_CONTENT = JSON.stringify({
+        skills: {
+          paths: [runtimeSkillsDir],
+        },
+      })
+
+      try {
+        const { discoverSkills } = await import("./loader")
+        process.chdir(TEST_DIR)
+
+        const skills = await discoverSkills({ includeClaudeCodePaths: false, directory: TEST_DIR })
+
+        expect(skills.some((skill) => skill.name === "fixed-opencode-skill")).toBe(true)
+        expect(skills.some((skill) => skill.name === "runtime-added-skill")).toBe(true)
+      } finally {
+        process.chdir(originalCwd)
+        if (originalOpenCodeConfigDir === undefined) {
+          delete process.env.OPENCODE_CONFIG_DIR
+        } else {
+          process.env.OPENCODE_CONFIG_DIR = originalOpenCodeConfigDir
+        }
+        if (originalConfigContent === undefined) {
+          delete process.env.OPENCODE_CONFIG_CONTENT
+        } else {
+          process.env.OPENCODE_CONFIG_CONTENT = originalConfigContent
+        }
+      }
+    })
+  })
 })

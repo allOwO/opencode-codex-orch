@@ -1,8 +1,9 @@
-import { join } from "path"
-import { homedir } from "os"
+import { homedir } from "node:os"
+import { join } from "node:path"
 import { getClaudeConfigDir } from "../../shared/claude-config-dir"
 import { getOpenCodeConfigDir } from "../../shared/opencode-config-dir"
 import type { CommandDefinition } from "../claude-code-command-loader/types"
+import { readRuntimeConfigSkillPaths, resolveRuntimeSkillPathCandidates } from "./runtime-config-skill-paths"
 import type { LoadedSkill } from "./types"
 import { skillsToCommandDefinitionRecord } from "./skill-definition-record"
 import { deduplicateSkillsByName } from "./skill-deduplication"
@@ -38,11 +39,36 @@ export interface DiscoverSkillsOptions {
   directory?: string
 }
 
+export async function discoverRuntimeConfiguredSkills(options: {
+  directory?: string
+  runtimeConfig?: unknown
+  runtimeConfigContent?: string
+} = {}): Promise<LoadedSkill[]> {
+  const baseDirectory = options.directory ?? process.cwd()
+  const runtimeConfigContent = options.runtimeConfigContent ?? process.env.OPENCODE_CONFIG_CONTENT
+  const configuredPaths = readRuntimeConfigSkillPaths({
+    runtimeConfig: options.runtimeConfig,
+    runtimeConfigContent,
+  })
+
+  if (configuredPaths.length === 0) {
+    return []
+  }
+
+  const candidatePaths = configuredPaths.flatMap((path) => resolveRuntimeSkillPathCandidates(path, baseDirectory))
+  const loadedByPath = await Promise.all(
+    candidatePaths.map((skillsDir) => loadSkillsFromDir({ skillsDir, scope: "opencode" }))
+  )
+
+  return deduplicateSkillsByName(loadedByPath.flat())
+}
+
 export async function discoverAllSkills(directory?: string): Promise<LoadedSkill[]> {
-  const [opencodeProjectSkills, opencodeGlobalSkills, projectSkills, userSkills, agentsProjectSkills, agentsGlobalSkills] =
+  const [opencodeProjectSkills, opencodeGlobalSkills, runtimeConfiguredSkills, projectSkills, userSkills, agentsProjectSkills, agentsGlobalSkills] =
     await Promise.all([
       discoverOpencodeProjectSkills(directory),
       discoverOpencodeGlobalSkills(),
+      discoverRuntimeConfiguredSkills({ directory }),
       discoverProjectClaudeSkills(directory),
       discoverUserClaudeSkills(),
       discoverProjectAgentsSkills(directory),
@@ -53,6 +79,7 @@ export async function discoverAllSkills(directory?: string): Promise<LoadedSkill
   return deduplicateSkillsByName([
     ...opencodeProjectSkills,
     ...opencodeGlobalSkills,
+    ...runtimeConfiguredSkills,
     ...projectSkills,
     ...agentsProjectSkills,
     ...userSkills,
@@ -63,14 +90,15 @@ export async function discoverAllSkills(directory?: string): Promise<LoadedSkill
 export async function discoverSkills(options: DiscoverSkillsOptions = {}): Promise<LoadedSkill[]> {
   const { includeClaudeCodePaths = true, directory } = options
 
-  const [opencodeProjectSkills, opencodeGlobalSkills] = await Promise.all([
+  const [opencodeProjectSkills, opencodeGlobalSkills, runtimeConfiguredSkills] = await Promise.all([
     discoverOpencodeProjectSkills(directory),
     discoverOpencodeGlobalSkills(),
+    discoverRuntimeConfiguredSkills({ directory }),
   ])
 
   if (!includeClaudeCodePaths) {
     // Priority: opencode-project > opencode
-    return deduplicateSkillsByName([...opencodeProjectSkills, ...opencodeGlobalSkills])
+    return deduplicateSkillsByName([...opencodeProjectSkills, ...opencodeGlobalSkills, ...runtimeConfiguredSkills])
   }
 
   const [projectSkills, userSkills, agentsProjectSkills, agentsGlobalSkills] = await Promise.all([
@@ -84,6 +112,7 @@ export async function discoverSkills(options: DiscoverSkillsOptions = {}): Promi
   return deduplicateSkillsByName([
     ...opencodeProjectSkills,
     ...opencodeGlobalSkills,
+    ...runtimeConfiguredSkills,
     ...projectSkills,
     ...agentsProjectSkills,
     ...userSkills,
