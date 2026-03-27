@@ -42,9 +42,10 @@ export function createToolRegistry(args: {
   managers: Pick<Managers, "backgroundManager" | "tmuxSessionManager" | "skillMcpManager">
   skillContext: SkillContext
   availableCategories: AvailableCategory[]
-  runtimeConfigState: RuntimeConfigState
+  runtimeConfigState?: RuntimeConfigState
 }): ToolRegistryResult {
-  const { ctx, pluginConfig, managers, skillContext, availableCategories, runtimeConfigState } = args
+  const runtimeConfigState = args.runtimeConfigState ?? { config: undefined, version: 0 }
+  const { ctx, pluginConfig, managers, skillContext, availableCategories } = args
 
   const backgroundTools = createBackgroundTools(managers.backgroundManager, ctx.client)
 
