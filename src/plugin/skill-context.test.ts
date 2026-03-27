@@ -56,16 +56,16 @@ runtime-context body
 
     process.env.OPENCODE_CONFIG_DIR = join(testDir, "opencode-config")
     process.env.CLAUDE_CONFIG_DIR = join(testDir, "claude-config")
+    process.env.OPENCODE_CONFIG_CONTENT = JSON.stringify({
+      skills: {
+        paths: [runtimeSkillsDir],
+      },
+    })
 
     const { createSkillContext } = await import("./skill-context")
     const context = await createSkillContext({
       directory: testDir,
       pluginConfig: {},
-      runtimeConfig: {
-        skills: {
-          paths: [runtimeSkillsDir],
-        },
-      },
     })
 
     expect(context.mergedSkills.some((skill) => skill.name === "runtime-context-skill")).toBe(true)
