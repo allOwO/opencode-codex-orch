@@ -14,11 +14,12 @@ export interface ConfigHandlerDeps {
   ctx: { directory: string; client?: any };
   pluginConfig: OpenCodeCodexOrchConfig;
   modelCacheState: ModelCacheState;
-  runtimeConfigState: RuntimeConfigState;
+  runtimeConfigState?: RuntimeConfigState;
 }
 
 export function createConfigHandler(deps: ConfigHandlerDeps) {
-  const { ctx, pluginConfig, modelCacheState, runtimeConfigState } = deps;
+  const runtimeConfigState = deps.runtimeConfigState ?? { config: undefined, version: 0 };
+  const { ctx, pluginConfig, modelCacheState } = deps;
 
   return async (config: Record<string, unknown>) => {
     runtimeConfigState.config = config;
