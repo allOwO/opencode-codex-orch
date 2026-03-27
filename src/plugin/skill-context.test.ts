@@ -66,6 +66,11 @@ runtime-context body
     const context = await createSkillContext({
       directory: testDir,
       pluginConfig: {},
+      runtimeConfig: {
+        skills: {
+          paths: [runtimeSkillsDir],
+        },
+      },
     })
 
     expect(context.mergedSkills.some((skill) => skill.name === "runtime-context-skill")).toBe(true)

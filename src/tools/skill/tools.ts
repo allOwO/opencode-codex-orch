@@ -185,8 +185,13 @@ export function createSkillTool(options: SkillLoadOptions = {}): ToolDefinition 
   let cachedSkills: LoadedSkill[] | null = null
   let cachedCommands: CommandInfo[] | null = options.commands ?? null
   let cachedDescription: string | null = null
+  let cachedDescriptionKey: string | null = null
+  let buildPromise: Promise<string> | null = null
+
+  const getCurrentCacheKey = (): string => options.getCacheKey?.() ?? "static"
 
   const getSkills = async (): Promise<LoadedSkill[]> => {
+    if (options.getSkills) return await options.getSkills()
     if (options.skills) return options.skills
     if (cachedSkills) return cachedSkills
     cachedSkills = await getAllSkills({disabledSkills: options?.disabledSkills})
@@ -194,6 +199,7 @@ export function createSkillTool(options: SkillLoadOptions = {}): ToolDefinition 
   }
 
   const getCommands = (): CommandInfo[] => {
+    if (options.getCommands) return options.getCommands()
     if (cachedCommands) return cachedCommands
     cachedCommands = discoverCommandsSync(undefined, {
       pluginsEnabled: options.pluginsEnabled,
@@ -203,27 +209,44 @@ export function createSkillTool(options: SkillLoadOptions = {}): ToolDefinition 
   }
 
   const buildDescription = async (): Promise<string> => {
-    if (cachedDescription) return cachedDescription
+    const cacheKey = getCurrentCacheKey()
+    if (cachedDescription && cachedDescriptionKey === cacheKey) return cachedDescription
     const skills = await getSkills()
     const commands = getCommands()
     const skillInfos = skills.map(loadedSkillToInfo)
     cachedDescription = formatCombinedDescription(skillInfos, commands)
+    cachedDescriptionKey = cacheKey
     return cachedDescription
   }
 
+  const ensureDescription = (): void => {
+    const cacheKey = getCurrentCacheKey()
+    if (cachedDescription && cachedDescriptionKey === cacheKey) return
+    if (buildPromise) return
+
+    buildPromise = buildDescription().finally(() => {
+      buildPromise = null
+    })
+  }
+
   // Eagerly build description when callers pre-provide skills/commands.
-  if (options.skills !== undefined) {
+  if (options.getSkills || options.getCommands) {
+    ensureDescription()
+  } else if (options.skills !== undefined) {
     const skillInfos = options.skills.map(loadedSkillToInfo)
     const commandsForDescription = options.commands ?? []
     cachedDescription = formatCombinedDescription(skillInfos, commandsForDescription)
+    cachedDescriptionKey = getCurrentCacheKey()
   } else if (options.commands !== undefined) {
     cachedDescription = formatCombinedDescription([], options.commands)
+    cachedDescriptionKey = getCurrentCacheKey()
   } else {
-    void buildDescription()
+    ensureDescription()
   }
 
   return tool({
     get description() {
+      ensureDescription()
       return cachedDescription ?? TOOL_DESCRIPTION_PREFIX
     },
     args: {

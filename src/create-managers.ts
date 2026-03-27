@@ -1,5 +1,5 @@
 import type { OpenCodeCodexOrchConfig } from "./config"
-import type { ModelCacheState } from "./plugin-state"
+import type { ModelCacheState, RuntimeConfigState } from "./plugin-state"
 import type { PluginContext, TmuxConfig } from "./plugin/types"
 
 import type { SubagentSessionCreatedEvent } from "./features/background-agent"
@@ -22,9 +22,10 @@ export function createManagers(args: {
   pluginConfig: OpenCodeCodexOrchConfig
   tmuxConfig: TmuxConfig
   modelCacheState: ModelCacheState
+  runtimeConfigState: RuntimeConfigState
   backgroundNotificationHookEnabled: boolean
 }): Managers {
-  const { ctx, pluginConfig, tmuxConfig, modelCacheState, backgroundNotificationHookEnabled } = args
+  const { ctx, pluginConfig, tmuxConfig, modelCacheState, runtimeConfigState, backgroundNotificationHookEnabled } = args
 
   const tmuxSessionManager = new TmuxSessionManager(ctx, tmuxConfig)
 
@@ -70,6 +71,7 @@ export function createManagers(args: {
     ctx: { directory: ctx.directory, client: ctx.client },
     pluginConfig,
     modelCacheState,
+    runtimeConfigState,
   })
 
   return {

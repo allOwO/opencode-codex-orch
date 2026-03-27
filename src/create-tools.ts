@@ -8,6 +8,7 @@ import type { Managers } from "./create-managers"
 import { createAvailableCategories } from "./plugin/available-categories"
 import { createSkillContext } from "./plugin/skill-context"
 import { createToolRegistry } from "./plugin/tool-registry"
+import type { RuntimeConfigState } from "./plugin-state"
 
 export type CreateToolsResult = {
   filteredTools: ToolsRecord
@@ -23,12 +24,14 @@ export async function createTools(args: {
   ctx: PluginContext
   pluginConfig: OpenCodeCodexOrchConfig
   managers: Pick<Managers, "backgroundManager" | "tmuxSessionManager" | "skillMcpManager">
+  runtimeConfigState: RuntimeConfigState
 }): Promise<CreateToolsResult> {
-  const { ctx, pluginConfig, managers } = args
+  const { ctx, pluginConfig, managers, runtimeConfigState } = args
 
   const skillContext = await createSkillContext({
     directory: ctx.directory,
     pluginConfig,
+    runtimeConfig: runtimeConfigState.config,
   })
 
   const availableCategories = createAvailableCategories(pluginConfig)
@@ -39,6 +42,7 @@ export async function createTools(args: {
     managers,
     skillContext,
     availableCategories,
+    runtimeConfigState,
   })
 
   return {

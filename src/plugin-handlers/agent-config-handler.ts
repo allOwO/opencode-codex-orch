@@ -9,6 +9,7 @@ import {
   discoverOpencodeGlobalSkills,
   discoverOpencodeProjectSkills,
   discoverProjectClaudeSkills,
+  discoverRuntimeConfiguredSkills,
   discoverUserClaudeSkills,
 } from "../features/opencode-skill-loader";
 import { loadProjectAgents, loadUserAgents } from "../features/claude-code-agent-loader";
@@ -50,6 +51,7 @@ export async function applyAgentConfig(params: {
     discoveredProjectSkills,
     discoveredOpencodeGlobalSkills,
     discoveredOpencodeProjectSkills,
+    discoveredRuntimeConfiguredSkills,
   ] = await Promise.all([
     discoverConfigSourceSkills({
       config: params.pluginConfig.skills,
@@ -61,6 +63,10 @@ export async function applyAgentConfig(params: {
        : Promise.resolve([]),
     discoverOpencodeGlobalSkills(),
     discoverOpencodeProjectSkills(params.ctx.directory),
+    discoverRuntimeConfiguredSkills({
+      directory: params.ctx.directory,
+      runtimeConfig: params.config,
+    }),
   ]);
 
   const allDiscoveredSkills = [
@@ -69,6 +75,7 @@ export async function applyAgentConfig(params: {
     ...discoveredProjectSkills,
     ...discoveredOpencodeGlobalSkills,
     ...discoveredUserSkills,
+    ...discoveredRuntimeConfiguredSkills,
   ];
 
   const browserProvider =

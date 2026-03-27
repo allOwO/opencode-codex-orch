@@ -25,6 +25,8 @@ import {
 import { getMainSessionID } from "../features/claude-code-session-state"
 import { filterDisabledTools } from "../shared/disabled-tools"
 import { log } from "../shared"
+import type { RuntimeConfigState } from "../plugin-state"
+import { createSkillContext } from "./skill-context"
 
 import type { Managers } from "../create-managers"
 import type { SkillContext } from "./skill-context"
@@ -40,8 +42,9 @@ export function createToolRegistry(args: {
   managers: Pick<Managers, "backgroundManager" | "tmuxSessionManager" | "skillMcpManager">
   skillContext: SkillContext
   availableCategories: AvailableCategory[]
+  runtimeConfigState: RuntimeConfigState
 }): ToolRegistryResult {
-  const { ctx, pluginConfig, managers, skillContext, availableCategories } = args
+  const { ctx, pluginConfig, managers, skillContext, availableCategories, runtimeConfigState } = args
 
   const backgroundTools = createBackgroundTools(managers.backgroundManager, ctx.client)
 
@@ -82,9 +85,21 @@ export function createToolRegistry(args: {
     pluginsEnabled: pluginConfig.claude_code?.plugins ?? true,
     enabledPluginsOverride: pluginConfig.claude_code?.plugins_override,
   })
+
+  const getCurrentSkillContext = async (): Promise<SkillContext> => {
+    if (!runtimeConfigState.config) return skillContext
+
+    return await createSkillContext({
+      directory: ctx.directory,
+      pluginConfig,
+      runtimeConfig: runtimeConfigState.config,
+    })
+  }
+
   const skillTool = createSkillTool({
     commands,
-    skills: skillContext.mergedSkills,
+    getSkills: async () => (await getCurrentSkillContext()).mergedSkills,
+    getCacheKey: () => `${runtimeConfigState.version}`,
     mcpManager: managers.skillMcpManager,
     getSessionID: getSessionIDForMcp,
   })

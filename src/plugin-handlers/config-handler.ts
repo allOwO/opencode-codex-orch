@@ -1,5 +1,5 @@
 import type { OpenCodeCodexOrchConfig } from "../config";
-import type { ModelCacheState } from "../plugin-state";
+import type { ModelCacheState, RuntimeConfigState } from "../plugin-state";
 import { log } from "../shared";
 import { applyAgentConfig } from "./agent-config-handler";
 import { applyCommandConfig } from "./command-config-handler";
@@ -14,12 +14,16 @@ export interface ConfigHandlerDeps {
   ctx: { directory: string; client?: any };
   pluginConfig: OpenCodeCodexOrchConfig;
   modelCacheState: ModelCacheState;
+  runtimeConfigState: RuntimeConfigState;
 }
 
 export function createConfigHandler(deps: ConfigHandlerDeps) {
-  const { ctx, pluginConfig, modelCacheState } = deps;
+  const { ctx, pluginConfig, modelCacheState, runtimeConfigState } = deps;
 
   return async (config: Record<string, unknown>) => {
+    runtimeConfigState.config = config;
+    runtimeConfigState.version += 1;
+
     const formatterConfig = config.formatter;
 
     applyProviderConfig({ config, modelCacheState });

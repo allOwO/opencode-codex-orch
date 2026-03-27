@@ -105,6 +105,45 @@ describe("skill tool - synchronous description", () => {
     // then
     expect(tool.description).toContain("No skills are currently available")
   })
+
+  it("refreshes dynamic skill descriptions when cache key changes", async () => {
+    let includeRuntimeSkill = false
+    let cacheKey = "0"
+
+    const tool = createSkillTool({
+      getSkills: async () => includeRuntimeSkill ? [createMockSkill("runtime-skill")] : [],
+      getCacheKey: () => cacheKey,
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(tool.description).not.toContain("runtime-skill")
+
+    includeRuntimeSkill = true
+    cacheKey = "1"
+    void tool.description
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(tool.description).toContain("runtime-skill")
+  })
+})
+
+describe("skill tool - dynamic skills", () => {
+  it("uses the latest dynamically resolved skills during execute", async () => {
+    let includeRuntimeSkill = false
+    const tool = createSkillTool({
+      getSkills: async () => includeRuntimeSkill ? [createMockSkill("brainstorming")] : [],
+      getCacheKey: () => includeRuntimeSkill ? "runtime" : "initial",
+    })
+
+    await expect(tool.execute({ name: "brainstorming" }, mockContext)).rejects.toThrow(
+      'Skill or command "brainstorming" not found.'
+    )
+
+    includeRuntimeSkill = true
+
+    const result = await tool.execute({ name: "brainstorming" }, mockContext)
+    expect(result).toContain("brainstorming")
+  })
 })
 
 describe("skill tool - agent restriction", () => {

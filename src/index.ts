@@ -9,7 +9,7 @@ import { createTools } from "./create-tools"
 import { createPluginInterface } from "./plugin-interface"
 
 import { loadPluginConfig } from "./plugin-config"
-import { createModelCacheState } from "./plugin-state"
+import { createModelCacheState, createRuntimeConfigState } from "./plugin-state"
 import { createFirstMessageVariantGate } from "./shared/first-message-variant"
 import { injectServerAuthIntoClient, log } from "./shared"
 import { startTmuxCheck } from "./tools"
@@ -41,12 +41,14 @@ const OpenCodeCodexOrchPlugin: Plugin = async (ctx) => {
   }
 
   const modelCacheState = createModelCacheState()
+  const runtimeConfigState = createRuntimeConfigState()
 
   const managers = createManagers({
     ctx,
     pluginConfig,
     tmuxConfig,
     modelCacheState,
+    runtimeConfigState,
     backgroundNotificationHookEnabled: isHookEnabled("background-notification"),
   })
 
@@ -54,6 +56,7 @@ const OpenCodeCodexOrchPlugin: Plugin = async (ctx) => {
     ctx,
     pluginConfig,
     managers,
+    runtimeConfigState,
   })
 
   const hooks = createHooks({

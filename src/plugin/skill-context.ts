@@ -36,8 +36,9 @@ function mapScopeToLocation(scope: SkillScope): AvailableSkill["location"] {
 export async function createSkillContext(args: {
   directory: string
   pluginConfig: OpenCodeCodexOrchConfig
+  runtimeConfig?: unknown
 }): Promise<SkillContext> {
-  const { directory, pluginConfig } = args
+  const { directory, pluginConfig, runtimeConfig } = args
 
   const browserProvider: BrowserAutomationProvider =
     pluginConfig.browser_automation_engine?.provider ?? "playwright"
@@ -66,7 +67,7 @@ export async function createSkillContext(args: {
       }),
       includeClaudeSkills ? discoverUserClaudeSkills() : Promise.resolve([]),
       discoverOpencodeGlobalSkills(),
-      discoverRuntimeConfiguredSkills({ directory }),
+      discoverRuntimeConfiguredSkills({ directory, runtimeConfig }),
       includeClaudeSkills ? discoverProjectClaudeSkills(directory) : Promise.resolve([]),
       discoverOpencodeProjectSkills(directory),
       discoverProjectAgentsSkills(directory),

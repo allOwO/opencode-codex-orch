@@ -23,8 +23,14 @@ export interface SkillLoadOptions {
   opencodeOnly?: boolean
   /** Pre-merged skills to use instead of discovering */
   skills?: LoadedSkill[]
+  /** Dynamic skill resolver used when skill availability can change after tool creation */
+  getSkills?: () => Promise<LoadedSkill[]>
   /** Pre-discovered commands to use instead of discovering */
   commands?: CommandInfo[]
+  /** Dynamic command resolver used when command availability can change after tool creation */
+  getCommands?: () => CommandInfo[]
+  /** Cache key for invalidating generated descriptions when dynamic sources change */
+  getCacheKey?: () => string
   /** MCP manager for querying skill-embedded MCP servers */
   mcpManager?: SkillMcpManager
   /** Session ID getter for MCP client identification */

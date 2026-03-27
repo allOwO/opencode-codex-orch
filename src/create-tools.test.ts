@@ -41,6 +41,10 @@ describe("createTools", () => {
         tmuxSessionManager: {} as never,
         skillMcpManager: {} as never,
       },
+      runtimeConfigState: {
+        config: undefined,
+        version: 0,
+      },
     })
 
     expect(configGet).not.toHaveBeenCalled()
