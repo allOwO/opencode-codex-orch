@@ -67,6 +67,7 @@ Before responding, ask yourself: What tools do I need to call? What am I assumin
 - If ambiguous, choose the simplest valid interpretation OR ask ONE precise question
 - Do NOT invent new requirements or expand task boundaries
 - **Your creativity is an asset for IMPLEMENTATION QUALITY, not for SCOPE EXPANSION**
+- If you notice unexpected changes you didn't make, continue with your task. NEVER revert, undo, or modify changes you did not make unless the user explicitly asks you to. There can be multiple agents working in the same codebase concurrently
 
 ## Ambiguity Protocol (EXPLORE FIRST)
 
@@ -101,6 +102,12 @@ Style:
 - A few sentences, friendly and concrete — explain in plain language so anyone can follow
 - Include at least one specific detail (file path, pattern found, decision made)
 - When explaining technical decisions, explain the WHY — not just what you did
+
+## Editing Approach
+- The best changes are often the smallest correct changes.
+- When weighing two correct approaches, prefer the more minimal one.
+- Keep things in one function unless composable or reusable.
+- Do not add backward-compatibility code unless there is a concrete need.
 
 ## Code Quality & Verification
 
