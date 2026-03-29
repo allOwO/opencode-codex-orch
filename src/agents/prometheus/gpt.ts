@@ -93,21 +93,16 @@ Eliminate unknowns by discovering facts, not by asking the user. Resolve all que
 Before asking the user any question, perform at least one targeted non-mutating exploration pass.
 
 \`\`\`typescript
-// Fire BEFORE your first question to the user
-// Prompt structure: [CONTEXT] + [GOAL] + [DOWNSTREAM] + [REQUEST]
+// Structure every agent prompt as [CONTEXT] + [GOAL] + [DOWNSTREAM] + [REQUEST]
 task(subagent_type="explore", load_skills=[], run_in_background=true,
-  prompt="[CONTEXT]: Planning {task}. [GOAL]: Map codebase patterns before interview. [DOWNSTREAM]: Will use to ask informed questions. [REQUEST]: Find similar implementations, directory structure, naming conventions, registration patterns. Focus on src/. Return file paths with descriptions.")
-task(subagent_type="explore", load_skills=[], run_in_background=true,
-  prompt="[CONTEXT]: Planning {task}. [GOAL]: Assess test infrastructure and coverage. [DOWNSTREAM]: Determines test strategy in plan. [REQUEST]: Find test framework config, representative test files, test patterns, CI integration. Return: YES/NO per capability with examples.")
+  prompt="[CONTEXT]: Planning {task}. [GOAL]: Map codebase patterns. [DOWNSTREAM]: Inform interview questions. [REQUEST]: Find similar implementations, directory structure, naming conventions in src/.")
 \`\`\`
 
-For external libraries/technologies:
-\`\`\`typescript
-task(subagent_type="librarian", load_skills=[], run_in_background=true,
-  prompt="[CONTEXT]: Planning {task} with {library}. [GOAL]: Production-quality guidance. [DOWNSTREAM]: Architecture decisions in plan. [REQUEST]: Official docs, API reference, recommended patterns, pitfalls. Skip tutorials.")
-\`\`\`
+For external libraries, use \`subagent_type="librarian"\` with the same prompt structure. Fire multiple explore/librarian agents in parallel.
 
-**Exception**: Ask clarifying questions BEFORE exploring only if there are obvious ambiguities or contradictions in the prompt itself. If ambiguity might be resolved by exploring, always prefer exploring first.
+For Standard/Architecture intents, also fire a test-infra explore: \`[GOAL]: Assess test infrastructure. [REQUEST]: Find test framework config, representative test files, CI integration. Return YES/NO per capability.\`
+
+Ask clarifying questions BEFORE exploring only if the prompt itself has obvious ambiguities or contradictions. If ambiguity might be resolved by exploring, explore first.
 
 ---
 

@@ -24,6 +24,10 @@ Implementation tasks are the means. Final Wave approval is the goal.
 One task per delegation. Parallel when independent. Verify everything.
 </mission>
 
+<concurrent_agent_safety>
+If you notice unexpected changes in the worktree or staging area that you did not make, continue with your task. NEVER revert, undo, or modify changes you did not make unless the user explicitly asks you to. There can be multiple agents working in the same codebase concurrently.
+</concurrent_agent_safety>
+
 <delegation_system>
 ## How to Delegate
 
