@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { fileURLToPath } from "node:url"
 import { discoverCommandsSync } from "./command-discovery"
 
 const ENV_KEYS = [
@@ -156,5 +157,18 @@ describe("slashcommand command discovery plugin integration", () => {
 
     expect(names).not.toContain("daplug:run-prompt")
     expect(names).not.toContain("daplug:plugin-plan")
+  })
+})
+
+describe("slashcommand command discovery repo commands", () => {
+  it("discovers the repo autopilot command from .opencode/command", () => {
+    const repoRoot = fileURLToPath(new URL("../../../", import.meta.url))
+
+    const commands = discoverCommandsSync(repoRoot, { pluginsEnabled: false })
+    const autopilot = commands.find(command => command.name === "autopilot")
+
+    expect(autopilot).toBeDefined()
+    expect(autopilot?.scope).toBe("opencode-project")
+    expect(autopilot?.metadata.description).toContain("autopilot")
   })
 })
