@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { findProjectRoot, findRuleFiles } from "./finder";
@@ -326,6 +326,7 @@ describe("findRuleFiles", () => {
 
 describe("findProjectRoot", () => {
   const TEST_DIR = join(tmpdir(), `project-root-test-${Date.now()}`);
+  const HOME_TEST_PREFIX = join(process.env.HOME ?? "/tmp", ".project-root-test-");
 
   beforeEach(() => {
     mkdirSync(TEST_DIR, { recursive: true });
@@ -366,16 +367,21 @@ describe("findProjectRoot", () => {
   });
 
   it("should return null when no project markers found", () => {
-    // given directory without any project markers
-    const isolatedDir = join(TEST_DIR, "isolated");
-    mkdirSync(isolatedDir, { recursive: true });
-    const file = join(isolatedDir, "file.txt");
-    writeFileSync(file, "content");
+    // given directory under a parent tree without project markers
+    const isolatedRoot = mkdtempSync(HOME_TEST_PREFIX);
+    try {
+      const isolatedDir = join(isolatedRoot, "isolated");
+      mkdirSync(isolatedDir, { recursive: true });
+      const file = join(isolatedDir, "file.txt");
+      writeFileSync(file, "content");
 
-    // when finding project root
-    const root = findProjectRoot(file);
+      // when finding project root
+      const root = findProjectRoot(file);
 
-    // then should return null
-    expect(root).toBeNull();
+      // then should return null
+      expect(root).toBeNull();
+    } finally {
+      rmSync(isolatedRoot, { recursive: true, force: true });
+    }
   });
 });
