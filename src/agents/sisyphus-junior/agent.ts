@@ -5,14 +5,15 @@
  * Category-spawned executor with domain-specific configurations.
  *
  * Routing:
- * 1. GPT models (openai/*, github-copilot/gpt-*) -> gpt.ts (GPT-5.4 optimized)
+ * 1. GPT models (openai/*, github-copilot/gpt-*) -> gpt.ts (GPT-optimized)
  * 2. Gemini models (google/*, google-vertex/*) -> gemini.ts (Gemini-optimized)
- * 3. Default (Claude, etc.) -> default.ts (Claude-optimized)
+ * 3. Kimi models -> kimi.ts (Kimi-specialized)
+ * 4. Default (Claude, etc.) -> default.ts (Claude-optimized)
  */
 
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode } from "../types"
-import { isGptModel, isGeminiModel } from "../types"
+import { isGptModel, isGeminiModel, isKimiModel } from "../types"
 import type { AgentOverrideConfig } from "../../config/schema"
 import {
   createAgentToolRestrictions,
@@ -24,6 +25,7 @@ import { buildGptSisyphusJuniorPrompt } from "./gpt"
 import { buildGpt54SisyphusJuniorPrompt } from "./gpt-5-4"
 import { buildGpt53CodexSisyphusJuniorPrompt } from "./gpt-5-3-codex"
 import { buildGeminiSisyphusJuniorPrompt } from "./gemini"
+import { buildKimiSisyphusJuniorPrompt } from "../kimi"
 
 const MODE: AgentMode = "subagent"
 
@@ -36,9 +38,13 @@ export const SISYPHUS_JUNIOR_DEFAULTS = {
   temperature: 0.1,
 } as const
 
-export type SisyphusJuniorPromptSource = "default" | "gpt" | "gpt-5-4" | "gpt-5-3-codex" | "gemini"
+export type SisyphusJuniorPromptSource = "default" | "gpt" | "gpt-5-4" | "gpt-5-3-codex" | "gemini" | "kimi"
 
 export function getSisyphusJuniorPromptSource(model?: string): SisyphusJuniorPromptSource {
+  if (model && isKimiModel(model)) {
+    return "kimi"
+  }
+
   if (model && isGptModel(model)) {
     const lower = model.toLowerCase()
     if (lower.includes("gpt-5.4") || lower.includes("gpt-5-4")) return "gpt-5-4"
@@ -70,6 +76,8 @@ export function buildSisyphusJuniorPrompt(
       return buildGptSisyphusJuniorPrompt(useTaskSystem, promptAppend)
     case "gemini":
       return buildGeminiSisyphusJuniorPrompt(useTaskSystem, promptAppend)
+    case "kimi":
+      return buildKimiSisyphusJuniorPrompt(useTaskSystem, promptAppend)
     case "default":
     default:
       return buildDefaultSisyphusJuniorPrompt(useTaskSystem, promptAppend)

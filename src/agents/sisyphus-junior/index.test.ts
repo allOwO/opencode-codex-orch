@@ -470,6 +470,28 @@ describe("getSisyphusJuniorPromptSource", () => {
     // then
     expect(source).toBe("default")
   })
+
+  test("returns 'kimi' for provider-based Kimi models", () => {
+    // given
+    const model = "kimi-for-coding/k2p5"
+
+    // when
+    const source = getSisyphusJuniorPromptSource(model)
+
+    // then
+    expect(source).toBe("kimi")
+  })
+
+  test("returns 'kimi' for model-based Kimi models", () => {
+    // given
+    const model = "opencode/kimi-k2.5-free"
+
+    // when
+    const source = getSisyphusJuniorPromptSource(model)
+
+    // then
+    expect(source).toBe("kimi")
+  })
 })
 
 describe("buildSisyphusJuniorPrompt", () => {
@@ -560,5 +582,19 @@ describe("buildSisyphusJuniorPrompt", () => {
     // then
     expect(prompt).toContain("<Todo_Discipline>")
     expect(prompt).toContain("todowrite")
+  })
+
+  test("Kimi model uses dedicated Kimi prompt instead of Claude default prompt", () => {
+    // given
+    const model = "kimi-for-coding/k2p5"
+
+    // when
+    const prompt = buildSisyphusJuniorPrompt(model, false)
+
+    // then
+    expect(prompt).toContain("You are OpenCode, an interactive general AI agent running on a user's computer.")
+    expect(prompt).toContain("opencode-codex-orch")
+    expect(prompt).not.toContain("<Role>")
+    expect(prompt).not.toContain("Focused executor from opencode-codex-orch")
   })
 })
