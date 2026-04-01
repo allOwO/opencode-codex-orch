@@ -7,12 +7,13 @@
  * Routing:
  * 1. GPT models (openai/*, github-copilot/gpt-*) → gpt.ts (GPT-5.4 optimized)
  * 2. Gemini models (google/*, google-vertex/*) → gemini.ts (Gemini-optimized)
- * 3. Default (Claude, etc.) → default.ts (Claude-optimized)
+ * 3. Kimi models → kimi.ts (Kimi-specialized)
+ * 4. Default (Claude, etc.) → default.ts (Claude-optimized)
  */
 
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "../types"
-import { isGptModel, isGeminiModel } from "../types"
+import { isGptModel, isGeminiModel, isKimiModel } from "../types"
 import type { AvailableAgent, AvailableSkill, AvailableCategory } from "../dynamic-agent-prompt-builder"
 import { buildCategorySkillsDelegationGuide } from "../dynamic-agent-prompt-builder"
 import type { CategoryConfig } from "../../config/schema"
@@ -21,6 +22,7 @@ import { mergeCategories } from "../../shared/merge-categories"
 import { getDefaultAtlasPrompt } from "./default"
 import { getGptAtlasPrompt } from "./gpt"
 import { getGeminiAtlasPrompt } from "./gemini"
+import { getKimiAtlasPrompt } from "./kimi"
 import {
   getCategoryDescription,
   buildAgentSelectionSection,
@@ -31,7 +33,7 @@ import {
 
 const MODE: AgentMode = "all"
 
-export type AtlasPromptSource = "default" | "gpt" | "gemini"
+export type AtlasPromptSource = "default" | "gpt" | "gemini" | "kimi"
 
 /**
  * Determines which Atlas prompt to use based on model.
@@ -42,6 +44,9 @@ export function getAtlasPromptSource(model?: string): AtlasPromptSource {
   }
   if (model && isGeminiModel(model)) {
     return "gemini"
+  }
+  if (model && isKimiModel(model)) {
+    return "kimi"
   }
   return "default"
 }
@@ -64,6 +69,8 @@ export function getAtlasPrompt(model?: string): string {
       return getGptAtlasPrompt()
     case "gemini":
       return getGeminiAtlasPrompt()
+    case "kimi":
+      return getKimiAtlasPrompt()
     case "default":
     default:
       return getDefaultAtlasPrompt()
