@@ -38,7 +38,9 @@ import {
 	isGeminiModel,
 	isGpt5_4Model,
 	isGptModel,
+	isKimiModel,
 } from "./types";
+import { buildKimiSisyphusPrompt } from "./sisyphus/kimi";
 
 const MODE: AgentMode = "all";
 export const SISYPHUS_PROMPT_METADATA: AgentPromptMetadata = {
@@ -499,6 +501,32 @@ export function createSisyphusAgent(
 				call_oco_agent: "deny",
 			} as AgentConfig["permission"],
 			reasoningEffort: "high",
+		};
+	}
+
+	if (isKimiModel(model)) {
+		const dynamicPrompt = buildDynamicSisyphusPrompt(
+			model,
+			agents,
+			tools,
+			skills,
+			categories,
+			useTaskSystem,
+		);
+		const prompt = buildKimiSisyphusPrompt(dynamicPrompt);
+		return {
+			description:
+				"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Sisyphus - opencode-codex-orch)",
+			mode: MODE,
+			model,
+			maxTokens: 64000,
+			prompt,
+			color: "#00CED1",
+			permission: {
+				question: "allow",
+				call_oco_agent: "deny",
+			} as AgentConfig["permission"],
+			thinking: { type: "enabled", budgetTokens: 32000 },
 		};
 	}
 
