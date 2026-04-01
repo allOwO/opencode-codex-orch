@@ -25,7 +25,7 @@ import { buildGptSisyphusJuniorPrompt } from "./gpt"
 import { buildGpt54SisyphusJuniorPrompt } from "./gpt-5-4"
 import { buildGpt53CodexSisyphusJuniorPrompt } from "./gpt-5-3-codex"
 import { buildGeminiSisyphusJuniorPrompt } from "./gemini"
-import { buildKimiSisyphusJuniorPrompt } from "../kimi"
+import { buildKimiSisyphusJuniorPrompt } from "./kimi"
 
 const MODE: AgentMode = "subagent"
 

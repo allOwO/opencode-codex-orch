@@ -1,7 +1,7 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
 import { createAgentToolRestrictions } from "../shared/permission-compat"
-import { maybePrependKimiPrompt } from "./kimi-prompt"
+import { maybePrependKimiPrompt } from "./kimi"
 
 const MODE: AgentMode = "subagent"
 
