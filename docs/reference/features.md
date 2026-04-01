@@ -367,6 +367,7 @@ Commands are slash-triggered workflows that execute predefined templates.
 
 | Command              | Description                                                                                |
 | -------------------- | ------------------------------------------------------------------------------------------ |
+| `/autopilot`         | Enable autopilot mode explicitly for this request                                          |
 | `/init-deep`         | Initialize hierarchical AGENTS.md knowledge base                                           |
 | `/ralph-loop`        | Start self-referential development loop until completion                                   |
 | `/ulw-loop`          | Start ultrawork loop - continues with ultrawork mode                                       |
@@ -375,6 +376,22 @@ Commands are slash-triggered workflows that execute predefined templates.
 | `/start-work`        | Start Sisyphus work session from Prometheus plan                                           |
 | `/stop-continuation` | Stop all continuation mechanisms (ralph loop, todo continuation, boulder) for this session |
 | `/handoff`           | Create a detailed context summary for continuing work in a new session                     |
+
+### /autopilot
+
+**Purpose**: Enable autopilot mode explicitly for the current request
+
+**Usage**:
+
+```
+/autopilot [task or request]
+```
+
+**Behavior**:
+
+- skips redundant “should I start?” confirmation pauses when intent is clear
+- preserves discovery, plan review, safety checks, tests, diagnostics, and builds
+- stops to ask when the request is ambiguous, destructive, contradictory, or security-sensitive
 
 ### /init-deep
 

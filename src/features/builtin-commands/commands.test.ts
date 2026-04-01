@@ -1,4 +1,5 @@
 import { describe, test, expect } from "bun:test"
+import { AUTOPILOT_TEMPLATE } from "./templates/autopilot"
 import { loadBuiltinCommands } from "./commands"
 import { HANDOFF_TEMPLATE } from "./templates/handoff"
 import { SKILL_CREATOR_TEMPLATE } from "./templates/skill-creator"
@@ -102,6 +103,51 @@ describe("loadBuiltinCommands", () => {
 
 	//#then
 	expect(commands["skill-creator"].description).toContain("skill-creator")
+  })
+
+  test("should include autopilot command in loaded commands", () => {
+    //#given
+    const disabledCommands: BuiltinCommandName[] = []
+
+    //#when
+    const commands = loadBuiltinCommands(disabledCommands)
+
+    //#then
+    expect(commands.autopilot).toBeDefined()
+    expect(commands.autopilot.name).toBe("autopilot")
+  })
+
+  test("should include autopilot template content in command template", () => {
+    //#given - no disabled commands
+
+    //#when
+    const commands = loadBuiltinCommands()
+
+    //#then
+    expect(commands.autopilot.template).toContain(AUTOPILOT_TEMPLATE)
+    expect(commands.autopilot.template).toContain("$ARGUMENTS")
+    expect(commands.autopilot.template).toContain("```text")
+  })
+
+  test("should have correct description for autopilot", () => {
+    //#given - no disabled commands
+
+    //#when
+    const commands = loadBuiltinCommands()
+
+    //#then
+    expect(commands.autopilot.description).toContain("autopilot")
+  })
+
+  test("should exclude autopilot when disabled", () => {
+    //#given
+    const disabledCommands: BuiltinCommandName[] = ["autopilot"]
+
+    //#when
+    const commands = loadBuiltinCommands(disabledCommands)
+
+    //#then
+    expect(commands.autopilot).toBeUndefined()
   })
 })
 

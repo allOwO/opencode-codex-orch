@@ -17,6 +17,7 @@ opencode-codex-orch turns a single AI agent session into a coordinated developme
 - **Multi-agent orchestration** with 10 specialized agents (Sisyphus, Atlas, Oracle, Prometheus, Librarian, Explore, Metis, Momus, Multimodal-Looker, Sisyphus-Junior)
 - **Multi-model routing** across GPT, Kimi, Gemini, GLM and more — **no Claude/Anthropic dependencies**
 - **`ultrawork` / `ulw`** prefix for autonomous, execution-biased operation
+- **Built-in slash commands** like `/autopilot`, `/refactor`, and `/handoff`
 - **Hash-anchored edits** (`LINE#ID` content hashing) for reliable file modifications
 - **Background agents** running 5+ tasks in parallel
 - **Built-in MCPs** (web search, Context7, Grep.app)

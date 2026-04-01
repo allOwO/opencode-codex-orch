@@ -1,5 +1,6 @@
 import type { CommandDefinition } from "../claude-code-command-loader"
 import type { BuiltinCommandName, BuiltinCommands } from "./types"
+import { AUTOPILOT_TEMPLATE } from "./templates/autopilot"
 import { HANDOFF_TEMPLATE } from "./templates/handoff"
 import { INIT_DEEP_TEMPLATE } from "./templates/init-deep"
 import { REFACTOR_TEMPLATE } from "./templates/refactor"
@@ -9,6 +10,17 @@ import { START_WORK_TEMPLATE } from "./templates/start-work"
 import { STOP_CONTINUATION_TEMPLATE } from "./templates/stop-continuation"
 
 const BUILTIN_COMMAND_DEFINITIONS: Record<BuiltinCommandName, Omit<CommandDefinition, "name">> = {
+  autopilot: {
+    description: "Enable autopilot mode explicitly for this request",
+    template: `<command-instruction>
+${AUTOPILOT_TEMPLATE}
+</command-instruction>
+
+<user-request>
+$ARGUMENTS
+</user-request>`,
+    argumentHint: "[task or request]",
+  },
   "init-deep": {
     description: "(builtin) Initialize hierarchical AGENTS.md knowledge base",
     template: `<command-instruction>

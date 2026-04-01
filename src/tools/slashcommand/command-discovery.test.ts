@@ -160,15 +160,15 @@ describe("slashcommand command discovery plugin integration", () => {
   })
 })
 
-describe("slashcommand command discovery repo commands", () => {
-  it("discovers the repo autopilot command from .opencode/command", () => {
+describe("slashcommand command discovery builtin commands", () => {
+  it("discovers the builtin autopilot command", () => {
     const repoRoot = fileURLToPath(new URL("../../../", import.meta.url))
 
     const commands = discoverCommandsSync(repoRoot, { pluginsEnabled: false })
     const autopilot = commands.find(command => command.name === "autopilot")
 
     expect(autopilot).toBeDefined()
-    expect(autopilot?.scope).toBe("opencode-project")
+    expect(autopilot?.scope).toBe("builtin")
     expect(autopilot?.metadata.description).toContain("autopilot")
   })
 })

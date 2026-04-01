@@ -1,11 +1,4 @@
----
-description: Enable autopilot mode explicitly for this request
-argument-hint: "[task or request]"
----
-
-<command-instruction>
-
-Autopilot mode is active for THIS request because the user explicitly invoked `/autopilot`.
+export const AUTOPILOT_TEMPLATE = `Autopilot mode is active for THIS request because the user explicitly invoked /autopilot.
 
 Apply the following rules immediately:
 
@@ -23,13 +16,14 @@ When the user's intent is clear:
 
 Decision rule:
 
-```
+
+\`\`\`text
 If user intent is clear and the action is reversible or low-risk:
     → proceed directly
 
 If the request is ambiguous, contradictory, destructive, or security-sensitive:
     → ask only the actually missing question
-```
+\`\`\`
 
 ## Second principle: skip redundant confirmation, keep valuable process
 
@@ -56,7 +50,7 @@ Even in autopilot mode, stop and ask if any of the following is true:
 
 When the task is done, report briefly in this structure:
 
-```text
+\`\`\`text
 📋 Autopilot report
 - Request: [one sentence]
 - Approach: [what you chose and why]
@@ -64,6 +58,5 @@ When the task is done, report briefly in this structure:
 - Changes: [files created/modified]
 - Verification: [what passed/failed]
 - Attention needed: [manual follow-up or "none"]
-```
-
-</command-instruction>
+\`\`\`
+`
