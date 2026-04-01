@@ -104,6 +104,16 @@ export function isGeminiModel(model: string): boolean {
   return modelName.startsWith("gemini-");
 }
 
+export function isKimiModel(model?: string): boolean {
+  if (!model) return false;
+
+  const lowered = model.toLowerCase();
+  const [providerID, ...modelParts] = lowered.split("/");
+  const modelID = modelParts.join("/");
+
+  return providerID.includes("kimi") || modelID.includes("kimi");
+}
+
 export type BuiltinAgentName =
   | "sisyphus"
   | "oracle"

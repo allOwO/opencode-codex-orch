@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { isGptModel, isGeminiModel, isGpt5_4Model } from "./types";
+import { isGptModel, isGeminiModel, isGpt5_4Model, isKimiModel } from "./types";
 
 describe("isGpt5_4Model", () => {
   test("detects gpt-5.4 models", () => {
@@ -120,5 +120,24 @@ describe("isGeminiModel", () => {
 
   test("#given opencode provider #then returns false", () => {
     expect(isGeminiModel("opencode/claude-opus-4-6")).toBe(false);
+  });
+});
+
+describe("isKimiModel", () => {
+  test("matches provider-based Kimi models", () => {
+    expect(isKimiModel("kimi-for-coding/k2p5")).toBe(true);
+    expect(isKimiModel("moonshotai/k2-latest")).toBe(false);
+    expect(isKimiModel("KIMI-FOR-CODING/k2p5")).toBe(true);
+  });
+
+  test("matches model-based Kimi models", () => {
+    expect(isKimiModel("opencode/kimi-k2.5-free")).toBe(true);
+    expect(isKimiModel("custom-provider/Kimi-K2.5")).toBe(true);
+  });
+
+  test("does not match non-Kimi models", () => {
+    expect(isKimiModel("openai/gpt-5.4")).toBe(false);
+    expect(isKimiModel("anthropic/claude-sonnet-4-6")).toBe(false);
+    expect(isKimiModel(undefined)).toBe(false);
   });
 });
