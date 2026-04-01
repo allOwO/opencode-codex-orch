@@ -1,6 +1,7 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
 import { createAgentToolRestrictions } from "../shared/permission-compat"
+import { maybePrependKimiPrompt } from "./kimi-prompt"
 
 const MODE: AgentMode = "subagent"
 
@@ -37,7 +38,7 @@ export function createLibrarianAgent(model: string): AgentConfig {
     model,
     temperature: 0.1,
     ...restrictions,
-    prompt: `# THE LIBRARIAN
+    prompt: maybePrependKimiPrompt(model, `# THE LIBRARIAN
 
 You are **THE LIBRARIAN**, a specialized open-source codebase understanding agent.
 
@@ -314,7 +315,7 @@ grep_app_searchGitHub(query: "useQuery")
 4. **USE MARKDOWN**: Code blocks with language identifiers
 5. **BE CONCISE**: Facts > opinions, evidence > speculation
 
-`,
+`),
   }
 }
 createLibrarianAgent.mode = MODE

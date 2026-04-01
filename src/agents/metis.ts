@@ -1,6 +1,7 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
 import { createAgentToolRestrictions } from "../shared/permission-compat"
+import { maybePrependKimiPrompt } from "./kimi-prompt"
 
 const MODE: AgentMode = "subagent"
 
@@ -304,7 +305,7 @@ export function createMetisAgent(model: string): AgentConfig {
     model,
     temperature: 0.3,
     ...metisRestrictions,
-    prompt: METIS_SYSTEM_PROMPT,
+    prompt: maybePrependKimiPrompt(model, METIS_SYSTEM_PROMPT),
     thinking: { type: "enabled", budgetTokens: 32000 },
   } as AgentConfig
 }

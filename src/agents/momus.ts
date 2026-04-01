@@ -2,6 +2,7 @@ import type { AgentConfig } from "@opencode-ai/sdk";
 import type { AgentMode, AgentPromptMetadata } from "./types";
 import { isGptModel } from "./types";
 import { createAgentToolRestrictions } from "../shared/permission-compat";
+import { maybePrependKimiPrompt } from "./kimi-prompt";
 
 const MODE: AgentMode = "subagent";
 
@@ -289,6 +290,12 @@ export function createMomusAgent(model: string): AgentConfig {
     "task",
   ]);
 
+  const isGpt = isGptModel(model);
+  const prompt = maybePrependKimiPrompt(
+    model,
+    isGpt ? MOMUS_GPT_PROMPT : MOMUS_DEFAULT_PROMPT,
+  );
+
   const base = {
     description:
       "Expert reviewer for evaluating work plans against rigorous clarity, verifiability, and completeness standards. (Momus - opencode-codex-orch)",
@@ -296,13 +303,12 @@ export function createMomusAgent(model: string): AgentConfig {
     model,
     temperature: 0.1,
     ...restrictions,
-    prompt: MOMUS_DEFAULT_PROMPT,
+    prompt,
   } as AgentConfig;
 
-  if (isGptModel(model)) {
+  if (isGpt) {
     return {
       ...base,
-      prompt: MOMUS_GPT_PROMPT,
       reasoningEffort: "medium",
       textVerbosity: "high",
     } as AgentConfig;

@@ -1,6 +1,7 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
 import { createAgentToolAllowlist } from "../shared/permission-compat"
+import { maybePrependKimiPrompt } from "./kimi-prompt"
 
 const MODE: AgentMode = "subagent"
 
@@ -21,7 +22,7 @@ export function createMultimodalLookerAgent(model: string): AgentConfig {
     model,
     temperature: 0.1,
     ...restrictions,
-    prompt: `You interpret media files that cannot be read as plain text.
+    prompt: maybePrependKimiPrompt(model, `You interpret media files that cannot be read as plain text.
 
 Your job: examine the attached file and extract ONLY what was requested.
 
@@ -52,7 +53,7 @@ Response rules:
 - Match the language of the request
 - Be thorough on the goal, concise on everything else
 
-Your output goes straight to the main agent for continued work.`,
+Your output goes straight to the main agent for continued work.`),
   }
 }
 createMultimodalLookerAgent.mode = MODE
