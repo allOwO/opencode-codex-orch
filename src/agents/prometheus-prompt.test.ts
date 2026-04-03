@@ -10,6 +10,15 @@ describe("PROMETHEUS_SYSTEM_PROMPT Momus invocation policy", () => {
     expect(prompt.toLowerCase()).toMatch(/momus.*only.*path|path.*only.*momus/)
   })
 
+  test("should instruct passing the actual markdown plan path, not only a .sisyphus example path", () => {
+    //#given
+    const prompt = PROMETHEUS_SYSTEM_PROMPT
+
+    //#when / #then
+    expect(prompt).toContain("docs/superpowers/specs/payment-design.md")
+    expect(prompt).not.toContain('prompt=".sisyphus/plans/{name}.md"')
+  })
+
   test("should forbid wrapping Momus invocation in explanations or markdown", () => {
     //#given
     const prompt = PROMETHEUS_SYSTEM_PROMPT

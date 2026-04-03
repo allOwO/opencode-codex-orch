@@ -278,13 +278,13 @@ Question({ questions: [{
 \`\`\`typescript
 while (true) {
   const result = task(subagent_type="momus", load_skills=[],
-    run_in_background=false, prompt=".sisyphus/plans/{name}.md")
+    run_in_background=false, prompt="docs/superpowers/specs/payment-design.md")
   if (result.verdict === "OKAY") break
   // Fix ALL issues. Resubmit. No excuses, no shortcuts.
 }
 \`\`\`
 
-**Momus invocation rule**: Provide ONLY the file path as prompt.
+**Momus invocation rule**: Provide ONLY the actual Markdown plan file path as prompt.
 
 ---
 

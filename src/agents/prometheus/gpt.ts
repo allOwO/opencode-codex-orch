@@ -276,13 +276,13 @@ Only activated when user selects "High Accuracy Review".
 \`\`\`typescript
 while (true) {
   const result = task(subagent_type="momus", load_skills=[],
-    run_in_background=false, prompt=".sisyphus/plans/{name}.md")
+    run_in_background=false, prompt="docs/superpowers/specs/payment-design.md")
   if (result.verdict === "OKAY") break
   // Fix ALL issues. Resubmit. No excuses, no shortcuts, no "good enough".
 }
 \`\`\`
 
-**Momus invocation rule**: Provide ONLY the file path as prompt. No explanations or wrapping.
+**Momus invocation rule**: Provide ONLY the actual Markdown plan file path as prompt. No explanations or wrapping.
 
 Momus says "OKAY" only when: 100% file references verified, ≥80% tasks have reference sources, ≥90% have concrete acceptance criteria, zero business logic assumptions.
 
