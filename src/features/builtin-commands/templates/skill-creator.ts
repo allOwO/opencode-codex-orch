@@ -1,6 +1,6 @@
 export const SKILL_CREATOR_TEMPLATE = `# Skill Creator Command
 
-Load the built-in skill-creator skill for creating, refining, or migrating SKILL.md-based skills.
+Load the built-in skill-creator skill for OpenCode-specific scope, packaging, discovery, and validation.
 
 ## How To Use This Command
 
@@ -9,10 +9,14 @@ Load the built-in skill-creator skill for creating, refining, or migrating SKILL
 \`skill(name="skill-creator")\`
 
 2. After the skill loads, use its guidance to:
-   - create a new skill
-   - refine an existing SKILL.md
-   - improve naming, description, and structure
-   - choose between local skill files and built-in skills
+   - choose between a local \`SKILL.md\` skill and a built-in TypeScript skill
+   - pick the narrowest reuse scope
+   - write minimal metadata and focused instructions
+   - validate the skill with explicit invocation
+
+## Scope
+
+The loaded skill covers OpenCode-specific scope, packaging, discovery, and validation. Do not duplicate general authoring doctrine from writing-skills.
 
 ## User Context
 

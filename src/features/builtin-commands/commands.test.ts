@@ -95,6 +95,14 @@ describe("loadBuiltinCommands", () => {
 	expect(commands["skill-creator"].template).toContain('skill(name="skill-creator")')
   })
 
+  test("should include OpenCode-specific guidance in skill-creator template", () => {
+	//#given - the template string
+
+	//#when / #then
+	expect(SKILL_CREATOR_TEMPLATE).toContain("OpenCode-specific scope, packaging, discovery, and validation")
+	expect(SKILL_CREATOR_TEMPLATE).toContain("Do not duplicate general authoring doctrine from writing-skills")
+  })
+
   test("should have correct description for skill-creator", () => {
 	//#given - no disabled commands
 
@@ -102,7 +110,8 @@ describe("loadBuiltinCommands", () => {
 	const commands = loadBuiltinCommands()
 
 	//#then
-	expect(commands["skill-creator"].description).toContain("skill-creator")
+	expect(commands["skill-creator"].description).toContain("OpenCode")
+	expect(commands["skill-creator"].description).toContain("built-in TypeScript skill")
   })
 
   test("should include autopilot command in loaded commands", () => {

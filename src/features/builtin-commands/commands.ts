@@ -69,7 +69,8 @@ ${REFACTOR_TEMPLATE}
     argumentHint: "<refactoring-target> [--scope=<file|module|project>] [--strategy=<safe|aggressive>]",
   },
   "skill-creator": {
-    description: "(builtin) Load skill-creator guidance for creating and refining skills",
+    description:
+      "(builtin) Load skill-creator guidance for OpenCode skill packaging and built-in TypeScript skill creation",
     template: `<command-instruction>
 ${SKILL_CREATOR_TEMPLATE}
 </command-instruction>
