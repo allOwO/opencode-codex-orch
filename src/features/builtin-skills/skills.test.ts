@@ -219,8 +219,22 @@ describe("createBuiltinSkills", () => {
 		// then
 		expect(skill.template).toContain("skill(name=")
 		expect(skill.template).toContain("SKILL.md")
-		expect(skill.template).toContain(".agents/skills/<skill-name>/SKILL.md")
-		expect(skill.template).toContain("recommended organizational default for generic project-level skills")
-		expect(skill.template).toContain("OpenCode will load the `.opencode` version first")
+		expect(skill.template).toContain(".agents/skills/<name>/SKILL.md")
+		expect(skill.template).toContain("Prefer the narrowest scope that matches intended reuse")
+		expect(skill.template).toContain("For general skill-writing doctrine, use writing-skills")
+	})
+
+	test("includes skill-creator skill with OpenCode-specific scope guidance", () => {
+		// given
+		const options = {}
+
+		// when
+		const skills = createBuiltinSkills(options)
+		const skill = getRequiredSkill(skills, "skill-creator")
+
+		// then
+		expect(skill.description).toContain("local SKILL.md skill")
+		expect(skill.description).toContain("built-in TypeScript skill")
+		expect(skill.template).toContain("For general skill-writing doctrine, use writing-skills")
 	})
 })
