@@ -4,6 +4,7 @@ import type { BuiltinSkill } from "./types"
 import {
   agentBrowserSkill,
   devBrowserSkill,
+  fastImplementationSkill,
   frontendUiUxSkill,
   gitCommitSkill,
   gitRebaseSkill,
@@ -32,6 +33,7 @@ export function createBuiltinSkills(options: CreateBuiltinSkillsOptions = {}): B
 
   const skills = [
     browserSkill,
+    fastImplementationSkill,
     frontendUiUxSkill,
     gitCommitSkill,
     gitRebaseSkill,

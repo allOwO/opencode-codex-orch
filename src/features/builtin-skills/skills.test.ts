@@ -81,10 +81,11 @@ describe("createBuiltinSkills", () => {
 			expect(skills.find((s) => s.name === "git-commit")).toBeDefined()
 			expect(skills.find((s) => s.name === "git-rebase")).toBeDefined()
 			expect(skills.find((s) => s.name === "git-search")).toBeDefined()
+			expect(skills.find((s) => s.name === "fast-implementation")).toBeDefined()
 		}
 	})
 
-	test("returns exactly 7 skills regardless of provider", () => {
+	test("returns exactly 8 skills regardless of provider", () => {
 		// given
 
 		// when
@@ -92,8 +93,8 @@ describe("createBuiltinSkills", () => {
 		const agentBrowserSkills = createBuiltinSkills({ browserProvider: "agent-browser" })
 
 		// then
-		expect(defaultSkills).toHaveLength(7)
-		expect(agentBrowserSkills).toHaveLength(7)
+		expect(defaultSkills).toHaveLength(8)
+		expect(agentBrowserSkills).toHaveLength(8)
 	})
 
 	test("should exclude playwright when it is in disabledSkills", () => {
@@ -111,7 +112,8 @@ describe("createBuiltinSkills", () => {
 		expect(skills.map((s) => s.name)).toContain("git-search")
 		expect(skills.map((s) => s.name)).toContain("dev-browser")
 		expect(skills.map((s) => s.name)).toContain("skill-creator")
-		expect(skills.length).toBe(6)
+		expect(skills.map((s) => s.name)).toContain("fast-implementation")
+		expect(skills.length).toBe(7)
 	})
 
 	test("should exclude multiple skills when they are in disabledSkills", () => {
@@ -129,7 +131,8 @@ describe("createBuiltinSkills", () => {
 		expect(skills.map((s) => s.name)).toContain("git-search")
 		expect(skills.map((s) => s.name)).toContain("dev-browser")
 		expect(skills.map((s) => s.name)).toContain("skill-creator")
-		expect(skills.length).toBe(5)
+		expect(skills.map((s) => s.name)).toContain("fast-implementation")
+		expect(skills.length).toBe(6)
 	})
 
 	test("should return an empty array when all skills are disabled", () => {
@@ -143,6 +146,7 @@ describe("createBuiltinSkills", () => {
 				"git-search",
 				"dev-browser",
 				"skill-creator",
+				"fast-implementation",
 			]),
 		}
 
@@ -161,7 +165,7 @@ describe("createBuiltinSkills", () => {
 		const skills = createBuiltinSkills(options)
 
 		// #then
-		expect(skills.length).toBe(7)
+		expect(skills.length).toBe(8)
 	})
 
 	test("includes frontend-ui-ux skill with restrained composition and brand-forward guidance", () => {
@@ -236,5 +240,33 @@ describe("createBuiltinSkills", () => {
 		expect(skill.description).toContain("local SKILL.md skill")
 		expect(skill.description).toContain("built-in TypeScript skill")
 		expect(skill.template).toContain("For general skill-writing doctrine, use writing-skills")
+	})
+
+	test("includes fast-implementation skill by default", () => {
+		// given
+		const options = {}
+
+		// when
+		const skills = createBuiltinSkills(options)
+		const skill = getRequiredSkill(skills, "fast-implementation")
+
+		// then
+		expect(skill.description).toContain("fast")
+		expect(skill.template).toContain("small")
+		expect(skill.template).toContain("direct")
+	})
+
+	test("fast-implementation skill template contains key guidance", () => {
+		// given
+		const options = {}
+
+		// when
+		const skills = createBuiltinSkills(options)
+		const skill = getRequiredSkill(skills, "fast-implementation")
+
+		// then
+		expect(skill.template).toContain("Requirement Lock")
+		expect(skill.template).toContain("Smallest correct change")
+		expect(skill.template).toContain("Self-review")
 	})
 })
