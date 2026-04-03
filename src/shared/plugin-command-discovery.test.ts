@@ -120,7 +120,7 @@ describe("plugin command discovery utility", () => {
   })
 
   describe("#given plugin loading is enabled", () => {
-    it("#then returns plugin command and skill definitions", () => {
+    it("#then returns plugin command definitions without plugin skills", () => {
       // given
       const options = { pluginsEnabled: true }
 
@@ -129,7 +129,7 @@ describe("plugin command discovery utility", () => {
 
       // then
       expect(Object.keys(definitions)).toContain("daplug:run-prompt")
-      expect(Object.keys(definitions)).toContain("daplug:plugin-plan")
+      expect(Object.keys(definitions)).not.toContain("daplug:plugin-plan")
     })
   })
 })

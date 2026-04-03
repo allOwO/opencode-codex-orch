@@ -4,7 +4,6 @@ import { addConfigLoadError, log } from "../shared";
 
 export type PluginComponents = {
   commands: Record<string, unknown>;
-  skills: Record<string, unknown>;
   agents: Record<string, unknown>;
   mcpServers: Record<string, unknown>;
   hooksConfigs: Array<{ hooks?: Record<string, unknown> }>;
@@ -14,7 +13,6 @@ export type PluginComponents = {
 
 const EMPTY_PLUGIN_COMPONENTS: PluginComponents = {
   commands: {},
-  skills: {},
   agents: {},
   mcpServers: {},
   hooksConfigs: [],

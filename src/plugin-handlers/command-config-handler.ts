@@ -74,7 +74,6 @@ export async function applyCommandConfig(params: {
     ...opencodeProjectCommands,
     ...opencodeProjectSkills,
     ...params.pluginComponents.commands,
-    ...params.pluginComponents.skills,
   };
 
   remapCommandAgentFields(params.config.command as Record<string, Record<string, unknown>>);

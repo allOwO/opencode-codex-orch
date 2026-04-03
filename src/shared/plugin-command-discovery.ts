@@ -1,7 +1,6 @@
 import {
   discoverInstalledPlugins,
   loadPluginCommands,
-  loadPluginSkillsAsCommands,
 } from "../features/claude-code-plugin-loader"
 import type { CommandDefinition } from "../features/claude-code-command-loader/types"
 
@@ -23,6 +22,5 @@ export function discoverPluginCommandDefinitions(
 
   return {
     ...loadPluginCommands(plugins),
-    ...loadPluginSkillsAsCommands(plugins),
   }
 }

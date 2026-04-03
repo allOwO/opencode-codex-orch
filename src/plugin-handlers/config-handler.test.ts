@@ -49,7 +49,6 @@ beforeEach(() => {
 
   spyOn(pluginLoader, "loadAllPluginComponents" as any).mockResolvedValue({
     commands: {},
-    skills: {},
     agents: {},
     mcpServers: {},
     hooksConfigs: [],
@@ -1088,7 +1087,6 @@ describe("config-handler plugin loading error boundary (#1559)", () => {
     ;(pluginLoader.loadAllPluginComponents as any).mockRestore?.()
     spyOn(pluginLoader, "loadAllPluginComponents" as any).mockResolvedValue({
       commands: { "test-cmd": { description: "test", template: "test" } },
-      skills: {},
       agents: {},
       mcpServers: {},
       hooksConfigs: [],

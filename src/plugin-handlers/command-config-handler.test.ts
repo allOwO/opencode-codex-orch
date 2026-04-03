@@ -8,7 +8,6 @@ import type { OpenCodeCodexOrchConfig } from "../config"
 
 const EMPTY_PLUGIN_COMPONENTS = {
   commands: {},
-  skills: {},
   agents: {},
   mcpServers: {},
   hooksConfigs: [],
@@ -17,6 +16,29 @@ const EMPTY_PLUGIN_COMPONENTS = {
 }
 
 describe("applyCommandConfig", () => {
+  test("does not merge plugin skills into command config", async () => {
+    const config: Record<string, unknown> = {}
+
+    const { applyCommandConfig } = await import("./command-config-handler")
+    await applyCommandConfig({
+      config,
+      pluginConfig: {} as OpenCodeCodexOrchConfig,
+      ctx: { directory: process.cwd() },
+      pluginComponents: {
+        ...EMPTY_PLUGIN_COMPONENTS,
+        skills: {
+          "daplug:plugin-plan": {
+            description: "plugin skill exposed as command",
+            template: "skill content",
+          },
+        },
+      } as typeof EMPTY_PLUGIN_COMPONENTS & { skills: Record<string, unknown> },
+    })
+
+    const commands = config.command as Record<string, unknown>
+    expect(commands["daplug:plugin-plan"]).toBeUndefined()
+  })
+
   test("adds runtime-configured skill paths without replacing fixed OpenCode skills", async () => {
     const rootDir = join(tmpdir(), `command-config-handler-${Date.now()}-${Math.random().toString(16).slice(2)}`)
     const originalOpenCodeConfigDir = process.env.OPENCODE_CONFIG_DIR

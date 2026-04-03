@@ -33,7 +33,6 @@ function createPluginConfig(overrides: Partial<OpenCodeCodexOrchConfig> = {}): O
 
 const EMPTY_PLUGIN_COMPONENTS = {
   commands: {},
-  skills: {},
   agents: {},
   mcpServers: {},
   hooksConfigs: [],

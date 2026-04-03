@@ -25,7 +25,6 @@ beforeEach(() => {
     "loadPluginComponents",
   ).mockResolvedValue({
     commands: {},
-    skills: {},
     agents: {},
     mcpServers: {},
     hooksConfigs: [],

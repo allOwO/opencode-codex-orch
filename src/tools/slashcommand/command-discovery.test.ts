@@ -126,18 +126,16 @@ describe("slashcommand command discovery plugin integration", () => {
     rmSync(tempDir, { recursive: true, force: true })
   })
 
-  it("discovers marketplace plugin commands and skills as command items", () => {
+  it("discovers marketplace plugin commands without exposing plugin skills as command items", () => {
     const commands = discoverCommandsSync(projectDir, { pluginsEnabled: true })
     const names = commands.map(command => command.name)
 
     expect(names).toContain("daplug:run-prompt")
-    expect(names).toContain("daplug:plugin-plan")
+    expect(names).not.toContain("daplug:plugin-plan")
 
     const pluginCommand = commands.find(command => command.name === "daplug:run-prompt")
-    const pluginSkill = commands.find(command => command.name === "daplug:plugin-plan")
 
     expect(pluginCommand?.scope).toBe("plugin")
-    expect(pluginSkill?.scope).toBe("plugin")
   })
 
   it("omits marketplace plugin commands when plugins are disabled", () => {
