@@ -15,15 +15,20 @@ export function buildBackgroundTaskNotificationText(input: {
   const errorInfo = task.error ? `\n**Error:** ${task.error}` : ""
 
   if (allComplete) {
+    const hasNonCompletedTasks = completedTasks.some((t) => t.status !== "completed")
+    const allDoneBanner = hasNonCompletedTasks
+      ? "[ALL BACKGROUND TASKS FINISHED]"
+      : "[ALL BACKGROUND TASKS COMPLETE]"
+    const completedTasksTitle = hasNonCompletedTasks ? "Final Statuses" : "Completed"
     const completedTasksText = completedTasks
-      .map((t) => `- \`${t.id}\`: ${t.description}`)
+      .map((t) => `- \`${t.id}\`: ${t.status} — ${t.description}`)
       .join("\n")
 
     return `<system-reminder>
-[ALL BACKGROUND TASKS COMPLETE]
+${allDoneBanner}
 
-**Completed:**
-${completedTasksText || `- \`${task.id}\`: ${task.description}`}
+**${completedTasksTitle}:**
+${completedTasksText || `- \`${task.id}\`: ${task.status} — ${task.description}`}
 
 Use \`background_output(task_id="<id>")\` to retrieve each result.
 </system-reminder>`

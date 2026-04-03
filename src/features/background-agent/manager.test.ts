@@ -1104,6 +1104,64 @@ describe("BackgroundManager.notifyParentSession - aborted parent", () => {
 
     manager.shutdown()
   })
+
+  test("should not report cancelled tasks as completed in all-done notification", async () => {
+    //#given
+    let capturedBody: Record<string, unknown> | undefined
+    const client = {
+      session: {
+        prompt: async () => ({}),
+        promptAsync: async (args: { body: Record<string, unknown> }) => {
+          capturedBody = args.body
+          return {}
+        },
+        abort: async () => ({}),
+        messages: async () => ({ data: [] }),
+      },
+    }
+    const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+    const completedTask: BackgroundTask = {
+      id: "task-completed",
+      sessionID: "session-completed",
+      parentSessionID: "session-parent",
+      parentMessageID: "msg-parent",
+      description: "successful task",
+      prompt: "test",
+      agent: "explore",
+      status: "completed",
+      startedAt: new Date(),
+      completedAt: new Date(),
+    }
+    const cancelledTask: BackgroundTask = {
+      id: "task-cancelled",
+      sessionID: "session-cancelled",
+      parentSessionID: "session-parent",
+      parentMessageID: "msg-parent",
+      description: "cancelled task",
+      prompt: "test",
+      agent: "explore",
+      status: "cancelled",
+      startedAt: new Date(),
+      completedAt: new Date(),
+    }
+    getTaskMap(manager).set(completedTask.id, completedTask)
+    getTaskMap(manager).set(cancelledTask.id, cancelledTask)
+    getPendingByParent(manager).set("session-parent", new Set([completedTask.id]))
+
+    //#when
+    await (manager as unknown as { notifyParentSession: (value: BackgroundTask) => Promise<void> })
+      .notifyParentSession(completedTask)
+
+    //#then
+    const text = String((capturedBody?.parts as Array<{ text?: string }> | undefined)?.[0]?.text ?? "")
+    expect(text).toContain("[ALL BACKGROUND TASKS FINISHED]")
+    expect(text).toContain("**Final Statuses:**")
+    expect(text).toContain("`task-completed`: completed")
+    expect(text).toContain("`task-cancelled`: cancelled")
+    expect(text).not.toContain("[ALL BACKGROUND TASKS COMPLETE]")
+
+    manager.shutdown()
+  })
 })
 
 describe("BackgroundManager.notifyParentSession - notifications toggle", () => {

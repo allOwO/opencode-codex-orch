@@ -1285,21 +1285,26 @@ export class BackgroundManager {
       ? Array.from(this.tasks.values())
         .filter(t => t.parentSessionID === task.parentSessionID && t.status !== "running" && t.status !== "pending")
       : []
+    const hasNonCompletedTasks = completedTasks.some(t => t.status !== "completed")
 
     const statusText = task.status === "completed" ? "COMPLETED" : task.status === "interrupt" ? "INTERRUPTED" : "CANCELLED"
     const errorInfo = task.error ? `\n**Error:** ${task.error}` : ""
 
     let notification: string
     if (allComplete) {
+        const allDoneBanner = hasNonCompletedTasks
+          ? "[ALL BACKGROUND TASKS FINISHED]"
+          : "[ALL BACKGROUND TASKS COMPLETE]"
+        const completedTasksTitle = hasNonCompletedTasks ? "Final Statuses" : "Completed"
         const completedTasksText = completedTasks
-          .map(t => `- \`${t.id}\`: ${t.description}`)
+          .map(t => `- \`${t.id}\`: ${t.status} — ${t.description}`)
           .join("\n")
 
         notification = `<system-reminder>
-[ALL BACKGROUND TASKS COMPLETE]
+${allDoneBanner}
 
-**Completed:**
-${completedTasksText || `- \`${task.id}\`: ${task.description}`}
+**${completedTasksTitle}:**
+${completedTasksText || `- \`${task.id}\`: ${task.status} — ${task.description}`}
 
 Use \`background_output(task_id="<id>")\` to retrieve each result.
 </system-reminder>`
