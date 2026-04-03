@@ -37,5 +37,6 @@ notepad.md
 oauth-success.html
 *.bun-build
 .worktrees/
-docs/superpowers/
+/docs/
+
 
