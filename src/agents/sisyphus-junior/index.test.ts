@@ -591,10 +591,61 @@ describe("buildSisyphusJuniorPrompt", () => {
     // when
     const prompt = buildSisyphusJuniorPrompt(model, false)
 
-    // then
-    expect(prompt).toContain("You are OpenCode, an interactive general AI agent running on a user's computer.")
-    expect(prompt).toContain("opencode-codex-orch")
+    // then - uses compact Kimi intro, not the old bloated OpenCode base prompt
+    expect(prompt).toContain("You are operating as a specialized subagent on a Kimi model.")
+    expect(prompt).toContain("opencode-codex-orch Specialized Executor")
     expect(prompt).not.toContain("<Role>")
     expect(prompt).not.toContain("Focused executor from opencode-codex-orch")
+    expect(prompt).not.toContain("You are OpenCode, an interactive general AI agent running on a user's computer.")
+  })
+
+  test("Kimi model prompt includes task discipline when useTaskSystem=true", () => {
+    // given
+    const model = "kimi-for-coding/k2p5"
+
+    // when
+    const prompt = buildSisyphusJuniorPrompt(model, true)
+
+    // then
+    expect(prompt).toContain("Task Discipline")
+    expect(prompt).toContain("task_create")
+    expect(prompt).not.toContain("todowrite")
+  })
+
+  test("Kimi model prompt includes todo discipline when useTaskSystem=false", () => {
+    // given
+    const model = "opencode/kimi-k2.5-free"
+
+    // when
+    const prompt = buildSisyphusJuniorPrompt(model, false)
+
+    // then
+    expect(prompt).toContain("Todo Discipline")
+    expect(prompt).toContain("todowrite")
+    expect(prompt).not.toContain("task_create")
+  })
+
+  test("Kimi model prompt includes verification section", () => {
+    // given
+    const model = "kimi-for-coding/k2p5"
+
+    // when
+    const prompt = buildSisyphusJuniorPrompt(model, false)
+
+    // then
+    expect(prompt).toContain("lsp_diagnostics")
+    expect(prompt).toContain("Verification")
+  })
+
+  test("Kimi model prompt appends promptAppend when provided", () => {
+    // given
+    const model = "kimi-for-coding/k2p5"
+
+    // when
+    const prompt = buildSisyphusJuniorPrompt(model, false, "KIMI_CUSTOM_APPEND")
+
+    // then
+    expect(prompt).toContain("KIMI_CUSTOM_APPEND")
+    expect(prompt).toContain("You are operating as a specialized subagent on a Kimi model.")
   })
 })
