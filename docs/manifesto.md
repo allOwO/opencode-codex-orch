@@ -69,35 +69,21 @@ Token efficiency matters. But not at the cost of work quality or human cognitive
 
 **The human should only need to say what they want. Everything else is the agent's job.**
 
-Two approaches achieve this:
+In practice, that means the user can describe intent at whatever level they prefer:
 
-### Approach 1: Prometheus (Interview Mode)
+- "I want to add authentication."
+- "Fix the failing tests."
+- "Refactor this module without changing behavior."
 
-You say: "I want to add authentication."
+From there, the orchestration system should:
 
-Prometheus:
-- Researches your codebase to understand existing patterns
-- Asks clarifying questions based on actual findings
-- Surfaces edge cases you hadn't considered
-- Documents decisions as you make them
-- Generates a complete work plan
+- Research the codebase to understand existing patterns
+- Ask clarifying questions only when they are truly necessary
+- Surface edge cases before they become bugs
+- Turn intent into an executable plan when planning is needed
+- Implement, verify, and keep going until the work is actually complete
 
-**You provide intent. The agent provides structure.**
-
-### Approach 2: Ultrawork (Just Do It Mode)
-
-You say: "ulw add authentication"
-
-The agent:
-- Figures out the right approach
-- Researches best practices
-- Implements following conventions
-- Verifies everything works
-- Keeps going until complete
-
-**You provide intent. The agent handles everything.**
-
-In both cases, the human's job is to **express what they want**, not to manage how it gets done.
+**You provide intent. The agent provides structure and execution.**
 
 ---
 
@@ -148,10 +134,9 @@ Everything in opencode-codex-orch is designed to make this loop work:
 
 | Feature | Purpose |
 |---------|---------|
-| Prometheus | Extract intent through intelligent interview |
-| Metis | Catch ambiguities before they become bugs |
-| Momus | Verify plans are complete before execution |
 | Orchestrator | Coordinate work without human micromanagement |
+| Reviewer | Verify plans and implementation quality before completion |
+| Oracle | Provide high-quality read-only consultation for hard decisions |
 | Todo Continuation | Force completion, prevent "I'm done" lies |
 | Category System | Route to optimal model without human decision |
 | Background Agents | Parallel research without blocking user |
@@ -164,8 +149,8 @@ Everything in opencode-codex-orch is designed to make this loop work:
 **You should be able to:**
 
 1. Describe what you want (high-level or detailed, your choice)
-2. Let the agent interview you if needed
-3. Confirm the plan (or just let ultrawork handle it)
+2. Let the agent clarify or plan only when needed
+3. Confirm the plan when the workflow requires approval
 4. Walk away
 5. Come back to completed, verified, production-ready work
 
