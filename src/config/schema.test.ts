@@ -173,13 +173,31 @@ describe("AgentOverrideConfigSchema", () => {
       const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
 
       expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.orchestrator_agent).toEqual(config.orchestrator_agent)
+      }
+    })
+
+    test("does not expose sisyphus_agent as an active top-level config key", () => {
+      const config = {
+        sisyphus_agent: {
+          disabled: false,
+        },
+      }
+
+      const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
+
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.sisyphus_agent).toBeUndefined()
+      }
     })
   })
 
   describe("category field", () => {
-    test("accepts category as optional string", () => {
+    test("accepts canonical category names", () => {
       // given
-      const config = { category: "visual-engineering" }
+      const config = { category: "designer" }
 
       // when
       const result = AgentOverrideConfigSchema.safeParse(config)
@@ -187,8 +205,14 @@ describe("AgentOverrideConfigSchema", () => {
       // then
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.category).toBe("visual-engineering")
+        expect(result.data.category).toBe("designer")
       }
+    })
+
+    test("rejects legacy category aliases in the public schema", () => {
+      const result = AgentOverrideConfigSchema.safeParse({ category: "visual-engineering" })
+
+      expect(result.success).toBe(false)
     })
 
     test("accepts config without category", () => {
@@ -310,9 +334,9 @@ describe("AgentOverrideConfigSchema", () => {
 
     test("accepts both model and category (deprecated usage)", () => {
       // given - category should take precedence at runtime, but both should validate
-      const config = { 
+      const config = {
         model: "openai/gpt-5.4",
-        category: "deep"
+        category: "hard",
       }
 
       // when
@@ -322,7 +346,7 @@ describe("AgentOverrideConfigSchema", () => {
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.data.model).toBe("openai/gpt-5.4")
-        expect(result.data.category).toBe("deep")
+        expect(result.data.category).toBe("hard")
       }
     })
   })
@@ -330,9 +354,9 @@ describe("AgentOverrideConfigSchema", () => {
   describe("combined fields", () => {
     test("accepts category with skills", () => {
       // given
-      const config = { 
-        category: "visual-engineering",
-        skills: ["frontend-ui-ux"]
+      const config = {
+        category: "designer",
+        skills: ["frontend-ui-ux"],
       }
 
       // when
@@ -341,18 +365,18 @@ describe("AgentOverrideConfigSchema", () => {
       // then
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.category).toBe("visual-engineering")
+        expect(result.data.category).toBe("designer")
         expect(result.data.skills).toEqual(["frontend-ui-ux"])
       }
     })
 
     test("accepts category with skills and other fields", () => {
       // given
-      const config = { 
-        category: "deep",
+      const config = {
+        category: "hard",
         skills: ["code-reviewer"],
         temperature: 0.3,
-        prompt_append: "Extra instructions"
+        prompt_append: "Extra instructions",
       }
 
       // when
@@ -361,7 +385,7 @@ describe("AgentOverrideConfigSchema", () => {
       // then
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.category).toBe("deep")
+        expect(result.data.category).toBe("hard")
         expect(result.data.skills).toEqual(["code-reviewer"])
         expect(result.data.temperature).toBe(0.3)
         expect(result.data.prompt_append).toBe("Extra instructions")
@@ -437,12 +461,12 @@ describe("HookNameSchema", () => {
   })
 })
 
-describe("Sisyphus-Junior agent override", () => {
-  test("schema accepts agents['Sisyphus-Junior'] and retains the key after parsing", () => {
+describe("canonical agent override surface", () => {
+  test("schema accepts agents['executor'] and retains the canonical key after parsing", () => {
     // given
     const config = {
       agents: {
-        "sisyphus-junior": {
+        executor: {
           model: "openai/gpt-5.4",
           temperature: 0.2,
         },
@@ -452,21 +476,38 @@ describe("Sisyphus-Junior agent override", () => {
     // when
     const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
 
-    // then
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.agents?.["sisyphus-junior"]).toBeDefined()
-      expect(result.data.agents?.["sisyphus-junior"]?.model).toBe("openai/gpt-5.4")
-      expect(result.data.agents?.["sisyphus-junior"]?.temperature).toBe(0.2)
-    }
-  })
+      // then
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.agents?.executor).toBeDefined()
+        expect(result.data.agents?.executor?.model).toBe("openai/gpt-5.4")
+        expect(result.data.agents?.executor?.temperature).toBe(0.2)
+      }
+    })
 
-  test("schema accepts sisyphus-junior with prompt_append", () => {
-    // given
+  test("schema strips legacy executor aliases from the public schema surface", () => {
     const config = {
       agents: {
         "sisyphus-junior": {
-          prompt_append: "Additional instructions for sisyphus-junior",
+          model: "openai/gpt-5.4",
+        },
+      },
+    }
+
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.agents?.["sisyphus-junior"]).toBeUndefined()
+    }
+  })
+
+  test("schema accepts executor with prompt_append", () => {
+    // given
+    const config = {
+      agents: {
+        executor: {
+          prompt_append: "Additional instructions for executor",
         },
       },
     }
@@ -474,20 +515,18 @@ describe("Sisyphus-Junior agent override", () => {
     // when
     const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
 
-    // then
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.agents?.["sisyphus-junior"]?.prompt_append).toBe(
-        "Additional instructions for sisyphus-junior"
-      )
-    }
-  })
+      // then
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.agents?.executor?.prompt_append).toBe("Additional instructions for executor")
+      }
+    })
 
-  test("schema accepts sisyphus-junior with tools override", () => {
+  test("schema accepts executor with tools override", () => {
     // given
     const config = {
       agents: {
-        "sisyphus-junior": {
+        executor: {
           tools: {
             read: true,
             write: false,
@@ -499,13 +538,13 @@ describe("Sisyphus-Junior agent override", () => {
     // when
     const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
 
-    // then
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.agents?.["sisyphus-junior"]?.tools).toEqual({
-        read: true,
-        write: false,
-      })
+      // then
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.agents?.executor?.tools).toEqual({
+          read: true,
+          write: false,
+        })
     }
   })
 
@@ -513,7 +552,7 @@ describe("Sisyphus-Junior agent override", () => {
     // given
     const config = {
       agents: {
-        sisyphus: {
+        orchestrator: {
           temperature: 0.1,
         },
         deepsearch: {
@@ -528,13 +567,13 @@ describe("Sisyphus-Junior agent override", () => {
     // when
     const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
 
-    // then
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.agents?.sisyphus?.temperature).toBe(0.1)
-      expect(result.data.agents?.deepsearch?.temperature).toBe(0.2)
-      expect(result.data.agents?.reviewer?.temperature).toBe(0.3)
-    }
+      // then
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.agents?.orchestrator?.temperature).toBe(0.1)
+        expect(result.data.agents?.deepsearch?.temperature).toBe(0.2)
+        expect(result.data.agents?.reviewer?.temperature).toBe(0.3)
+      }
   })
 
   test("overridable agent name schema rejects retired agent names", () => {

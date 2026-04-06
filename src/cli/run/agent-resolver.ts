@@ -31,7 +31,7 @@ const normalizeAgentName = (agent?: string): ResolvedAgent | undefined => {
 
 const isAgentDisabled = (agentConfigKey: string, config: OpenCodeCodexOrchConfig): boolean => {
   const lowered = agentConfigKey.toLowerCase()
-  const orchestratorAgentConfig = config.orchestrator_agent ?? config.sisyphus_agent
+  const orchestratorAgentConfig = config.orchestrator_agent
   if (lowered === DEFAULT_AGENT && orchestratorAgentConfig?.disabled === true) {
     return true
   }

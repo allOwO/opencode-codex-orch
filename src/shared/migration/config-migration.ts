@@ -131,8 +131,10 @@ export function migrateConfigFile(
     needsWrite = true
   }
 
-  if (copy.omo_agent) {
-    copy.sisyphus_agent = copy.omo_agent
+  const legacyOrchestratorAgentConfig = copy.orchestrator_agent ?? copy.sisyphus_agent ?? copy.omo_agent
+  if (legacyOrchestratorAgentConfig) {
+    copy.orchestrator_agent = legacyOrchestratorAgentConfig
+    delete copy.sisyphus_agent
     delete copy.omo_agent
     needsWrite = true
   }

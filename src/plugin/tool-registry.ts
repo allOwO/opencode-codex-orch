@@ -55,7 +55,7 @@ export function createToolRegistry(args: {
     directory: ctx.directory,
     userCategories: pluginConfig.categories,
     agentOverrides: pluginConfig.agents,
-    sisyphusJuniorModel: pluginConfig.agents?.["sisyphus-junior"]?.model,
+    sisyphusJuniorModel: pluginConfig.agents?.executor?.model,
     browserProvider: skillContext.browserProvider,
     disabledSkills: skillContext.disabledSkills,
     availableCategories,

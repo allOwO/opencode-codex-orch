@@ -116,13 +116,15 @@ describe("migrateConfigFile", () => {
         "visual-engineering": { model: "google/gemini-3.1-pro" },
       },
       omo_agent: { disabled: false },
+      sisyphus_agent: { planner_enabled: true },
     }
     const configPath = createTempConfig(rawConfig)
 
     const needsWrite = migrateConfigFile(configPath, rawConfig)
 
     expect(needsWrite).toBe(true)
-    expect(rawConfig.sisyphus_agent).toEqual({ disabled: false })
+    expect(rawConfig.orchestrator_agent).toEqual({ planner_enabled: true })
+    expect(rawConfig.sisyphus_agent).toBeUndefined()
     expect(rawConfig.omo_agent).toBeUndefined()
 
     const agents = rawConfig.agents as Record<string, unknown>
