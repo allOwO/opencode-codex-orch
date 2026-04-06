@@ -90,7 +90,7 @@ describe("checkCompletionConditions continuation coverage", () => {
     expect(result).toBe(true)
   })
 
-  it("returns false when active ralph-loop continuation exists for this session", async () => {
+  it("ignores retired ralph-loop continuation state for this session", async () => {
     // given
     spyOn(console, "log").mockImplementation(() => {})
     const directory = createTempDir()
@@ -111,10 +111,10 @@ describe("checkCompletionConditions continuation coverage", () => {
     const result = await checkCompletionConditions(ctx)
 
     // then
-    expect(result).toBe(false)
+    expect(result).toBe(true)
   })
 
-  it("returns true when active ralph-loop is bound to another session", async () => {
+  it("ignores retired ralph-loop continuation state bound to another session", async () => {
     // given
     spyOn(console, "log").mockImplementation(() => {})
     const directory = createTempDir()

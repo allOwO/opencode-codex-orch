@@ -238,4 +238,31 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 
 		rmSync(directory, { recursive: true, force: true })
 	})
+
+	test("#given stop-continuation command #when skill tool runs #then retired ralph-loop cancellation is not invoked", async () => {
+		const directory = join(tmpdir(), `tool-before-stop-continuation-${Date.now()}`)
+		mkdirSync(directory, { recursive: true })
+		let cancelLoopCalls = 0
+
+		const handler = createToolExecuteBeforeHandler({
+			ctx: createCtx(directory) as unknown as Parameters<typeof createToolExecuteBeforeHandler>[0]["ctx"],
+			hooks: {
+				ralphLoop: {
+					startLoop: () => {},
+					cancelLoop: () => {
+						cancelLoopCalls += 1
+					},
+				},
+			} as unknown as Parameters<typeof createToolExecuteBeforeHandler>[0]["hooks"],
+		})
+
+		await handler(
+			{ tool: "skill", sessionID: "ses-main", callID: "call-stop" },
+			{ args: { name: "stop-continuation" } },
+		)
+
+		expect(cancelLoopCalls).toBe(0)
+
+		rmSync(directory, { recursive: true, force: true })
+	})
 })
