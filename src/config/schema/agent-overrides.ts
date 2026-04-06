@@ -41,7 +41,7 @@ export const AgentOverrideConfigSchema = z.object({
   textVerbosity: z.enum(["low", "medium", "high"]).optional(),
   /** Provider-specific options. Passed directly to OpenCode SDK. */
   providerOptions: z.record(z.string(), z.unknown()).optional(),
-  /** Per-message ultrawork override model/variant when ultrawork keyword is detected. */
+  /** Legacy ultrawork override config retained for migration compatibility only. */
   ultrawork: z
     .object({
       model: z.string().optional(),

@@ -30,7 +30,6 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 			started_at: new Date().toISOString(),
 			prompt: "Ship feature",
 			session_id: "ses-main",
-			ultrawork: true,
 			verification_pending: true,
 		})
 
@@ -90,7 +89,6 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 			started_at: new Date().toISOString(),
 			prompt: "Ship feature",
 			session_id: "ses-main",
-			ultrawork: true,
 			verification_pending: true,
 		})
 
@@ -142,7 +140,6 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 			started_at: new Date().toISOString(),
 			prompt: "Ship feature",
 			session_id: "ses-main",
-			ultrawork: true,
 			verification_pending: true,
 		})
 

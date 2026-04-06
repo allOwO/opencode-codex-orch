@@ -32,7 +32,6 @@ type RalphLoopHook = {
     sessionID: string,
     prompt: string,
     options: {
-      ultrawork?: boolean
       maxIterations?: number
       completionPromise?: string
       strategy?: "reset" | "continue"
