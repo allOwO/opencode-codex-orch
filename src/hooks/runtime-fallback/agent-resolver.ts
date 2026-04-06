@@ -1,22 +1,32 @@
 import { getSessionAgent } from "../../features/claude-code-session-state"
+import { getAgentConfigKey } from "../../shared/agent-display-names"
 
 export const AGENT_NAMES = [
-  "sisyphus",
+  "orchestrator",
   "oracle",
   "librarian",
   "explore",
-  "prometheus",
-  "atlas",
-  "metis",
-  "momus",
-  "sisyphus-junior",
+  "deepsearch",
+  "reviewer",
+  "executor",
   "build",
   "plan",
-  "multimodal-looker",
 ]
 
+const LEGACY_RUNTIME_AGENT_ALIASES: Record<string, string> = {
+  sisyphus: "orchestrator",
+  "sisyphus (ultraworker)": "orchestrator",
+  momus: "reviewer",
+  "momus (plan critic)": "reviewer",
+  "momus (plan reviewer)": "reviewer",
+  "sisyphus-junior": "executor",
+  "multimodal-looker": "librarian",
+}
+
+const RUNTIME_AGENT_PATTERNS = [...AGENT_NAMES, ...Object.keys(LEGACY_RUNTIME_AGENT_ALIASES)]
+
 export const agentPattern = new RegExp(
-  `\\b(${AGENT_NAMES
+  `\\b(${RUNTIME_AGENT_PATTERNS
     .sort((a, b) => b.length - a.length)
     .map((a) => a.replace(/-/g, "\\-"))
     .join("|")})\\b`,
@@ -26,18 +36,20 @@ export const agentPattern = new RegExp(
 export function detectAgentFromSession(sessionID: string): string | undefined {
   const match = sessionID.match(agentPattern)
   if (match) {
-    return match[1].toLowerCase()
+    return normalizeAgentName(match[1])
   }
   return undefined
 }
 
 export function normalizeAgentName(agent: string | undefined): string | undefined {
   if (!agent) return undefined
-  const normalized = agent.toLowerCase().trim()
-  if (AGENT_NAMES.includes(normalized)) {
-    return normalized
+  const normalized = getAgentConfigKey(agent).toLowerCase().trim()
+  const legacyAlias = LEGACY_RUNTIME_AGENT_ALIASES[normalized]
+  const activeAgent = legacyAlias ?? normalized
+  if (AGENT_NAMES.includes(activeAgent)) {
+    return activeAgent
   }
-  const match = normalized.match(agentPattern)
+  const match = activeAgent.match(agentPattern)
   if (match) {
     return match[1].toLowerCase()
   }

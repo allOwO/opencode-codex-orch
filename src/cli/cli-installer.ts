@@ -114,10 +114,10 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
   console.log()
 
   printBox(
-    `${color.bold("Pro Tip:")} Include ${color.cyan("ultrawork")} (or ${color.cyan("ulw")}) in your prompt.\n` +
-      `All features work like magic—parallel agents, background tasks,\n` +
+    `${color.bold("Pro Tip:")} Start with a direct request to the orchestrator.\n` +
+      `You still get parallel agents, background tasks,\n` +
       `deep exploration, and relentless execution until completion.`,
-    "The Magic Word",
+    "Getting Started",
   )
 
   console.log(`${SYMBOLS.star} ${color.yellow("If you found this helpful, consider starring the repo!")}`)

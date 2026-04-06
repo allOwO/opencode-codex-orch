@@ -11,41 +11,41 @@ const createConfig = (overrides: Partial<OpenCodeCodexOrchConfig> = {}): OpenCod
 describe("resolveRunAgent", () => {
   it("uses CLI agent over env and config", () => {
     // given
-    const config = createConfig({ default_run_agent: "prometheus" })
-    const env = { OPENCODE_DEFAULT_AGENT: "Atlas" }
+    const config = createConfig({ default_run_agent: "Reviewer" })
+    const env = { OPENCODE_DEFAULT_AGENT: "Executor" }
 
     // when
     const agent = resolveRunAgent(
-      { message: "test", agent: "Prometheus" },
+      { message: "test", agent: "Orchestrator" },
       config,
       env
     )
 
     // then
-    expect(agent).toBe("Prometheus (Plan Builder)")
+    expect(agent).toBe("Orchestrator")
   })
 
   it("uses env agent over config", () => {
     // given
-    const config = createConfig({ default_run_agent: "prometheus" })
-    const env = { OPENCODE_DEFAULT_AGENT: "Atlas" }
+    const config = createConfig({ default_run_agent: "Reviewer" })
+    const env = { OPENCODE_DEFAULT_AGENT: "Executor" }
 
     // when
     const agent = resolveRunAgent({ message: "test" }, config, env)
 
     // then
-    expect(agent).toBe("Atlas (Plan Executor)")
+    expect(agent).toBe("Executor")
   })
 
   it("uses config agent over default", () => {
     // given
-    const config = createConfig({ default_run_agent: "Prometheus" })
+    const config = createConfig({ default_run_agent: "Reviewer" })
 
     // when
     const agent = resolveRunAgent({ message: "test" }, config, {})
 
     // then
-    expect(agent).toBe("Prometheus (Plan Builder)")
+    expect(agent).toBe("Reviewer")
   })
 
   it("falls back to sisyphus when none set", () => {
@@ -67,7 +67,7 @@ describe("resolveRunAgent", () => {
     const agent = resolveRunAgent({ message: "test" }, config, {})
 
     // then
-    expect(agent).toBe("Prometheus (Plan Builder)")
+    expect(agent).toBe("Reviewer")
   })
 
   it("maps display-name style default_run_agent values to canonical display names", () => {

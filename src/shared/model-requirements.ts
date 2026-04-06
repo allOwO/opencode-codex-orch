@@ -121,68 +121,6 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       },
     ],
   },
-  "multimodal-looker": {
-    fallbackChain: [
-      {
-        providers: ["openai", "opencode"],
-        model: "gpt-5.4",
-        variant: "medium",
-      },
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      {
-        providers: ["moonshotai", "moonshotai-cn", "firmware", "ollama-cloud", "aihubmix"],
-        model: "kimi-k2.5",
-      },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3-flash",
-      },
-      { providers: ["zai-coding-plan"], model: "glm-4.6v" },
-      {
-        providers: ["openai", "github-copilot", "opencode"],
-        model: "gpt-5-nano",
-      },
-    ],
-  },
-  prometheus: {
-    fallbackChain: [
-      {
-        providers: ["anthropic", "github-copilot", "opencode"],
-        model: "claude-opus-4-6",
-        variant: "max",
-      },
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      {
-        providers: ["openai", "github-copilot", "opencode"],
-        model: "gpt-5.4",
-        variant: "high",
-      },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3.1-pro",
-      },
-    ],
-  },
-  metis: {
-    fallbackChain: [
-      {
-        providers: ["anthropic", "github-copilot", "opencode"],
-        model: "claude-opus-4-6",
-        variant: "max",
-      },
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      {
-        providers: ["openai", "github-copilot", "opencode"],
-        model: "gpt-5.4",
-        variant: "high",
-      },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3.1-pro",
-        variant: "high",
-      },
-    ],
-  },
   momus: {
     fallbackChain: [
       {
@@ -218,24 +156,6 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         providers: ["google", "github-copilot", "opencode"],
         model: "gemini-3.1-pro",
         variant: "high",
-      },
-    ],
-  },
-  atlas: {
-    fallbackChain: [
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      {
-        providers: ["moonshotai", "moonshotai-cn", "firmware", "ollama-cloud", "aihubmix"],
-        model: "kimi-k2.5",
-      },
-      {
-        providers: ["anthropic", "github-copilot", "opencode"],
-        model: "claude-sonnet-4-5",
-      },
-      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.4", variant: "medium" },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3.1-pro",
       },
     ],
   },

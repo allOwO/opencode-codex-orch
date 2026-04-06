@@ -5,7 +5,7 @@ import type { ModelRequirement } from "../shared/model-requirements";
 // not runtime-only providers like `nvidia`.
 
 export const CLI_AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
-  sisyphus: {
+  orchestrator: {
     fallbackChain: [
       {
         providers: ["anthropic", "github-copilot", "opencode"],
@@ -57,49 +57,8 @@ export const CLI_AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["opencode"], model: "gpt-5-nano" },
     ],
   },
-  "multimodal-looker": {
+  deepsearch: {
     fallbackChain: [
-      {
-        providers: ["openai", "opencode"],
-        model: "gpt-5.4",
-        variant: "medium",
-      },
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3-flash",
-      },
-      { providers: ["zai-coding-plan"], model: "glm-4.6v" },
-      { providers: ["opencode"], model: "gpt-5-nano" },
-    ],
-  },
-  prometheus: {
-    fallbackChain: [
-      {
-        providers: ["anthropic", "github-copilot", "opencode"],
-        model: "claude-opus-4-6",
-        variant: "max",
-      },
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      {
-        providers: ["openai", "github-copilot", "opencode"],
-        model: "gpt-5.4",
-        variant: "high",
-      },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3.1-pro",
-      },
-    ],
-  },
-  metis: {
-    fallbackChain: [
-      {
-        providers: ["anthropic", "github-copilot", "opencode"],
-        model: "claude-opus-4-6",
-        variant: "max",
-      },
-      { providers: ["kimi-for-coding"], model: "k2p5" },
       {
         providers: ["openai", "github-copilot", "opencode"],
         model: "gpt-5.4",
@@ -110,35 +69,39 @@ export const CLI_AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         model: "gemini-3.1-pro",
         variant: "high",
       },
+      {
+        providers: ["anthropic", "github-copilot", "opencode"],
+        model: "claude-opus-4-6",
+        variant: "max",
+      },
     ],
   },
-  momus: {
+  reviewer: {
     fallbackChain: [
       {
         providers: ["openai", "github-copilot", "opencode"],
         model: "gpt-5.4",
-        variant: "xhigh",
+        variant: "high",
       },
       {
         providers: ["anthropic", "github-copilot", "opencode"],
         model: "claude-opus-4-6",
         variant: "max",
       },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3.1-pro",
-        variant: "high",
-      },
     ],
   },
-  atlas: {
+  executor: {
     fallbackChain: [
       { providers: ["kimi-for-coding"], model: "k2p5" },
       {
         providers: ["anthropic", "github-copilot", "opencode"],
         model: "claude-sonnet-4-5",
       },
-      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.4", variant: "medium" },
+      {
+        providers: ["openai", "github-copilot", "opencode"],
+        model: "gpt-5.4",
+        variant: "medium",
+      },
       {
         providers: ["google", "github-copilot", "opencode"],
         model: "gemini-3.1-pro",
@@ -149,7 +112,7 @@ export const CLI_AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
 
 export const CLI_CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> =
 {
-  "visual-engineering": {
+  designer: {
     fallbackChain: [
       {
         providers: ["google", "github-copilot", "opencode"],
@@ -165,7 +128,7 @@ export const CLI_CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> =
       { providers: ["kimi-for-coding"], model: "k2p5" },
     ],
   },
-  deep: {
+  hard: {
     fallbackChain: [
       {
         providers: ["openai", "opencode"],
@@ -198,17 +161,8 @@ export const CLI_CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> =
       { providers: ["opencode"], model: "gpt-5-nano" },
     ],
   },
-  writing: {
-    fallbackChain: [
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3-flash",
-      },
-      {
-        providers: ["anthropic", "github-copilot", "opencode"],
-        model: "claude-sonnet-4-6",
-      },
-    ],
-  },
 };
+
+CLI_CATEGORY_MODEL_REQUIREMENTS["visual-engineering"] = CLI_CATEGORY_MODEL_REQUIREMENTS.designer;
+CLI_CATEGORY_MODEL_REQUIREMENTS.deep = CLI_CATEGORY_MODEL_REQUIREMENTS.hard;
+CLI_CATEGORY_MODEL_REQUIREMENTS.writing = CLI_CATEGORY_MODEL_REQUIREMENTS.hard;

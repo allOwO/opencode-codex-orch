@@ -48,4 +48,14 @@ describe("git-worktree", () => {
     expect(summary).toContain("src/b.ts")
     expect(summary).toContain("src/c.ts")
   })
+
+  test("#given .opencode notepad change #when formatting #then reports notepad update", () => {
+    const summary = formatFileChanges(
+      [{ path: ".opencode/notepad.md", added: 2, removed: 0, status: "modified" }],
+      ".opencode/notepad.md",
+    )
+
+    expect(summary).toContain("[NOTEPAD UPDATED]")
+    expect(summary).toContain(".opencode/notepad.md")
+  })
 })

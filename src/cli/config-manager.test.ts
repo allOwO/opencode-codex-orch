@@ -186,8 +186,8 @@ describe("generateOcoConfig - model fallback system", () => {
     // #when generating config
     const result = generateOcoConfig(config)
 
-    // #then Sisyphus uses Copilot (OR logic - copilot is in claude-opus-4-6 providers)
-    expect((result.agents as Record<string, { model: string }>).sisyphus.model).toBe("github-copilot/claude-opus-4.6")
+    // #then orchestrator uses Copilot (OR logic - copilot is in claude-opus-4-6 providers)
+    expect((result.agents as Record<string, { model: string }>).orchestrator.model).toBe("github-copilot/claude-opus-4.6")
   })
 
   test("uses ultimate fallback when no providers configured", () => {
@@ -206,9 +206,9 @@ describe("generateOcoConfig - model fallback system", () => {
     // #when generating config
     const result = generateOcoConfig(config)
 
-    // #then Sisyphus is omitted (requires all fallback providers)
+    // #then orchestrator is omitted (requires all fallback providers)
     expect(result.$schema).toBe("https://raw.githubusercontent.com/allOwO/opencode-codex-orch/main/assets/opencode-codex-orch.schema.json")
-    expect((result.agents as Record<string, { model: string }>).sisyphus).toBeUndefined()
+    expect((result.agents as Record<string, { model: string }>).orchestrator).toBeUndefined()
   })
 
   test("uses ZAI model for librarian when Z.ai is available", () => {
@@ -229,8 +229,8 @@ describe("generateOcoConfig - model fallback system", () => {
 
     // #then librarian should use ZAI model
     expect((result.agents as Record<string, { model: string }>).librarian.model).toBe("zai-coding-plan/glm-4.7")
-    // #then Sisyphus uses Claude (OR logic)
-    expect((result.agents as Record<string, { model: string }>).sisyphus.model).toBe("anthropic/claude-opus-4-6")
+    // #then orchestrator uses Claude (OR logic)
+    expect((result.agents as Record<string, { model: string }>).orchestrator.model).toBe("anthropic/claude-opus-4-6")
   })
 
   test("uses native OpenAI models when only ChatGPT available", () => {
@@ -249,13 +249,17 @@ describe("generateOcoConfig - model fallback system", () => {
     // #when generating config
     const result = generateOcoConfig(config)
 
-    // #then Sisyphus resolves to gpt-5.4 medium (openai is now in sisyphus chain)
-    expect((result.agents as Record<string, { model: string; variant?: string }>).sisyphus.model).toBe("openai/gpt-5.4")
-    expect((result.agents as Record<string, { model: string; variant?: string }>).sisyphus.variant).toBe("medium")
+    // #then orchestrator resolves to gpt-5.4 medium (openai is now in orchestrator chain)
+    expect((result.agents as Record<string, { model: string; variant?: string }>).orchestrator.model).toBe("openai/gpt-5.4")
+    expect((result.agents as Record<string, { model: string; variant?: string }>).orchestrator.variant).toBe("medium")
     // #then Oracle should use native OpenAI (first fallback entry)
     expect((result.agents as Record<string, { model: string }>).oracle.model).toBe("openai/gpt-5.4")
-    // #then multimodal-looker should use native OpenAI (first fallback entry is gpt-5.4)
-    expect((result.agents as Record<string, { model: string }>)["multimodal-looker"].model).toBe("openai/gpt-5.4")
+    // #then deepsearch should use native OpenAI and retired agents should be absent
+    expect((result.agents as Record<string, { model: string }>).deepsearch.model).toBe("openai/gpt-5.4")
+    expect((result.agents as Record<string, { model: string }>)["multimodal-looker"]).toBeUndefined()
+    expect((result.agents as Record<string, { model: string }>).prometheus).toBeUndefined()
+    expect((result.agents as Record<string, { model: string }>).atlas).toBeUndefined()
+    expect((result.agents as Record<string, { model: string }>).metis).toBeUndefined()
   })
 
   test("uses haiku for explore when Claude max20", () => {

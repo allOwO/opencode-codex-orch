@@ -74,10 +74,10 @@ bunx opencode-codex-orch install
 ```bash
 opencode
 # 然后输入：
-ulw fix the failing tests
+fix the failing tests
 ```
 
-`ulw` 触发自主执行模式。智能体自动探索代码库、制定计划、实施方案、验证结果。
+Orchestrator 会自动探索代码库、制定计划、实施方案并验证结果。
 
 ## 文档
 

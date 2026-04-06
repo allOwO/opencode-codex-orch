@@ -39,8 +39,6 @@ Core glue layer. 20 source files assembling the 8 OpenCode hook handlers and com
 | `recent-synthetic-idles.ts` | Dedup rapid idle events |
 | `unstable-agent-babysitter.ts` | Track unstable agent behavior across sessions |
 | `types.ts` | `PluginContext`, `PluginInterface`, `ToolsRecord`, `TmuxConfig` |
-| `ultrawork-model-override.ts` | Ultrawork mode model override logic |
-| `ultrawork-db-model-override.ts` | DB-level model override for ultrawork |
 | `config-handler.ts` | Runtime config loading and caching |
 
 ## KEY PATTERNS

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test"
 import { createOracleAgent } from "./oracle"
 import { createMomusAgent } from "./momus"
-import { createMetisAgent } from "./metis"
 import { createLibrarianAgent } from "./librarian"
 import { createExploreAgent } from "./explore"
+import { createDeepSearchAgent } from "./deepsearch"
 
 const KIMI_PROVIDER_MODEL = "kimi-for-coding/k2p5"
 const KIMI_MODEL_ID = "opencode/kimi-k2.5-free"
@@ -23,11 +23,11 @@ describe("Kimi prompt augmentation for subagents", () => {
     expect(prompt).toContain("APPROVAL BIAS")
   })
 
-  test("Metis prepends Kimi system prompt while preserving Metis instructions", () => {
-    const prompt = createMetisAgent(KIMI_PROVIDER_MODEL).prompt ?? ""
+  test("DeepSearch prepends Kimi system prompt while preserving DeepSearch instructions", () => {
+    const prompt = createDeepSearchAgent(KIMI_PROVIDER_MODEL).prompt ?? ""
 
     expect(prompt).toContain("You are OpenCode, an interactive general AI agent running on a user's computer.")
-    expect(prompt).toContain("# Metis - Pre-Planning Consultant")
+    expect(prompt).toContain("# DeepSearch")
   })
 
   test("Librarian prepends Kimi system prompt while preserving Librarian instructions", () => {

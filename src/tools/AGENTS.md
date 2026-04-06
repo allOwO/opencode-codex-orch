@@ -23,7 +23,7 @@
 |------|---------|------------|
 | `task` | `createDelegateTask` | description, prompt, category, subagent_type, run_in_background, session_id, load_skills, command |
 
-**4 Built-in Categories**: visual-engineering, deep, quick, writing
+**3 Canonical Categories**: designer, hard, quick
 
 ### Agent Invocation (1)
 
@@ -90,10 +90,9 @@
 
 | Category | Default Model | Domain |
 |----------|---------------|--------|
-| visual-engineering | google/gemini-3.1-pro high | Frontend, UI/UX |
-| deep | openai/gpt-5.3-codex medium | Hard logic, deep implementation |
+| designer | google/gemini-3.1-pro high | Frontend, UI/UX |
+| hard | openai/gpt-5.3-codex medium | Hard logic, deep implementation |
 | quick | anthropic/claude-haiku-4-5 | Trivial tasks |
-| writing | kimi-for-coding/k2p5 | Documentation |
 
 ## HOW TO ADD A TOOL
 

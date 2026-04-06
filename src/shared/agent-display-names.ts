@@ -5,10 +5,6 @@ export const AGENT_DISPLAY_NAMES: Record<string, string> = {
   librarian: "librarian",
   explore: "explore",
   deepsearch: "DeepSearch",
-  prometheus: "Prometheus (Plan Builder)",
-  atlas: "Atlas (Plan Executor)",
-  metis: "Metis (Plan Consultant)",
-  "multimodal-looker": "multimodal-looker",
   executor: "Executor",
   build: "build",
 }
@@ -60,7 +56,7 @@ const LEGACY_NAME_ALIASES: Record<string, string> = {
 
 /**
  * Resolve an agent name (display name or config key) to its lowercase config key.
- * "Atlas (Plan Executor)" → "atlas", "atlas" → "atlas", "unknown" → "unknown"
+ * "Orchestrator" → "orchestrator", "orchestrator" → "orchestrator", "unknown" → "unknown"
  */
 export function getAgentConfigKey(agentName: string): string {
   const lower = agentName.toLowerCase()
