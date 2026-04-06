@@ -565,10 +565,10 @@ export function buildUltraworkSection(
   }
 
   if (agents.length > 0) {
-    const ultraworkAgentPriority = ["explore", "librarian", "plan", "oracle"]
+    const consultationPriority = ["explore", "librarian", "plan", "oracle"]
     const sortedAgents = [...agents].sort((a, b) => {
-      const aIdx = ultraworkAgentPriority.indexOf(a.name)
-      const bIdx = ultraworkAgentPriority.indexOf(b.name)
+      const aIdx = consultationPriority.indexOf(a.name)
+      const bIdx = consultationPriority.indexOf(b.name)
       if (aIdx === -1 && bIdx === -1) return 0
       if (aIdx === -1) return 1
       if (bIdx === -1) return -1

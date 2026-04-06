@@ -9,7 +9,6 @@ export interface RalphLoopState {
   started_at: string
   prompt: string
   session_id?: string
-  ultrawork?: boolean
   strategy?: "reset" | "continue"
   max_iterations?: number
   verification_pending?: boolean

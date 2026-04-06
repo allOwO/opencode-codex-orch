@@ -187,7 +187,7 @@ describe("buildCategorySkillsDelegationGuide", () => {
 	});
 });
 
-describe("buildUltraworkSection", () => {
+describe("buildSkillAndAgentSection", () => {
 	const agents: AvailableAgent[] = [];
 
 	it("should separate builtin and custom skills", () => {
@@ -201,7 +201,7 @@ describe("buildUltraworkSection", () => {
 			{ name: "react-19", description: "React 19 patterns", location: "user" },
 		];
 
-		//#when: building ultrawork section
+		//#when: building skill and agent section
 		const result = buildUltraworkSection(agents, [], skills);
 
 		//#then: should have separate sections
@@ -220,7 +220,7 @@ describe("buildUltraworkSection", () => {
 			},
 		];
 
-		//#when: building ultrawork section
+		//#when: building skill and agent section
 		const result = buildUltraworkSection(agents, [], skills);
 
 		//#then: should have single section
