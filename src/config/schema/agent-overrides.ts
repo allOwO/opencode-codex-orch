@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { FallbackModelsSchema } from "./fallback-models"
+import { BuiltinCategoryNameSchema } from "./categories"
 import { AgentPermissionSchema } from "./internal/permission"
 
 export const AgentOverrideConfigSchema = z.object({
@@ -8,7 +9,7 @@ export const AgentOverrideConfigSchema = z.object({
   fallback_models: FallbackModelsSchema.optional(),
   variant: z.string().optional(),
   /** Category name to inherit model and other settings from CategoryConfig */
-  category: z.string().optional(),
+  category: BuiltinCategoryNameSchema.optional(),
   /** Skill names to inject into agent prompt */
   skills: z.array(z.string()).optional(),
   temperature: z.number().min(0).max(2).optional(),
@@ -61,11 +62,8 @@ export const AgentOverridesSchema = z.object({
   orchestrator: AgentOverrideConfigSchema.optional(),
   reviewer: AgentOverrideConfigSchema.optional(),
   executor: AgentOverrideConfigSchema.optional(),
-  sisyphus: AgentOverrideConfigSchema.optional(),
   deepsearch: AgentOverrideConfigSchema.optional(),
-  "sisyphus-junior": AgentOverrideConfigSchema.optional(),
   "OpenCode-Builder": AgentOverrideConfigSchema.optional(),
-  momus: AgentOverrideConfigSchema.optional(),
   oracle: AgentOverrideConfigSchema.optional(),
   librarian: AgentOverrideConfigSchema.optional(),
   explore: AgentOverrideConfigSchema.optional(),

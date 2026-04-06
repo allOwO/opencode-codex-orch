@@ -136,7 +136,7 @@ export async function applyAgentConfig(params: {
       Object.entries(agents).filter(([name]) => !disabledAgentNames.has(name.toLowerCase()))
     );
 
-  const orchestratorAgentConfig = params.pluginConfig.orchestrator_agent ?? params.pluginConfig.sisyphus_agent
+  const orchestratorAgentConfig = params.pluginConfig.orchestrator_agent
   const isSisyphusEnabled = orchestratorAgentConfig?.disabled !== true;
   const builderEnabled =
     orchestratorAgentConfig?.default_builder_enabled ?? false;
@@ -158,7 +158,7 @@ export async function applyAgentConfig(params: {
     };
 
     agentConfig["sisyphus-junior"] = createSisyphusJuniorAgentWithOverrides(
-      params.pluginConfig.agents?.["sisyphus-junior"],
+      params.pluginConfig.agents?.executor,
       undefined,
       useTaskSystem,
     );

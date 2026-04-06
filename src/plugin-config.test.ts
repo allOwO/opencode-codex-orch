@@ -128,7 +128,7 @@ describe("parseConfigPartially", () => {
       const rawConfig = {
         agents: {
           oracle: { model: "openai/gpt-5.4" },
-          momus: { model: "openai/gpt-5.4" },
+          reviewer: { model: "openai/gpt-5.4" },
         },
         disabled_hooks: ["comment-checker"],
       };
@@ -137,7 +137,7 @@ describe("parseConfigPartially", () => {
 
       expect(result).not.toBeNull();
       expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.4");
-      expect(result!.agents?.momus?.model).toBe("openai/gpt-5.4");
+      expect(result!.agents?.reviewer?.model).toBe("openai/gpt-5.4");
       expect(result!.disabled_hooks).toEqual(["comment-checker"]);
     });
   });
@@ -151,7 +151,7 @@ describe("parseConfigPartially", () => {
       const rawConfig = {
         agents: {
           oracle: { model: "openai/gpt-5.4" },
-          momus: { model: "openai/gpt-5.4" },
+          reviewer: { model: "openai/gpt-5.4" },
           prometheus: {
             permission: {
               edit: { "*": "ask", ".sisyphus/**": "allow" },
@@ -166,7 +166,7 @@ describe("parseConfigPartially", () => {
       expect(result).not.toBeNull();
       expect(result!.disabled_hooks).toEqual(["comment-checker"]);
       expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.4");
-      expect(result!.agents?.momus?.model).toBe("openai/gpt-5.4");
+      expect(result!.agents?.reviewer?.model).toBe("openai/gpt-5.4");
       expect(result!.agents).not.toHaveProperty("prometheus");
     });
 

@@ -128,11 +128,11 @@ describe("Sisyphus-Junior model inheritance", () => {
     )
   })
 
-  test("uses explicitly configured sisyphus-junior model", async () => {
+  test("uses explicitly configured executor model", async () => {
     // #given
     const pluginConfig: OpenCodeCodexOrchConfig = {
       agents: {
-        "sisyphus-junior": {
+        executor: {
           model: "openai/gpt-5.3-codex",
         },
       },
@@ -172,7 +172,7 @@ describe("retired planning agents", () => {
       oracle: { name: "oracle", prompt: "test", mode: "subagent" },
     })
     const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
+      orchestrator_agent: {
         planner_enabled: true,
       },
     }
@@ -202,7 +202,7 @@ describe("retired planning agents", () => {
   test("planner flags no longer demote the plan agent", async () => {
     // #given
     const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
+      orchestrator_agent: {
         planner_enabled: true,
         replace_plan: true,
       },
@@ -240,7 +240,7 @@ describe("retired planning agents", () => {
   test("plan agent remains unchanged when planner is disabled", async () => {
     // #given
     const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
+      orchestrator_agent: {
         planner_enabled: false,
       },
     }
@@ -276,7 +276,7 @@ describe("retired planning agents", () => {
 
   test("planner flags do not create a prometheus agent", async () => {
     const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
+      orchestrator_agent: {
         planner_enabled: true,
       },
     }
@@ -472,7 +472,7 @@ describe("default_agent behavior with Sisyphus orchestration", () => {
   test("does not normalize configured default_agent when Sisyphus is disabled", async () => {
     // given
     const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
+      orchestrator_agent: {
         disabled: true,
       },
     }
@@ -601,7 +601,7 @@ describe("Prometheus category config resolution", () => {
 describe("plan agent without prometheus", () => {
   test("keeps explicit plan agent configuration intact", async () => {
     const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
+      orchestrator_agent: {
         planner_enabled: true,
         replace_plan: true,
       },
@@ -638,7 +638,7 @@ describe("plan agent without prometheus", () => {
 describe("Deadlock prevention - fetchAvailableModels must not receive client", () => {
   test("handler completes without consulting the OpenCode client during agent loading", async () => {
     const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
+      orchestrator_agent: {
         planner_enabled: true,
       },
     }
