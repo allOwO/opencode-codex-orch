@@ -391,15 +391,15 @@ ${customSkills.length > 0 ? `4. **User-installed skills get PRIORITY.** When in 
 
 ### Category Domain Matching (ZERO TOLERANCE)
 
-**VISUAL WORK = ALWAYS \`visual-engineering\`. NO EXCEPTIONS.**
+**VISUAL WORK = ALWAYS \`designer\`. NO EXCEPTIONS.**
 
-Any task involving UI, UX, CSS, styling, layout, animation, design, or frontend components MUST go to \`visual-engineering\`. Never delegate visual work to \`quick\` or any other category.
+Any task involving UI, UX, CSS, styling, layout, animation, design, or frontend components MUST go to \`designer\`. Never delegate visual work to \`quick\` or any other category.
 
 | Task Domain | MUST Use Category |
 |---|---|
-| UI, styling, animations, layout, design | \`visual-engineering\` |
-| Hard logic, architecture decisions, algorithms | \`deep\` |
-| Autonomous research + end-to-end implementation | \`deep\` |
+| UI, styling, animations, layout, design | \`designer\` |
+| Hard logic, architecture decisions, algorithms | \`hard\` |
+| Autonomous research + end-to-end implementation | \`hard\` |
 | Single-file typo, trivial config change | \`quick\` |
 
 **When in doubt about category, it is almost never \`quick\`. Match the domain.**`
@@ -506,7 +506,7 @@ Plan Agent returns a structured work breakdown with parallel execution opportuni
 
 export function buildParallelDelegationSection(model: string, categories: AvailableCategory[]): string {
   const isNonClaude = !model.toLowerCase().includes('claude')
-  const hasDelegationCategory = categories.some(c => c.name === 'deep')
+  const hasDelegationCategory = categories.some(c => c.name === 'hard')
 
   if (!isNonClaude || !hasDelegationCategory) return ""
 
@@ -516,7 +516,7 @@ export function buildParallelDelegationSection(model: string, categories: Availa
 
 For ANY implementation task:
 1. **ALWAYS decompose** the work into independent units.
-2. **ALWAYS delegate** EACH unit to a \`deep\` agent in parallel (\`run_in_background=true\`).
+2. **ALWAYS delegate** EACH unit to a \`hard\` agent in parallel (\`run_in_background=true\`).
 3. **NEVER work sequentially.** If 4 independent units exist, spawn 4 agents.
 4. **NEVER implement directly** when delegation is possible.
 

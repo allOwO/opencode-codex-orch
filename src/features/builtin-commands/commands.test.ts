@@ -6,6 +6,15 @@ import { SKILL_CREATOR_TEMPLATE } from "./templates/skill-creator"
 import type { BuiltinCommandName } from "./types"
 
 describe("loadBuiltinCommands", () => {
+  test("does not expose retired planning and loop commands", () => {
+    const commands = loadBuiltinCommands()
+
+    expect(commands["ralph-loop"]).toBeUndefined()
+    expect(commands["ulw-loop"]).toBeUndefined()
+    expect(commands["cancel-ralph"]).toBeUndefined()
+    expect(commands["start-work"]).toBeUndefined()
+  })
+
   test("should include handoff command in loaded commands", () => {
     //#given
     const disabledCommands: BuiltinCommandName[] = []

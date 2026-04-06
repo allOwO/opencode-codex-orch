@@ -28,10 +28,9 @@ export const CategoryConfigSchema = z.object({
 })
 
 export const BuiltinCategoryNameSchema = z.enum([
-  "visual-engineering",
-  "deep",
+  "designer",
+  "hard",
   "quick",
-  "writing",
 ])
 
 export const CategoriesConfigSchema = z.record(z.string(), CategoryConfigSchema)

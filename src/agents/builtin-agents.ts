@@ -7,9 +7,7 @@ import { createSisyphusAgent } from "./sisyphus"
 import { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
 import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
 import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
-import { createMultimodalLookerAgent, MULTIMODAL_LOOKER_PROMPT_METADATA } from "./multimodal-looker"
-import { createMetisAgent, metisPromptMetadata } from "./metis"
-import { createAtlasAgent, atlasPromptMetadata } from "./atlas"
+import { createDeepSearchAgent, DEEPSEARCH_PROMPT_METADATA } from "./deepsearch"
 import { createMomusAgent, momusPromptMetadata } from "./momus"
 
 import type { AvailableCategory } from "./dynamic-agent-prompt-builder"
@@ -23,8 +21,6 @@ import { mergeCategories } from "../shared/merge-categories"
 import { buildAvailableSkills } from "./builtin-agents/available-skills"
 import { collectPendingBuiltinAgents } from "./builtin-agents/general-agents"
 import { maybeCreateSisyphusConfig } from "./builtin-agents/sisyphus-agent"
-
-import { maybeCreateAtlasConfig } from "./builtin-agents/atlas-agent"
 import { buildCustomAgentMetadata, parseRegisteredAgentSummaries } from "./custom-agent-summaries"
 
 type AgentSource = AgentFactory | AgentConfig
@@ -34,12 +30,8 @@ const agentSources: Record<BuiltinAgentName, AgentSource> = {
   oracle: createOracleAgent,
   librarian: createLibrarianAgent,
   explore: createExploreAgent,
-  "multimodal-looker": createMultimodalLookerAgent,
-  metis: createMetisAgent,
+  deepsearch: createDeepSearchAgent,
   momus: createMomusAgent,
-  // Note: Atlas is handled specially in createBuiltinAgents()
-  // because it needs OrchestratorContext, not just a model string
-  atlas: createAtlasAgent as AgentFactory,
 }
 
 /**
@@ -50,10 +42,8 @@ const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
   oracle: ORACLE_PROMPT_METADATA,
   librarian: LIBRARIAN_PROMPT_METADATA,
   explore: EXPLORE_PROMPT_METADATA,
-  "multimodal-looker": MULTIMODAL_LOOKER_PROMPT_METADATA,
-  metis: metisPromptMetadata,
+  deepsearch: DEEPSEARCH_PROMPT_METADATA,
   momus: momusPromptMetadata,
-  atlas: atlasPromptMetadata,
 }
 
 export async function createBuiltinAgents(
@@ -156,22 +146,6 @@ export async function createBuiltinAgents(
   // Add pending agents after sisyphus to maintain order
   for (const [name, config] of pendingAgentConfigs) {
     result[name] = config
-  }
-
-  const atlasConfig = maybeCreateAtlasConfig({
-    disabledAgents,
-    agentOverrides,
-    uiSelectedModel,
-    availableModels,
-    systemDefaultModel,
-    availableAgents,
-    availableSkills,
-    mergedCategories,
-    directory,
-    userCategories: categories,
-  })
-  if (atlasConfig) {
-    result["atlas"] = atlasConfig
   }
 
   return result

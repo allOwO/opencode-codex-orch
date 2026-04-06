@@ -38,10 +38,10 @@ function createMockContext(directory: string): RunContext {
 }
 
 function writeBoulderStateFile(directory: string, activePlanPath: string, sessionIDs: string[]): void {
-  const sisyphusDir = join(directory, ".sisyphus")
-  mkdirSync(sisyphusDir, { recursive: true })
+  const opencodeDir = join(directory, ".opencode")
+  mkdirSync(opencodeDir, { recursive: true })
   writeFileSync(
-    join(sisyphusDir, "boulder.json"),
+    join(opencodeDir, "boulder.json"),
     JSON.stringify({
       active_plan: activePlanPath,
       started_at: new Date().toISOString(),
@@ -58,8 +58,8 @@ describe("checkCompletionConditions continuation coverage", () => {
     // given
     spyOn(console, "log").mockImplementation(() => {})
     const directory = createTempDir()
-    const planPath = join(directory, ".sisyphus", "plans", "active-plan.md")
-    mkdirSync(join(directory, ".sisyphus", "plans"), { recursive: true })
+    const planPath = join(directory, "docs", "superpowers", "plans", "active-plan.md")
+    mkdirSync(join(directory, "docs", "superpowers", "plans"), { recursive: true })
     writeFileSync(planPath, "- [ ] incomplete task\n", "utf-8")
     writeBoulderStateFile(directory, planPath, ["test-session"])
     const ctx = createMockContext(directory)
@@ -76,8 +76,8 @@ describe("checkCompletionConditions continuation coverage", () => {
     // given
     spyOn(console, "log").mockImplementation(() => {})
     const directory = createTempDir()
-    const planPath = join(directory, ".sisyphus", "plans", "done-plan.md")
-    mkdirSync(join(directory, ".sisyphus", "plans"), { recursive: true })
+    const planPath = join(directory, "docs", "superpowers", "plans", "done-plan.md")
+    mkdirSync(join(directory, "docs", "superpowers", "plans"), { recursive: true })
     writeFileSync(planPath, "- [x] completed task\n", "utf-8")
     writeBoulderStateFile(directory, planPath, ["test-session"])
     const ctx = createMockContext(directory)
@@ -98,6 +98,7 @@ describe("checkCompletionConditions continuation coverage", () => {
       active: true,
       iteration: 2,
       max_iterations: 10,
+      initial_completion_promise: "DONE",
       completion_promise: "DONE",
       started_at: new Date().toISOString(),
       prompt: "keep going",
@@ -121,6 +122,7 @@ describe("checkCompletionConditions continuation coverage", () => {
       active: true,
       iteration: 2,
       max_iterations: 10,
+      initial_completion_promise: "DONE",
       completion_promise: "DONE",
       started_at: new Date().toISOString(),
       prompt: "keep going",

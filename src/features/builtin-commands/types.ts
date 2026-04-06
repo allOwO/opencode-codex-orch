@@ -1,6 +1,6 @@
 import type { CommandDefinition } from "../claude-code-command-loader"
 
-export type BuiltinCommandName = "autopilot" | "init-deep" | "ralph-loop" | "cancel-ralph" | "ulw-loop" | "refactor" | "skill-creator" | "start-work" | "stop-continuation" | "handoff"
+export type BuiltinCommandName = "autopilot" | "init-deep" | "refactor" | "skill-creator" | "stop-continuation" | "handoff"
 
 export interface BuiltinCommandConfig {
   disabled_commands?: BuiltinCommandName[]

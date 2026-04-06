@@ -2,6 +2,14 @@ import { describe, it, expect } from "bun:test"
 import { AGENT_DISPLAY_NAMES, getAgentDisplayName, getAgentConfigKey } from "./agent-display-names"
 
 describe("getAgentDisplayName", () => {
+  it("returns display name for orchestrator", () => {
+    expect(getAgentDisplayName("orchestrator")).toBe("Orchestrator")
+  })
+
+  it("returns display name for reviewer", () => {
+    expect(getAgentDisplayName("reviewer")).toBe("Reviewer")
+  })
+
   it("returns display name for lowercase config key (new format)", () => {
     // given config key "sisyphus"
     const configKey = "sisyphus"
@@ -9,8 +17,8 @@ describe("getAgentDisplayName", () => {
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Sisyphus (Ultraworker)"
-    expect(result).toBe("Sisyphus (Ultraworker)")
+    // then returns canonical public name
+    expect(result).toBe("Orchestrator")
   })
 
   it("returns display name for uppercase config key (old format - case-insensitive)", () => {
@@ -20,8 +28,8 @@ describe("getAgentDisplayName", () => {
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Sisyphus (Ultraworker)" (case-insensitive lookup)
-    expect(result).toBe("Sisyphus (Ultraworker)")
+    // then returns canonical public name (case-insensitive lookup)
+    expect(result).toBe("Orchestrator")
   })
 
   it("returns original key for unknown agents (fallback)", () => {
@@ -64,8 +72,8 @@ describe("getAgentDisplayName", () => {
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Sisyphus-Junior"
-    expect(result).toBe("Sisyphus-Junior")
+    // then returns canonical public name
+    expect(result).toBe("Executor")
   })
 
   it("returns display name for metis", () => {
@@ -86,8 +94,8 @@ describe("getAgentDisplayName", () => {
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Momus (Plan Critic)"
-    expect(result).toBe("Momus (Plan Critic)")
+    // then returns canonical public name
+    expect(result).toBe("Reviewer")
   })
 
   it("returns display name for oracle", () => {
@@ -136,11 +144,16 @@ describe("getAgentDisplayName", () => {
 })
 
 describe("getAgentConfigKey", () => {
+  it("resolves canonical display names to canonical config keys", () => {
+    expect(getAgentConfigKey("Orchestrator")).toBe("orchestrator")
+    expect(getAgentConfigKey("Reviewer")).toBe("reviewer")
+  })
+
   it("resolves display name to config key", () => {
-    // given display name "Sisyphus (Ultraworker)"
+    // given legacy display name
     // when getAgentConfigKey called
-    // then returns "sisyphus"
-    expect(getAgentConfigKey("Sisyphus (Ultraworker)")).toBe("sisyphus")
+    // then returns canonical config key
+    expect(getAgentConfigKey("Sisyphus (Ultraworker)")).toBe("orchestrator")
   })
 
   it("resolves display name case-insensitively", () => {
@@ -170,25 +183,32 @@ describe("getAgentConfigKey", () => {
     expect(getAgentConfigKey("Prometheus (Plan Builder)")).toBe("prometheus")
     expect(getAgentConfigKey("Atlas (Plan Executor)")).toBe("atlas")
     expect(getAgentConfigKey("Metis (Plan Consultant)")).toBe("metis")
-    expect(getAgentConfigKey("Momus (Plan Critic)")).toBe("momus")
-    expect(getAgentConfigKey("Sisyphus-Junior")).toBe("sisyphus-junior")
+    expect(getAgentConfigKey("Momus (Plan Critic)")).toBe("reviewer")
+    expect(getAgentConfigKey("Sisyphus-Junior")).toBe("executor")
   })
 })
 
 describe("AGENT_DISPLAY_NAMES", () => {
+  it("contains canonical mappings for surviving renamed agents", () => {
+    expect(AGENT_DISPLAY_NAMES.orchestrator).toBe("Orchestrator")
+    expect(AGENT_DISPLAY_NAMES.reviewer).toBe("Reviewer")
+  })
+
   it("contains all expected agent mappings", () => {
     // given expected mappings
     const expectedMappings = {
-      sisyphus: "Sisyphus (Ultraworker)",
+      orchestrator: "Orchestrator",
+      deepsearch: "DeepSearch",
       prometheus: "Prometheus (Plan Builder)",
       atlas: "Atlas (Plan Executor)",
-      "sisyphus-junior": "Sisyphus-Junior",
+      executor: "Executor",
       metis: "Metis (Plan Consultant)",
-      momus: "Momus (Plan Critic)",
+      reviewer: "Reviewer",
       oracle: "oracle",
       librarian: "librarian",
       explore: "explore",
       "multimodal-looker": "multimodal-looker",
+      build: "build",
     }
 
     // when checking the constant

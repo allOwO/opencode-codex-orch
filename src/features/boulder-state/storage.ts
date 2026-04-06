@@ -7,16 +7,27 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs"
 import { dirname, join, basename } from "node:path"
 import type { BoulderState, PlanProgress } from "./types"
-import { BOULDER_DIR, BOULDER_FILE, PROMETHEUS_PLANS_DIR } from "./constants"
+import {
+  BOULDER_DIR,
+  BOULDER_FILE,
+  LEGACY_BOULDER_DIR,
+  LEGACY_PROMETHEUS_PLANS_DIR,
+  PROMETHEUS_PLANS_DIR,
+} from "./constants"
 
 export function getBoulderFilePath(directory: string): string {
   return join(directory, BOULDER_DIR, BOULDER_FILE)
 }
 
-export function readBoulderState(directory: string): BoulderState | null {
-  const filePath = getBoulderFilePath(directory)
+function getLegacyBoulderFilePath(directory: string): string {
+  return join(directory, LEGACY_BOULDER_DIR, BOULDER_FILE)
+}
 
-  if (!existsSync(filePath)) {
+export function readBoulderState(directory: string): BoulderState | null {
+  const filePaths = [getBoulderFilePath(directory), getLegacyBoulderFilePath(directory)]
+  const filePath = filePaths.find((candidate) => existsSync(candidate))
+
+  if (!filePath) {
     return null
   }
 
@@ -87,26 +98,30 @@ export function clearBoulderState(directory: string): boolean {
  * Prometheus stores plans at: {project}/.sisyphus/plans/{name}.md
  */
 export function findPrometheusPlans(directory: string): string[] {
-  const plansDir = join(directory, PROMETHEUS_PLANS_DIR)
+  const planDirs = [join(directory, PROMETHEUS_PLANS_DIR), join(directory, LEGACY_PROMETHEUS_PLANS_DIR)]
 
-  if (!existsSync(plansDir)) {
-    return []
+  for (const plansDir of planDirs) {
+    if (!existsSync(plansDir)) {
+      continue
+    }
+
+    try {
+      const files = readdirSync(plansDir)
+      return files
+        .filter((f) => f.endsWith(".md"))
+        .map((f) => join(plansDir, f))
+        .sort((a, b) => {
+          // Sort by modification time, newest first
+          const aStat = require("node:fs").statSync(a)
+          const bStat = require("node:fs").statSync(b)
+          return bStat.mtimeMs - aStat.mtimeMs
+        })
+    } catch {
+      return []
+    }
   }
 
-  try {
-    const files = readdirSync(plansDir)
-    return files
-      .filter((f) => f.endsWith(".md"))
-      .map((f) => join(plansDir, f))
-      .sort((a, b) => {
-        // Sort by modification time, newest first
-        const aStat = require("node:fs").statSync(a)
-        const bStat = require("node:fs").statSync(b)
-        return bStat.mtimeMs - aStat.mtimeMs
-      })
-  } catch {
-    return []
-  }
+  return []
 }
 
 /**

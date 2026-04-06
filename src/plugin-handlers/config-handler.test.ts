@@ -161,8 +161,8 @@ describe("Sisyphus-Junior model inheritance", () => {
   })
 })
 
-describe("Plan agent demote behavior", () => {
-  test("orders core agents as sisyphus -> prometheus -> atlas", async () => {
+describe("retired planning agents", () => {
+  test("orders orchestrator before the remaining builtin agents", async () => {
     // #given
     const createBuiltinAgentsMock = agents.createBuiltinAgents as unknown as {
       mockResolvedValue: (value: Record<string, unknown>) => void
@@ -170,7 +170,6 @@ describe("Plan agent demote behavior", () => {
     createBuiltinAgentsMock.mockResolvedValue({
       sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
       oracle: { name: "oracle", prompt: "test", mode: "subagent" },
-      atlas: { name: "atlas", prompt: "test", mode: "primary" },
     })
     const pluginConfig: OpenCodeCodexOrchConfig = {
       sisyphus_agent: {
@@ -195,16 +194,12 @@ describe("Plan agent demote behavior", () => {
 
     // #then
     const keys = Object.keys(config.agent as Record<string, unknown>)
-    const coreAgents = [
-      getAgentDisplayName("sisyphus"),
-      getAgentDisplayName("prometheus"),
-      getAgentDisplayName("atlas"),
-    ]
-    const ordered = keys.filter((key) => coreAgents.includes(key))
-    expect(ordered).toEqual(coreAgents)
+    expect(keys[0]).toBe(getAgentDisplayName("sisyphus"))
+    expect(keys).toContain(getAgentDisplayName("sisyphus-junior"))
+    expect(keys).toContain(getAgentDisplayName("oracle"))
   })
 
-  test("plan agent should be demoted to subagent without inheriting prometheus prompt", async () => {
+  test("planner flags no longer demote the plan agent", async () => {
     // #given
     const pluginConfig: OpenCodeCodexOrchConfig = {
       sisyphus_agent: {
@@ -234,12 +229,12 @@ describe("Plan agent demote behavior", () => {
     // #when
     await handler(config)
 
-    // #then - plan is demoted to subagent but does NOT inherit prometheus prompt
+    // #then
     const agents = config.agent as Record<string, { mode?: string; name?: string; prompt?: string }>
     expect(agents.plan).toBeDefined()
-    expect(agents.plan.mode).toBe("subagent")
-    expect(agents.plan.prompt).toBeUndefined()
-    expect(agents[getAgentDisplayName("prometheus")]?.prompt).toBeDefined()
+    expect(agents.plan.mode).toBe("primary")
+    expect(agents.plan.prompt).toBe("original plan prompt")
+    expect(agents[getAgentDisplayName("prometheus")]).toBeUndefined()
   })
 
   test("plan agent remains unchanged when planner is disabled", async () => {
@@ -279,8 +274,7 @@ describe("Plan agent demote behavior", () => {
     expect(agents.plan.prompt).toBe("original plan prompt")
   })
 
-  test("prometheus should have mode 'all' to be callable via task", async () => {
-    // given
+  test("planner flags do not create a prometheus agent", async () => {
     const pluginConfig: OpenCodeCodexOrchConfig = {
       sisyphus_agent: {
         planner_enabled: true,
@@ -299,14 +293,10 @@ describe("Plan agent demote behavior", () => {
       },
     })
 
-    // when
     await handler(config)
 
-    // then
     const agents = config.agent as Record<string, { mode?: string }>
-    const prometheusKey = getAgentDisplayName("prometheus")
-    expect(agents[prometheusKey]).toBeDefined()
-    expect(agents[prometheusKey].mode).toBe("all")
+    expect(agents[getAgentDisplayName("prometheus")]).toBeUndefined()
   })
 })
 
@@ -608,9 +598,8 @@ describe("Prometheus category config resolution", () => {
   })
 })
 
-describe("Prometheus direct override priority over category", () => {
-  test("direct reasoningEffort takes priority over category reasoningEffort", async () => {
-    // given - category has reasoningEffort=xhigh, direct override says "low"
+describe("retired prometheus config", () => {
+  test("ignores prometheus overrides even when categories are configured", async () => {
     const pluginConfig: OpenCodeCodexOrchConfig = {
       sisyphus_agent: {
         planner_enabled: true,
@@ -641,146 +630,15 @@ describe("Prometheus direct override priority over category", () => {
       },
     })
 
-    // when
     await handler(config)
 
-    // then - direct override's reasoningEffort wins
-    const agents = config.agent as Record<string, { reasoningEffort?: string }>
-    const pKey = getAgentDisplayName("prometheus")
-    expect(agents[pKey]).toBeDefined()
-    expect(agents[pKey].reasoningEffort).toBe("low")
-  })
-
-  test("category reasoningEffort applied when no direct override", async () => {
-    // given - category has reasoningEffort but no direct override
-    const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
-        planner_enabled: true,
-      },
-      categories: {
-        "reasoning-cat": {
-          model: "openai/gpt-5.4",
-          reasoningEffort: "high",
-        },
-      },
-      agents: {
-        prometheus: {
-          category: "reasoning-cat",
-        },
-      },
-    }
-    const config: Record<string, unknown> = {
-      model: "anthropic/claude-opus-4-6",
-      agent: {},
-    }
-    const handler = createConfigHandler({
-      ctx: { directory: "/tmp" },
-      pluginConfig,
-      modelCacheState: {
-        anthropicContext1MEnabled: false,
-        modelContextLimitsCache: new Map(),
-      },
-    })
-
-    // when
-    await handler(config)
-
-    // then - category's reasoningEffort is applied
-    const agents = config.agent as Record<string, { reasoningEffort?: string }>
-    const pKey = getAgentDisplayName("prometheus")
-    expect(agents[pKey]).toBeDefined()
-    expect(agents[pKey].reasoningEffort).toBe("high")
-  })
-
-  test("direct temperature takes priority over category temperature", async () => {
-    // given
-    const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
-        planner_enabled: true,
-      },
-      categories: {
-        "temp-cat": {
-          model: "openai/gpt-5.4",
-          temperature: 0.8,
-        },
-      },
-      agents: {
-        prometheus: {
-          category: "temp-cat",
-          temperature: 0.1,
-        },
-      },
-    }
-    const config: Record<string, unknown> = {
-      model: "anthropic/claude-opus-4-6",
-      agent: {},
-    }
-    const handler = createConfigHandler({
-      ctx: { directory: "/tmp" },
-      pluginConfig,
-      modelCacheState: {
-        anthropicContext1MEnabled: false,
-        modelContextLimitsCache: new Map(),
-      },
-    })
-
-    // when
-    await handler(config)
-
-    // then - direct temperature wins over category
-    const agents = config.agent as Record<string, { temperature?: number }>
-    const pKey = getAgentDisplayName("prometheus")
-    expect(agents[pKey]).toBeDefined()
-    expect(agents[pKey].temperature).toBe(0.1)
-  })
-
-  test("prometheus prompt_append is appended to base prompt", async () => {
-    // #given - prometheus override with prompt_append
-    const customInstructions = "## Custom Project Rules\nUse max 2 commits."
-    const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
-        planner_enabled: true,
-      },
-      agents: {
-        prometheus: {
-          prompt_append: customInstructions,
-        },
-      },
-    }
-    const config: Record<string, unknown> = {
-      model: "anthropic/claude-opus-4-6",
-      agent: {},
-    }
-    const handler = createConfigHandler({
-      ctx: { directory: "/tmp" },
-      pluginConfig,
-      modelCacheState: {
-        anthropicContext1MEnabled: false,
-        modelContextLimitsCache: new Map(),
-      },
-    })
-
-    // #when
-    await handler(config)
-
-    // #then - prompt_append is appended to base prompt, not overwriting it
-    const agents = config.agent as Record<string, { prompt?: string }>
-    const pKey = getAgentDisplayName("prometheus")
-    expect(agents[pKey]).toBeDefined()
-    expect(agents[pKey].prompt).toContain("Prometheus")
-    expect(agents[pKey].prompt).toContain(customInstructions)
-    expect(agents[pKey].prompt!.endsWith(customInstructions)).toBe(true)
+    const agents = config.agent as Record<string, unknown>
+    expect(agents[getAgentDisplayName("prometheus")]).toBeUndefined()
   })
 })
 
-describe("Plan agent model inheritance from prometheus", () => {
-  test("plan agent inherits all model-related settings from resolved prometheus config", async () => {
-    //#given - prometheus resolves to claude-opus-4-6 with model settings
-    spyOn(shared, "resolveModelPipeline" as any).mockReturnValue({
-      model: "anthropic/claude-opus-4-6",
-      provenance: "provider-fallback",
-      variant: "max",
-    })
+describe("plan agent without prometheus", () => {
+  test("keeps explicit plan agent configuration intact", async () => {
     const pluginConfig: OpenCodeCodexOrchConfig = {
       sisyphus_agent: {
         planner_enabled: true,
@@ -806,162 +664,18 @@ describe("Plan agent model inheritance from prometheus", () => {
       },
     })
 
-    //#when
     await handler(config)
 
-    //#then - plan inherits model and variant from prometheus, but NOT prompt
-    const agents = config.agent as Record<string, { mode?: string; model?: string; variant?: string; prompt?: string }>
+    const agents = config.agent as Record<string, { mode?: string; prompt?: string }>
     expect(agents.plan).toBeDefined()
-    expect(agents.plan.mode).toBe("subagent")
-    expect(agents.plan.model).toBe("anthropic/claude-opus-4-6")
-    expect(agents.plan.variant).toBe("max")
-    expect(agents.plan.prompt).toBeUndefined()
-  })
-
-  test("plan agent inherits temperature, reasoningEffort, and other model settings from prometheus", async () => {
-    //#given - prometheus configured with category that has temperature and reasoningEffort
-    spyOn(shared, "resolveModelPipeline" as any).mockReturnValue({
-      model: "openai/gpt-5.4",
-      provenance: "override",
-      variant: "high",
-    })
-    const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
-        planner_enabled: true,
-        replace_plan: true,
-      },
-      agents: {
-        prometheus: {
-          model: "openai/gpt-5.4",
-          variant: "high",
-          temperature: 0.3,
-          top_p: 0.9,
-          maxTokens: 16000,
-          reasoningEffort: "high",
-          textVerbosity: "medium",
-          thinking: { type: "enabled", budgetTokens: 8000 },
-        },
-      },
-    }
-    const config: Record<string, unknown> = {
-      model: "anthropic/claude-opus-4-6",
-      agent: {},
-    }
-    const handler = createConfigHandler({
-      ctx: { directory: "/tmp" },
-      pluginConfig,
-      modelCacheState: {
-        anthropicContext1MEnabled: false,
-        modelContextLimitsCache: new Map(),
-      },
-    })
-
-    //#when
-    await handler(config)
-
-    //#then - plan inherits ALL model-related settings from resolved prometheus
-    const agents = config.agent as Record<string, Record<string, unknown>>
-    expect(agents.plan).toBeDefined()
-    expect(agents.plan.mode).toBe("subagent")
-    expect(agents.plan.model).toBe("openai/gpt-5.4")
-    expect(agents.plan.variant).toBe("high")
-    expect(agents.plan.temperature).toBe(0.3)
-    expect(agents.plan.top_p).toBe(0.9)
-    expect(agents.plan.maxTokens).toBe(16000)
-    expect(agents.plan.reasoningEffort).toBe("high")
-    expect(agents.plan.textVerbosity).toBe("medium")
-    expect(agents.plan.thinking).toEqual({ type: "enabled", budgetTokens: 8000 })
-  })
-
-  test("plan agent user override takes priority over prometheus inherited settings", async () => {
-    //#given - prometheus resolves to opus, but user has plan override for gpt-5.4
-    spyOn(shared, "resolveModelPipeline" as any).mockReturnValue({
-      model: "anthropic/claude-opus-4-6",
-      provenance: "provider-fallback",
-      variant: "max",
-    })
-    const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
-        planner_enabled: true,
-        replace_plan: true,
-      },
-      agents: {
-        plan: {
-          model: "openai/gpt-5.4",
-          variant: "high",
-          temperature: 0.5,
-        },
-      },
-    }
-    const config: Record<string, unknown> = {
-      model: "anthropic/claude-opus-4-6",
-      agent: {},
-    }
-    const handler = createConfigHandler({
-      ctx: { directory: "/tmp" },
-      pluginConfig,
-      modelCacheState: {
-        anthropicContext1MEnabled: false,
-        modelContextLimitsCache: new Map(),
-      },
-    })
-
-    //#when
-    await handler(config)
-
-    //#then - plan uses its own override, not prometheus settings
-    const agents = config.agent as Record<string, Record<string, unknown>>
-    expect(agents.plan.model).toBe("openai/gpt-5.4")
-    expect(agents.plan.variant).toBe("high")
-    expect(agents.plan.temperature).toBe(0.5)
-  })
-
-  test("plan agent does NOT inherit prompt, description, or color from prometheus", async () => {
-    //#given
-    spyOn(shared, "resolveModelPipeline" as any).mockReturnValue({
-      model: "anthropic/claude-opus-4-6",
-      provenance: "provider-fallback",
-      variant: "max",
-    })
-    const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
-        planner_enabled: true,
-        replace_plan: true,
-      },
-    }
-    const config: Record<string, unknown> = {
-      model: "anthropic/claude-opus-4-6",
-      agent: {},
-    }
-    const handler = createConfigHandler({
-      ctx: { directory: "/tmp" },
-      pluginConfig,
-      modelCacheState: {
-        anthropicContext1MEnabled: false,
-        modelContextLimitsCache: new Map(),
-      },
-    })
-
-    //#when
-    await handler(config)
-
-    //#then - plan has model settings but NOT prompt/description/color
-    const agents = config.agent as Record<string, Record<string, unknown>>
-    expect(agents.plan.model).toBe("anthropic/claude-opus-4-6")
-    expect(agents.plan.prompt).toBeUndefined()
-    expect(agents.plan.description).toBeUndefined()
-    expect(agents.plan.color).toBeUndefined()
+    expect(agents.plan.mode).toBe("primary")
+    expect(agents.plan.prompt).toBe("original plan prompt")
+    expect(agents[getAgentDisplayName("prometheus") as keyof typeof agents]).toBeUndefined()
   })
 })
 
 describe("Deadlock prevention - fetchAvailableModels must not receive client", () => {
-  test("fetchAvailableModels should be called with undefined client to prevent deadlock during plugin init", async () => {
-    // given - This test ensures we don't regress on issue #1301
-    // Passing client to fetchAvailableModels during config handler causes deadlock:
-    // - Plugin init waits for server response (client.provider.list())
-    // - Server waits for plugin init to complete before handling requests
-    const fetchSpy = spyOn(shared, "fetchAvailableModels" as any).mockResolvedValue(new Set<string>())
-
+  test("handler completes without consulting the OpenCode client during agent loading", async () => {
     const pluginConfig: OpenCodeCodexOrchConfig = {
       sisyphus_agent: {
         planner_enabled: true,
@@ -975,6 +689,8 @@ describe("Deadlock prevention - fetchAvailableModels must not receive client", (
       provider: { list: () => Promise.resolve({ data: { connected: [] } }) },
       model: { list: () => Promise.resolve({ data: [] }) },
     }
+    const providerList = spyOn(mockClient.provider, "list")
+    const modelList = spyOn(mockClient.model, "list")
     const handler = createConfigHandler({
       ctx: { directory: "/tmp", client: mockClient },
       pluginConfig,
@@ -987,13 +703,8 @@ describe("Deadlock prevention - fetchAvailableModels must not receive client", (
     // when
     await handler(config)
 
-    // then - fetchAvailableModels must be called with undefined as first argument (no client)
-    // This prevents the deadlock described in issue #1301
-    expect(fetchSpy).toHaveBeenCalled()
-    const firstCallArgs = fetchSpy.mock.calls[0]
-    expect(firstCallArgs[0]).toBeUndefined()
-
-    fetchSpy.mockRestore?.()
+    expect(providerList).not.toHaveBeenCalled()
+    expect(modelList).not.toHaveBeenCalled()
   })
 })
 
@@ -1119,8 +830,6 @@ describe("config-handler plugin loading error boundary (#1559)", () => {
 describe("per-agent todowrite/todoread deny when task_system enabled", () => {
   const AGENTS_WITH_TODO_DENY = new Set([
     getAgentDisplayName("sisyphus"),
-    getAgentDisplayName("atlas"),
-    getAgentDisplayName("prometheus"),
     getAgentDisplayName("sisyphus-junior"),
   ])
 
@@ -1131,8 +840,6 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
     }
     createBuiltinAgentsMock.mockResolvedValue({
       sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
-      atlas: { name: "atlas", prompt: "test", mode: "primary" },
-      prometheus: { name: "prometheus", prompt: "test", mode: "primary" },
       "sisyphus-junior": { name: "sisyphus-junior", prompt: "test", mode: "subagent" },
       oracle: { name: "oracle", prompt: "test", mode: "subagent" },
     })

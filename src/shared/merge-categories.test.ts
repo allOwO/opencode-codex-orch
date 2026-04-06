@@ -78,7 +78,7 @@ describe("mergeCategories", () => {
     const result = mergeCategories(userCategories)
 
     //#then
-    expect(result.deep).toBeDefined()
-    expect(result.deep.model).toBe("anthropic/claude-opus-4-6")
+    expect(result.hard).toBeDefined()
+    expect(result.hard.model).toBe("anthropic/claude-opus-4-6")
   })
 })

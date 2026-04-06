@@ -9,6 +9,7 @@ import {
   HookNameSchema,
   OpenCodeCodexOrchConfigSchema,
 } from "./schema"
+import { OverridableAgentNameSchema } from "./schema/agent-names"
 
 describe("disabled_mcps schema", () => {
   test("should accept built-in MCP names", () => {
@@ -145,6 +146,36 @@ describe("disabled_mcps schema", () => {
 })
 
 describe("AgentOverrideConfigSchema", () => {
+  describe("legacy simplification rename surface", () => {
+    test("accepts orchestrator and reviewer agent override keys", () => {
+      const config = {
+        agents: {
+          orchestrator: { model: "openai/gpt-5.4" },
+          reviewer: { model: "google/gemini-2.5-pro" },
+        },
+      }
+
+      const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
+
+      expect(result.success).toBe(true)
+    })
+
+    test("accepts orchestrator_agent as the primary top-level orchestrator config key", () => {
+      const config = {
+        orchestrator_agent: {
+          disabled: false,
+          default_builder_enabled: false,
+          planner_enabled: false,
+          replace_plan: false,
+        },
+      }
+
+      const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
+
+      expect(result.success).toBe(true)
+    })
+  })
+
   describe("category field", () => {
     test("accepts category as optional string", () => {
       // given
@@ -383,7 +414,7 @@ describe("CategoryConfigSchema", () => {
 describe("BuiltinCategoryNameSchema", () => {
   test("accepts all builtin category names", () => {
     // given
-      const categories = ["visual-engineering", "deep", "quick", "writing"]
+      const categories = ["designer", "hard", "quick"]
 
     // when / #then
     for (const cat of categories) {
@@ -478,17 +509,17 @@ describe("Sisyphus-Junior agent override", () => {
     }
   })
 
-  test("schema accepts lowercase agent names (sisyphus, atlas, prometheus)", () => {
+  test("schema accepts kept agent names including deepsearch", () => {
     // given
     const config = {
       agents: {
         sisyphus: {
           temperature: 0.1,
         },
-        atlas: {
+        deepsearch: {
           temperature: 0.2,
         },
-        prometheus: {
+        reviewer: {
           temperature: 0.3,
         },
       },
@@ -501,33 +532,15 @@ describe("Sisyphus-Junior agent override", () => {
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.agents?.sisyphus?.temperature).toBe(0.1)
-      expect(result.data.agents?.atlas?.temperature).toBe(0.2)
-      expect(result.data.agents?.prometheus?.temperature).toBe(0.3)
+      expect(result.data.agents?.deepsearch?.temperature).toBe(0.2)
+      expect(result.data.agents?.reviewer?.temperature).toBe(0.3)
     }
   })
 
-  test("schema accepts lowercase metis and momus agent names", () => {
-    // given
-    const config = {
-      agents: {
-        metis: {
-          category: "deep",
-        },
-        momus: {
-          category: "quick",
-        },
-      },
-    }
-
-    // when
-    const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
-
-    // then
-    expect(result.success).toBe(true)
-    if (result.success) {
-        expect(result.data.agents?.metis?.category).toBe("deep")
-      expect(result.data.agents?.momus?.category).toBe("quick")
-    }
+  test("overridable agent name schema rejects retired agent names", () => {
+    expect(OverridableAgentNameSchema.safeParse("metis").success).toBe(false)
+    expect(OverridableAgentNameSchema.safeParse("atlas").success).toBe(false)
+    expect(OverridableAgentNameSchema.safeParse("prometheus").success).toBe(false)
   })
 })
 

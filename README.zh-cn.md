@@ -10,13 +10,12 @@
 
 ## 它能做什么
 
-opencode-codex-orch 将单个 AI Agent 会话变成一支协调运作的开发团队。Sisyphus 负责编排调度，专业智能体分别负责调研、规划、代码搜索和执行，跨多个模型提供商并行工作。
+opencode-codex-orch 将单个 AI Agent 会话变成一支协调运作的开发团队。Orchestrator 负责编排调度，专业智能体分别负责调研、审查、代码搜索和执行，跨多个模型提供商并行工作。
 
 **核心能力：**
 
-- **多智能体编排**：10 个专业智能体（Sisyphus、Atlas、Oracle、Prometheus、Librarian、Explore、Metis、Momus、Multimodal-Looker、Sisyphus-Junior）
+- **多智能体编排**：使用精简后的智能体表面（Orchestrator、Executor、Reviewer、Oracle、Librarian、Explore、DeepSearch）
 - **多模型路由**：自动调度 GPT、Kimi、Gemini、GLM 等模型 — **无 Claude/Anthropic 依赖**
-- **`ultrawork` / `ulw`**：自主执行模式，一键触发
 - **基于哈希的编辑**：`LINE#ID` 内容哈希验证，确保文件修改可靠
 - **后台智能体**：5+ 个任务并行执行
 - **内置 MCP**：Web 搜索、Context7、Grep.app

@@ -3,8 +3,8 @@ import type { RunOptions } from "./types"
 import type { OpenCodeCodexOrchConfig } from "../../config"
 import { getAgentConfigKey, getAgentDisplayName } from "../../shared/agent-display-names"
 
-const CORE_AGENT_ORDER = ["sisyphus", "prometheus", "atlas"] as const
-const DEFAULT_AGENT = "sisyphus"
+const CORE_AGENT_ORDER = ["orchestrator", "prometheus", "atlas"] as const
+const DEFAULT_AGENT = "orchestrator"
 
 type EnvVars = Record<string, string | undefined>
 type CoreAgentKey = (typeof CORE_AGENT_ORDER)[number]
@@ -31,7 +31,8 @@ const normalizeAgentName = (agent?: string): ResolvedAgent | undefined => {
 
 const isAgentDisabled = (agentConfigKey: string, config: OpenCodeCodexOrchConfig): boolean => {
   const lowered = agentConfigKey.toLowerCase()
-  if (lowered === DEFAULT_AGENT && config.sisyphus_agent?.disabled === true) {
+  const orchestratorAgentConfig = config.orchestrator_agent ?? config.sisyphus_agent
+  if (lowered === DEFAULT_AGENT && orchestratorAgentConfig?.disabled === true) {
     return true
   }
   return (config.disabled_agents ?? []).some(

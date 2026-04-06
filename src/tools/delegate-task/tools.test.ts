@@ -67,9 +67,9 @@ describe("sisyphus-task", () => {
   })
 
   describe("DEFAULT_CATEGORIES", () => {
-    test("visual-engineering category has model and variant config", () => {
+    test("designer category has model and variant config", () => {
       // given
-      const category = DEFAULT_CATEGORIES["visual-engineering"]
+      const category = DEFAULT_CATEGORIES.designer
 
       // when / #then
       expect(category).toBeDefined()
@@ -77,9 +77,9 @@ describe("sisyphus-task", () => {
       expect(category.variant).toBe("high")
     })
 
-    test("deep category has model and variant config", () => {
+    test("hard category has model and variant config", () => {
       // given
-      const category = DEFAULT_CATEGORIES["deep"]
+      const category = DEFAULT_CATEGORIES.hard
 
       // when / #then
       expect(category).toBeDefined()
@@ -87,9 +87,9 @@ describe("sisyphus-task", () => {
       expect(category.variant).toBe("medium")
     })
 
-    test("deep category has model and variant config", () => {
+    test("hard category keeps the codex model and variant config", () => {
       // given
-      const category = DEFAULT_CATEGORIES["deep"]
+      const category = DEFAULT_CATEGORIES.hard
 
       // when / #then
       expect(category).toBeDefined()
@@ -97,39 +97,39 @@ describe("sisyphus-task", () => {
       expect(category.variant).toBe("medium")
     })
 
-    test("writing category uses kimi model", () => {
+    test("writing alias resolves to the hard category config", () => {
       // given
       const category = DEFAULT_CATEGORIES.writing
 
       // when / #then
       expect(category).toBeDefined()
-      expect(category.model).toBe("kimi-for-coding/k2p5")
-      expect(category.variant).toBeUndefined()
+      expect(category.model).toBe("openai/gpt-5.3-codex")
+      expect(category.variant).toBe("medium")
     })
   })
 
   describe("CATEGORY_PROMPT_APPENDS", () => {
-    test("visual-engineering category has design-focused prompt", () => {
+    test("designer category has design-focused prompt", () => {
       // given
-      const promptAppend = CATEGORY_PROMPT_APPENDS["visual-engineering"]
+      const promptAppend = CATEGORY_PROMPT_APPENDS.designer
 
       // when / #then
       expect(promptAppend).toContain("VISUAL/UI")
       expect(promptAppend).toContain("Design-first")
     })
 
-    test("deep category covers hard logic and autonomous execution", () => {
+    test("hard category covers hard logic and autonomous execution", () => {
       // given
-      const promptAppend = CATEGORY_PROMPT_APPENDS["deep"]
+      const promptAppend = CATEGORY_PROMPT_APPENDS.hard
 
       // when / #then
       expect(promptAppend).toContain("DEEP IMPLEMENTATION / HARD LOGIC")
       expect(promptAppend).toContain("autonomous")
     })
 
-    test("deep category keeps autonomous execution prompt", () => {
+    test("hard category keeps autonomous execution prompt", () => {
       // given
-      const promptAppend = CATEGORY_PROMPT_APPENDS["deep"]
+      const promptAppend = CATEGORY_PROMPT_APPENDS.hard
 
       // when / #then
       expect(promptAppend).toContain("HARD LOGIC")
@@ -149,9 +149,9 @@ describe("sisyphus-task", () => {
       }
     })
 
-    test("deep category exists and has description", () => {
+    test("hard category exists and has description", () => {
       // given / #when
-      const description = CATEGORY_DESCRIPTIONS.deep
+      const description = CATEGORY_DESCRIPTIONS.hard
 
       // then
       expect(description).toBeDefined()
@@ -462,7 +462,7 @@ describe("sisyphus-task", () => {
        await tool.execute(args, toolContext)
 
        // then
-       expect(args.subagent_type).toBe("Sisyphus-Junior")
+       expect(args.subagent_type).toBe("Executor")
     }, { timeout: 10000 })
 
     test("category overrides subagent_type and still maps to sisyphus-junior", async () => {
@@ -527,7 +527,7 @@ describe("sisyphus-task", () => {
       const result = await tool.execute(args, toolContext)
 
       //#then
-      expect(args.subagent_type).toBe("Sisyphus-Junior")
+      expect(args.subagent_type).toBe("Executor")
       expect(result).toContain("Background task launched")
     }, { timeout: 10000 })
 
@@ -2135,12 +2135,12 @@ describe("sisyphus-task", () => {
         abort: new AbortController().signal,
       }
       
-      // when - writing category (gemini-3-flash)
+      // when - designer category (gemini-3.1-pro)
       const result = await tool.execute(
         {
-          description: "Test writing forced background",
+          description: "Test designer forced background",
           prompt: "Write something",
-          category: "writing",
+          category: "designer",
           run_in_background: false,
           load_skills: ["git-commit"],
         },
@@ -3792,7 +3792,7 @@ describe("sisyphus-task", () => {
       )
 
       // then - title should follow OpenCode format
-      expect(createBody.title).toBe("Implement feature X (@Sisyphus-Junior subagent)")
+      expect(createBody.title).toBe("Implement feature X (@Executor subagent)")
     }, { timeout: 10000 })
 
     test("sync task output includes <task_metadata> block with session_id", async () => {

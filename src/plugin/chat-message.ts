@@ -4,9 +4,6 @@ import type { PluginContext } from "./types"
 import { applyAgentReasoningEffort, hasConnectedProvidersCache } from "../shared"
 import { setSessionModel } from "../shared/session-model-state"
 import { setSessionAgent } from "../features/claude-code-session-state"
-import { applyUltraworkModelOverrideOnMessage } from "./ultrawork-model-override"
-import { applyUltraworkModeOnMessage } from "./ultrawork-mode"
-import { parseRalphLoopArguments } from "../hooks/ralph-loop/command-arguments"
 
 import type { CreatedHooks } from "../create-hooks"
 
@@ -147,49 +144,5 @@ export function createChatMessageHandler(args: {
       )
     }
 
-    if (hooks.ralphLoop) {
-      const parts = output.parts
-      const promptText =
-        parts
-          ?.filter((p) => p.type === "text" && p.text)
-          .map((p) => p.text)
-          .join("\n")
-          .trim() || ""
-
-      const isRalphLoopTemplate =
-        promptText.includes("You are starting a Ralph Loop") &&
-        promptText.includes("<user-task>")
-      const isUlwLoopTemplate =
-        promptText.includes("You are starting an ULTRAWORK Loop") &&
-        promptText.includes("<user-task>")
-      const isCancelRalphTemplate = promptText.includes(
-        "Cancel the currently active Ralph Loop",
-      )
-
-      if (isRalphLoopTemplate || isUlwLoopTemplate) {
-        const taskMatch = promptText.match(/<user-task>\s*([\s\S]*?)\s*<\/user-task>/i)
-        const rawTask = taskMatch?.[1]?.trim() || ""
-        const parsedArguments = parseRalphLoopArguments(rawTask)
-
-        hooks.ralphLoop.startLoop(input.sessionID, parsedArguments.prompt, {
-          ultrawork: isUlwLoopTemplate,
-          maxIterations: parsedArguments.maxIterations,
-          completionPromise: parsedArguments.completionPromise,
-          strategy: parsedArguments.strategy,
-        })
-      } else if (isCancelRalphTemplate) {
-        hooks.ralphLoop.cancelLoop(input.sessionID)
-      }
-    }
-
-    applyUltraworkModelOverrideOnMessage(pluginConfig, input.agent, output, pluginContext.client.tui, input.sessionID)
-    if (applyUltraworkModeOnMessage(input.agent, output)) {
-      showWarningToast(
-        pluginContext.client.tui,
-        "Ultrawork Mode Activated",
-        "Execution-biased mode enabled for this turn.",
-        2500,
-      )
-    }
   }
 }

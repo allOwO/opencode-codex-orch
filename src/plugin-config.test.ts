@@ -165,7 +165,9 @@ describe("parseConfigPartially", () => {
 
       expect(result).not.toBeNull();
       expect(result!.disabled_hooks).toEqual(["comment-checker"]);
-      expect(result!.agents).toBeUndefined();
+      expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.4");
+      expect(result!.agents?.momus?.model).toBe("openai/gpt-5.4");
+      expect(result!.agents).not.toHaveProperty("prometheus");
     });
 
     it("should preserve valid agents when a non-agent section is invalid", () => {

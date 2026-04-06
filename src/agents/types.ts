@@ -119,10 +119,8 @@ export type BuiltinAgentName =
   | "oracle"
   | "librarian"
   | "explore"
-  | "multimodal-looker"
-  | "metis"
-  | "momus"
-  | "atlas";
+  | "deepsearch"
+  | "momus";
 
 export type OverridableAgentName = "build" | BuiltinAgentName;
 

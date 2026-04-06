@@ -232,9 +232,10 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(librarian.fallbackChain[2]).toEqual({ providers: ["opencode"], model: "minimax-m2.5-free" })
   })
 
-  test("all 9 builtin agents have valid fallbackChain arrays", () => {
-    // #given - list of 9 agent names
+  test("all builtin agents have valid fallbackChain arrays", () => {
+    // #given - list of builtin agent names
     const expectedAgents = [
+      "deepsearch",
       "sisyphus",
       "oracle",
       "librarian",
@@ -250,7 +251,7 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     const definedAgents = Object.keys(AGENT_MODEL_REQUIREMENTS)
 
     // #then - all agents present with valid fallbackChain
-    expect(definedAgents).toHaveLength(9)
+    expect(definedAgents).toHaveLength(12)
     for (const agent of expectedAgents) {
       const requirement = AGENT_MODEL_REQUIREMENTS[agent]
       expect(requirement).toBeDefined()
@@ -327,37 +328,27 @@ describe("CATEGORY_MODEL_REQUIREMENTS", () => {
     expect(primary.providers[0]).toBe("anthropic")
   })
 
-  test("writing has valid fallbackChain with official Kimi-first fallbacks", () => {
-    // given - writing category requirement
+  test("writing alias reuses the hard fallbackChain", () => {
+    // given - writing category compatibility alias
     const writing = CATEGORY_MODEL_REQUIREMENTS["writing"]
 
     // when - accessing writing requirement
-    // then - fallbackChain: k2p5 -> official kimi -> gemini-3-flash -> claude-sonnet-4-6
+    // then - fallbackChain matches hard/codex-first behavior
     expect(writing).toBeDefined()
     expect(writing.fallbackChain).toBeArray()
-    expect(writing.fallbackChain).toHaveLength(4)
+    expect(writing.fallbackChain).toHaveLength(3)
 
     const primary = writing.fallbackChain[0]
-    expect(primary.model).toBe("k2p5")
-    expect(primary.providers[0]).toBe("kimi-for-coding")
-
-    const second = writing.fallbackChain[1]
-    expect(second.model).toBe("kimi-k2.5")
-    expect(second.providers).toContain("moonshotai")
-
-    const third = writing.fallbackChain[2]
-    expect(third.model).toBe("gemini-3-flash")
-    expect(third.providers[0]).toBe("google")
-
-    const fourth = writing.fallbackChain[3]
-    expect(fourth.model).toBe("claude-sonnet-4-6")
-    expect(fourth.providers[0]).toBe("anthropic")
+    expect(primary.model).toBe("gpt-5.3-codex")
+    expect(primary.providers[0]).toBe("openai")
   })
 
-  test("all 4 categories have valid fallbackChain arrays", () => {
-    // given - list of 4 category names
+  test("canonical categories and compatibility aliases have valid fallbackChain arrays", () => {
+    // given - canonical categories plus compatibility aliases
     const expectedCategories = [
+      "designer",
       "visual-engineering",
+      "hard",
       "deep",
       "quick",
       "writing",
@@ -367,7 +358,7 @@ describe("CATEGORY_MODEL_REQUIREMENTS", () => {
     const definedCategories = Object.keys(CATEGORY_MODEL_REQUIREMENTS)
 
     // then - all categories present with valid fallbackChain
-    expect(definedCategories).toHaveLength(4)
+    expect(definedCategories).toHaveLength(6)
     for (const category of expectedCategories) {
       const requirement = CATEGORY_MODEL_REQUIREMENTS[category]
       expect(requirement).toBeDefined()

@@ -12,11 +12,11 @@
  * This map will be removed in a future major version once migration period ends.
  */
 export const MODEL_TO_CATEGORY_MAP: Record<string, string> = {
-  "google/gemini-3.1-pro": "visual-engineering",
-  "google/gemini-3-flash": "writing",
-  "openai/gpt-5.4": "deep",
+  "google/gemini-3.1-pro": "designer",
+  "google/gemini-3-flash": "hard",
+  "openai/gpt-5.4": "hard",
   "anthropic/claude-haiku-4-5": "quick",
-  "anthropic/claude-opus-4-6": "deep",
+  "anthropic/claude-opus-4-6": "hard",
   "anthropic/claude-sonnet-4-6": "quick",
 }
 

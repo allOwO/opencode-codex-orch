@@ -56,7 +56,7 @@ describe("resolveRunAgent", () => {
     const agent = resolveRunAgent({ message: "test" }, config, {})
 
     // then
-    expect(agent).toBe("Sisyphus (Ultraworker)")
+    expect(agent).toBe("Orchestrator")
   })
 
   it("skips disabled sisyphus for next available core agent", () => {
@@ -72,13 +72,13 @@ describe("resolveRunAgent", () => {
 
   it("maps display-name style default_run_agent values to canonical display names", () => {
     // given
-    const config = createConfig({ default_run_agent: "Sisyphus (Ultraworker)" })
+    const config = createConfig({ default_run_agent: "Orchestrator" })
 
     // when
     const agent = resolveRunAgent({ message: "test" }, config, {})
 
     // then
-    expect(agent).toBe("Sisyphus (Ultraworker)")
+    expect(agent).toBe("Orchestrator")
   })
 })
 

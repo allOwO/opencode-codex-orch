@@ -36,7 +36,7 @@ function createAgent(name: string): AvailableAgent {
 
 describe("buildCategorySkillsDelegationGuide", () => {
 	const categories: AvailableCategory[] = [
-		{ name: "visual-engineering", description: "Frontend, UI/UX" },
+		{ name: "designer", description: "Frontend, UI/UX" },
 		{ name: "quick", description: "Trivial tasks" },
 	];
 
@@ -180,7 +180,7 @@ describe("buildCategorySkillsDelegationGuide", () => {
 		const result = buildCategorySkillsDelegationGuide(categories, allSkills);
 
 		//#then: should list categories with their descriptions
-		expect(result).toContain("`visual-engineering`");
+		expect(result).toContain("`designer`");
 		expect(result).toContain("Frontend, UI/UX");
 		expect(result).toContain("`quick`");
 		expect(result).toContain("Trivial tasks");
@@ -230,8 +230,8 @@ describe("buildUltraworkSection", () => {
 });
 
 describe("buildParallelDelegationSection", () => {
-	const deepCategory: AvailableCategory = {
-		name: "deep",
+	const hardCategory: AvailableCategory = {
+		name: "hard",
 		description: "Autonomous problem-solving",
 	};
 	const otherCategory: AvailableCategory = {
@@ -239,10 +239,10 @@ describe("buildParallelDelegationSection", () => {
 		description: "Trivial tasks",
 	};
 
-	it("#given non-Claude model with deep category #when building #then returns aggressive delegation section", () => {
+	it("#given non-Claude model with hard category #when building #then returns aggressive delegation section", () => {
 		//#given
 		const model = "google/gemini-3-pro";
-		const categories = [deepCategory, otherCategory];
+		const categories = [hardCategory, otherCategory];
 
 		//#when
 		const result = buildParallelDelegationSection(model, categories);
@@ -258,7 +258,7 @@ describe("buildParallelDelegationSection", () => {
 	it("#given Claude model #when building #then returns empty", () => {
 		//#given
 		const model = "anthropic/claude-opus-4-6";
-		const categories = [deepCategory];
+		const categories = [hardCategory];
 
 		//#when
 		const result = buildParallelDelegationSection(model, categories);
@@ -267,7 +267,7 @@ describe("buildParallelDelegationSection", () => {
 		expect(result).toBe("");
 	});
 
-	it("#given non-Claude model without deep category #when building #then returns empty", () => {
+	it("#given non-Claude model without hard category #when building #then returns empty", () => {
 		//#given
 		const model = "openai/gpt-5.4";
 		const categories = [otherCategory];
