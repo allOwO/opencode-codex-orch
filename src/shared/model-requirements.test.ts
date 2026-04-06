@@ -26,40 +26,40 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(second).toEqual({ providers: ["kimi-for-coding"], model: "k2p5" })
   })
 
-  test("sisyphus has claude-opus-4-6 as primary with Kimi and GPT/GLM fallbacks", () => {
-    // #given - sisyphus agent requirement
-    const sisyphus = AGENT_MODEL_REQUIREMENTS["sisyphus"]
+  test("orchestrator has claude-opus-4-6 as primary with Kimi and GPT/GLM fallbacks", () => {
+    // #given - orchestrator agent requirement
+    const orchestrator = AGENT_MODEL_REQUIREMENTS["orchestrator"]
 
     // #when - accessing Sisyphus requirement
     // #then - fallbackChain has 6 entries with correct ordering
-    expect(sisyphus).toBeDefined()
-    expect(sisyphus.fallbackChain).toBeArray()
-    expect(sisyphus.fallbackChain).toHaveLength(6)
-    expect(sisyphus.requiresAnyModel).toBe(true)
+    expect(orchestrator).toBeDefined()
+    expect(orchestrator.fallbackChain).toBeArray()
+    expect(orchestrator.fallbackChain).toHaveLength(6)
+    expect(orchestrator.requiresAnyModel).toBe(true)
 
-    const primary = sisyphus.fallbackChain[0]
+    const primary = orchestrator.fallbackChain[0]
     expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode"])
     expect(primary.model).toBe("claude-opus-4-6")
     expect(primary.variant).toBe("max")
 
-    const second = sisyphus.fallbackChain[1]
+    const second = orchestrator.fallbackChain[1]
     expect(second.providers).toEqual(["kimi-for-coding"])
     expect(second.model).toBe("k2p5")
 
-    const third = sisyphus.fallbackChain[2]
+    const third = orchestrator.fallbackChain[2]
     expect(third.providers).toContain("moonshotai")
     expect(third.model).toBe("kimi-k2.5")
 
-    const fourth = sisyphus.fallbackChain[3]
+    const fourth = orchestrator.fallbackChain[3]
     expect(fourth.providers).toContain("openai")
     expect(fourth.model).toBe("gpt-5.4")
     expect(fourth.variant).toBe("medium")
 
-    const fifth = sisyphus.fallbackChain[4]
+    const fifth = orchestrator.fallbackChain[4]
     expect(fifth.providers).toContain("zai-coding-plan")
     expect(fifth.model).toBe("glm-5")
 
-    const last = sisyphus.fallbackChain[5]
+    const last = orchestrator.fallbackChain[5]
     expect(last.providers[0]).toBe("opencode")
     expect(last.model).toBe("big-pickle")
   })
@@ -106,73 +106,6 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(quaternary.model).toBe("gpt-5-nano")
   })
 
-  test("multimodal-looker has valid fallbackChain with gpt-5.4 as primary", () => {
-    // given - multimodal-looker agent requirement
-    const multimodalLooker = AGENT_MODEL_REQUIREMENTS["multimodal-looker"]
-
-    // when - accessing multimodal-looker requirement
-    // then - fallbackChain: gpt-5.4 -> k2p5 -> official kimi -> gemini-3-flash -> glm-4.6v -> gpt-5-nano
-    expect(multimodalLooker).toBeDefined()
-    expect(multimodalLooker.fallbackChain).toBeArray()
-    expect(multimodalLooker.fallbackChain).toHaveLength(6)
-
-    const primary = multimodalLooker.fallbackChain[0]
-    expect(primary.providers).toEqual(["openai", "opencode"])
-    expect(primary.model).toBe("gpt-5.4")
-    expect(primary.variant).toBe("medium")
-    const secondary = multimodalLooker.fallbackChain[1]
-    expect(secondary.providers).toEqual(["kimi-for-coding"])
-    expect(secondary.model).toBe("k2p5")
-
-    const tertiary = multimodalLooker.fallbackChain[2]
-    expect(tertiary.providers).toContain("moonshotai")
-    expect(tertiary.model).toBe("kimi-k2.5")
-
-    const quaternary = multimodalLooker.fallbackChain[3]
-    expect(quaternary.model).toBe("gemini-3-flash")
-    const last = multimodalLooker.fallbackChain[5]
-    expect(last.providers).toEqual(["openai", "github-copilot", "opencode"])
-    expect(last.model).toBe("gpt-5-nano")
-  })
-
-  test("prometheus has claude-opus-4-6 as primary", () => {
-    // #given - prometheus agent requirement
-    const prometheus = AGENT_MODEL_REQUIREMENTS["prometheus"]
-
-    // #when - accessing Prometheus requirement
-    // #then - claude-opus-4-6 is first
-    expect(prometheus).toBeDefined()
-    expect(prometheus.fallbackChain).toBeArray()
-    expect(prometheus.fallbackChain.length).toBeGreaterThan(1)
-
-    const primary = prometheus.fallbackChain[0]
-    expect(primary.model).toBe("claude-opus-4-6")
-    expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode"])
-    expect(primary.variant).toBe("max")
-
-    const secondary = prometheus.fallbackChain[1]
-    expect(secondary).toEqual({ providers: ["kimi-for-coding"], model: "k2p5" })
-  })
-
-  test("metis has claude-opus-4-6 as primary", () => {
-    // #given - metis agent requirement
-    const metis = AGENT_MODEL_REQUIREMENTS["metis"]
-
-    // #when - accessing Metis requirement
-    // #then - claude-opus-4-6 is first
-    expect(metis).toBeDefined()
-    expect(metis.fallbackChain).toBeArray()
-    expect(metis.fallbackChain.length).toBeGreaterThan(1)
-
-    const primary = metis.fallbackChain[0]
-    expect(primary.model).toBe("claude-opus-4-6")
-    expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode"])
-    expect(primary.variant).toBe("max")
-
-    const secondary = metis.fallbackChain[1]
-    expect(secondary).toEqual({ providers: ["kimi-for-coding"], model: "k2p5" })
-  })
-
   test("momus has valid fallbackChain with gpt-5.4 as primary", () => {
     // given - momus agent requirement
     const momus = AGENT_MODEL_REQUIREMENTS["momus"]
@@ -189,34 +122,16 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(primary.providers[0]).toBe("openai")
   })
 
-  test("atlas has Kimi-first fallbackChain with official provider fallbacks", () => {
-    // given - atlas agent requirement
-    const atlas = AGENT_MODEL_REQUIREMENTS["atlas"]
+  test("deepsearch has GPT-first fallbackChain for exhaustive search", () => {
+    const deepsearch = AGENT_MODEL_REQUIREMENTS["deepsearch"]
 
-    // when - accessing Atlas requirement
-    // then - fallbackChain starts with Kimi and includes official provider fallbacks
-    expect(atlas).toBeDefined()
-    expect(atlas.fallbackChain).toBeArray()
-    expect(atlas.fallbackChain.length).toBeGreaterThan(0)
-
-    const primary = atlas.fallbackChain[0]
-    expect(primary.model).toBe("k2p5")
-    expect(primary.providers[0]).toBe("kimi-for-coding")
-
-    const secondary = atlas.fallbackChain[1]
-    expect(secondary.model).toBe("kimi-k2.5")
-    expect(secondary.providers).toContain("moonshotai")
-
-    const tertiary = atlas.fallbackChain[2]
-    expect(tertiary.model).toBe("claude-sonnet-4-5")
-    expect(tertiary.providers[0]).toBe("anthropic")
-
-    const quaternary = atlas.fallbackChain[3]
-    expect(quaternary.model).toBe("gpt-5.4")
-    expect(quaternary.variant).toBe("medium")
-
-    const fifth = atlas.fallbackChain[4]
-    expect(fifth.model).toBe("gemini-3.1-pro")
+    expect(deepsearch).toBeDefined()
+    expect(deepsearch.fallbackChain).toHaveLength(3)
+    expect(deepsearch.fallbackChain[0]).toEqual({
+      providers: ["openai", "github-copilot", "opencode"],
+      model: "gpt-5.4",
+      variant: "high",
+    })
   })
 
   test("librarian includes OpenCode MiniMax after official GLM entries", () => {
@@ -235,23 +150,21 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
   test("all builtin agents have valid fallbackChain arrays", () => {
     // #given - list of builtin agent names
     const expectedAgents = [
-      "deepsearch",
+      "orchestrator",
       "sisyphus",
+      "deepsearch",
       "oracle",
       "librarian",
       "explore",
-      "multimodal-looker",
-      "prometheus",
-      "metis",
       "momus",
-      "atlas",
+      "reviewer",
     ]
 
     // when - checking AGENT_MODEL_REQUIREMENTS
     const definedAgents = Object.keys(AGENT_MODEL_REQUIREMENTS)
 
     // #then - all agents present with valid fallbackChain
-    expect(definedAgents).toHaveLength(12)
+    expect(definedAgents).toHaveLength(8)
     for (const agent of expectedAgents) {
       const requirement = AGENT_MODEL_REQUIREMENTS[agent]
       expect(requirement).toBeDefined()
@@ -265,6 +178,13 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
         expect(entry.model.length).toBeGreaterThan(0)
       }
     }
+  })
+
+  test("retired agents are absent from active model requirements", () => {
+    expect(AGENT_MODEL_REQUIREMENTS).not.toHaveProperty("prometheus")
+    expect(AGENT_MODEL_REQUIREMENTS).not.toHaveProperty("atlas")
+    expect(AGENT_MODEL_REQUIREMENTS).not.toHaveProperty("metis")
+    expect(AGENT_MODEL_REQUIREMENTS).not.toHaveProperty("multimodal-looker")
   })
 })
 

@@ -381,8 +381,8 @@ describe("generateModelConfig", () => {
     })
   })
 
-  describe("Sisyphus agent special cases", () => {
-    test("Sisyphus is created when at least one fallback provider is available (Claude)", () => {
+  describe("orchestrator agent special cases", () => {
+    test("orchestrator is created when at least one fallback provider is available (Claude)", () => {
       // #given
       const config = createConfig({ hasClaude: true, isMax20: true })
 
@@ -390,10 +390,10 @@ describe("generateModelConfig", () => {
       const result = generateModelConfig(config)
 
       // #then
-      expect(result.agents?.sisyphus?.model).toBe("anthropic/claude-opus-4-6")
+      expect(result.agents?.orchestrator?.model).toBe("anthropic/claude-opus-4-6")
     })
 
-    test("Sisyphus is created when multiple fallback providers are available", () => {
+    test("orchestrator is created when multiple fallback providers are available", () => {
       // #given
       const config = createConfig({
         hasClaude: true,
@@ -407,10 +407,10 @@ describe("generateModelConfig", () => {
       const result = generateModelConfig(config)
 
       // #then
-      expect(result.agents?.sisyphus?.model).toBe("anthropic/claude-opus-4-6")
+      expect(result.agents?.orchestrator?.model).toBe("anthropic/claude-opus-4-6")
     })
 
-    test("Sisyphus resolves to gpt-5.4 medium when only OpenAI is available", () => {
+    test("orchestrator resolves to gpt-5.4 medium when only OpenAI is available", () => {
       // #given
       const config = createConfig({ hasOpenAI: true })
 
@@ -418,8 +418,8 @@ describe("generateModelConfig", () => {
       const result = generateModelConfig(config)
 
       // #then
-      expect(result.agents?.sisyphus?.model).toBe("openai/gpt-5.4")
-      expect(result.agents?.sisyphus?.variant).toBe("medium")
+      expect(result.agents?.orchestrator?.model).toBe("openai/gpt-5.4")
+      expect(result.agents?.orchestrator?.variant).toBe("medium")
     })
   })
 

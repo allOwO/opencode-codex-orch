@@ -20,7 +20,6 @@ config/schema/
 ├── experimental.ts             # Feature flags (plugin_load_timeout_ms min 1000)
 ├── sisyphus.ts                 # SisyphusConfigSchema (task system)
 ├── sisyphus-agent.ts           # SisyphusAgentConfigSchema
-├── ralph-loop.ts               # RalphLoopConfigSchema
 ├── tmux.ts                     # TmuxConfigSchema + TmuxLayoutSchema
 ├── websearch.ts                # provider: "exa" | "tavily"
 ├── claude-code.ts              # CC compatibility settings

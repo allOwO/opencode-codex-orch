@@ -325,7 +325,7 @@ describe("default_agent behavior with Sisyphus orchestration", () => {
     expect(config.default_agent).toBe(getAgentDisplayName("prometheus"))
   })
 
-  test("canonicalizes configured default_agent when key uses mixed case", async () => {
+  test("preserves retired mixed-case default_agent values as custom names", async () => {
     // given
     const pluginConfig: OpenCodeCodexOrchConfig = {}
     const config: Record<string, unknown> = {
@@ -346,7 +346,7 @@ describe("default_agent behavior with Sisyphus orchestration", () => {
     await handler(config)
 
     // then
-    expect(config.default_agent).toBe(getAgentDisplayName("prometheus"))
+    expect(config.default_agent).toBe("PrOmEtHeUs")
   })
 
   test("canonicalizes configured default_agent key to display name", async () => {
@@ -595,45 +595,6 @@ describe("Prometheus category config resolution", () => {
     expect(config?.top_p).toBe(0.9)
     expect(config?.maxTokens).toBe(32000)
     expect(config?.tools).toEqual({ tool1: true, tool2: false })
-  })
-})
-
-describe("retired prometheus config", () => {
-  test("ignores prometheus overrides even when categories are configured", async () => {
-    const pluginConfig: OpenCodeCodexOrchConfig = {
-      sisyphus_agent: {
-        planner_enabled: true,
-      },
-      categories: {
-        "test-planning": {
-          model: "openai/gpt-5.4",
-          reasoningEffort: "xhigh",
-        },
-      },
-      agents: {
-        prometheus: {
-          category: "test-planning",
-          reasoningEffort: "low",
-        },
-      },
-    }
-    const config: Record<string, unknown> = {
-      model: "anthropic/claude-opus-4-6",
-      agent: {},
-    }
-    const handler = createConfigHandler({
-      ctx: { directory: "/tmp" },
-      pluginConfig,
-      modelCacheState: {
-        anthropicContext1MEnabled: false,
-        modelContextLimitsCache: new Map(),
-      },
-    })
-
-    await handler(config)
-
-    const agents = config.agent as Record<string, unknown>
-    expect(agents[getAgentDisplayName("prometheus")]).toBeUndefined()
   })
 })
 

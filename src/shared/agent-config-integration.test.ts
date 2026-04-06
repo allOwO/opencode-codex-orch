@@ -103,40 +103,35 @@ describe("Agent Config Integration", () => {
       expect(getAgentDisplayName("reviewer")).toBe("Reviewer")
     })
 
-    test("returns correct display names for all builtin agents", () => {
+    test("returns correct display names for all active builtin agents", () => {
       // given - lowercase config keys
-        const agents = ["orchestrator", "atlas", "prometheus", "metis", "reviewer", "oracle", "librarian", "explore", "multimodal-looker", "deepsearch"]
+      const agents = ["orchestrator", "reviewer", "oracle", "librarian", "explore", "deepsearch"]
 
       // when - display names are requested
       const displayNames = agents.map((agent) => getAgentDisplayName(agent))
 
       // then - display names are correct
       expect(displayNames).toContain("Orchestrator")
-      expect(displayNames).toContain("Atlas (Plan Executor)")
-      expect(displayNames).toContain("Prometheus (Plan Builder)")
-      expect(displayNames).toContain("Metis (Plan Consultant)")
       expect(displayNames).toContain("Reviewer")
       expect(displayNames).toContain("oracle")
       expect(displayNames).toContain("librarian")
       expect(displayNames).toContain("explore")
-        expect(displayNames).toContain("multimodal-looker")
-        expect(displayNames).toContain("DeepSearch")
+      expect(displayNames).toContain("DeepSearch")
     })
 
-    test("handles lowercase keys case-insensitively", () => {
-      // given - various case formats of lowercase keys
-      const keys = ["Sisyphus", "Atlas", "SISYPHUS", "atlas", "prometheus", "PROMETHEUS"]
+    test("handles active and legacy compatibility names case-insensitively", () => {
+      const keys = ["Sisyphus", "Momus", "SISYPHUS", "reviewer", "DeepSearch", "DEEPSEARCH"]
 
       // when - display names are requested
       const displayNames = keys.map((key) => getAgentDisplayName(key))
 
       // then - correct display names are returned
       expect(displayNames[0]).toBe("Orchestrator")
-      expect(displayNames[1]).toBe("Atlas (Plan Executor)")
+      expect(displayNames[1]).toBe("Reviewer")
       expect(displayNames[2]).toBe("Orchestrator")
-      expect(displayNames[3]).toBe("Atlas (Plan Executor)")
-      expect(displayNames[4]).toBe("Prometheus (Plan Builder)")
-      expect(displayNames[5]).toBe("Prometheus (Plan Builder)")
+      expect(displayNames[3]).toBe("Reviewer")
+      expect(displayNames[4]).toBe("DeepSearch")
+      expect(displayNames[5]).toBe("DeepSearch")
     })
 
     test("returns original key for unknown agents", () => {
@@ -163,9 +158,9 @@ describe("Agent Config Integration", () => {
       expect(allLowercase).toBe(true)
     })
 
-    test("model requirements include all builtin agents", () => {
+    test("model requirements include all active builtin agents", () => {
       // given - expected builtin agents
-      const expectedAgents = ["orchestrator", "sisyphus", "deepsearch", "atlas", "prometheus", "metis", "reviewer", "oracle", "librarian", "explore", "multimodal-looker"]
+      const expectedAgents = ["orchestrator", "sisyphus", "deepsearch", "reviewer", "oracle", "librarian", "explore", "momus"]
 
       // when - checking AGENT_MODEL_REQUIREMENTS
       const agentKeys = Object.keys(AGENT_MODEL_REQUIREMENTS)
@@ -216,7 +211,7 @@ describe("Agent Config Integration", () => {
       // given - new format config (already lowercase)
       const newConfig = {
         orchestrator: { model: "anthropic/claude-opus-4-6" },
-        atlas: { model: "anthropic/claude-opus-4-6" },
+        reviewer: { model: "anthropic/claude-opus-4-6" },
       }
 
       // when - migration is applied (should be no-op)
@@ -230,11 +225,11 @@ describe("Agent Config Integration", () => {
 
       // when - display names are retrieved
       const sisyphusDisplay = getAgentDisplayName("orchestrator")
-      const atlasDisplay = getAgentDisplayName("atlas")
+      const reviewerDisplay = getAgentDisplayName("reviewer")
 
       // then - display names are correct
       expect(sisyphusDisplay).toBe("Orchestrator")
-      expect(atlasDisplay).toBe("Atlas (Plan Executor)")
+      expect(reviewerDisplay).toBe("Reviewer")
     })
   })
 })

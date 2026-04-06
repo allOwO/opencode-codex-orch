@@ -2,9 +2,8 @@ import { describe, test, expect } from "bun:test"
 import { createOracleAgent } from "./oracle"
 import { createLibrarianAgent } from "./librarian"
 import { createExploreAgent } from "./explore"
+import { createDeepSearchAgent } from "./deepsearch"
 import { createMomusAgent } from "./momus"
-import { createMetisAgent } from "./metis"
-import { createAtlasAgent } from "./atlas"
 
 const TEST_MODEL = "anthropic/claude-sonnet-4-5"
 
@@ -83,32 +82,19 @@ describe("read-only agent tool restrictions", () => {
     })
   })
 
-  describe("Metis", () => {
-    test("denies all file-writing tools", () => {
+  describe("DeepSearch", () => {
+    test("allows its orchestration tool allowlist", () => {
       // given
-      const agent = createMetisAgent(TEST_MODEL)
-
-      // when
-      const permission = agent.permission as Record<string, string>
-
-      // then
-      for (const tool of FILE_WRITE_TOOLS) {
-        expect(permission[tool]).toBe("deny")
-      }
-    })
-  })
-
-  describe("Atlas", () => {
-    test("allows delegation tools for orchestration", () => {
-      // given
-      const agent = createAtlasAgent({ model: TEST_MODEL })
+      const agent = createDeepSearchAgent(TEST_MODEL)
 
       // when
       const permission = (agent.permission ?? {}) as Record<string, string>
 
       // then
-      expect(permission["task"]).toBeUndefined()
-      expect(permission["call_oco_agent"]).toBeUndefined()
+      expect(permission["question"]).toBe("allow")
+      expect(permission["read"]).toBe("allow")
+      expect(permission["write"]).toBe("allow")
+      expect(permission["call_oco_agent"]).toBe("allow")
     })
   })
 })

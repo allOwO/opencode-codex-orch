@@ -85,10 +85,10 @@ export async function runTuiInstaller(args: InstallArgs, version: string): Promi
   p.log.message(`Run ${color.cyan("opencode")} to start!`)
 
   p.note(
-    `Include ${color.cyan("ultrawork")} (or ${color.cyan("ulw")}) in your prompt.\n` +
-      `All features work like magic—parallel agents, background tasks,\n` +
+    `Start with a direct request to the orchestrator.\n` +
+      `You still get parallel agents, background tasks,\n` +
       `deep exploration, and relentless execution until completion.`,
-    "The Magic Word",
+    "Getting Started",
   )
 
   p.log.message(`${color.yellow("★")} If you found this helpful, consider starring the repo!`)

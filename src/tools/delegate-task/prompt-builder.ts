@@ -8,7 +8,7 @@ const PLAN_AGENT_PROMPT_APPEND = `
 Additional requirements for this planning request:
 - Answer in English.
 - Write the plan in English.
-- Plan well for ultrawork execution.
+ - Plan for direct orchestrator-driven execution.
 - Use TDD-oriented planning.
 - Include a clear atomic commit strategy.`
 

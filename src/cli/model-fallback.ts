@@ -35,10 +35,10 @@ export function generateModelConfig(config: InstallConfig): GeneratedOcoConfig {
 
   if (!hasAnyProvider) {
     return {
-      $schema: SCHEMA_URL,
-      agents: Object.fromEntries(
-        Object.entries(CLI_AGENT_MODEL_REQUIREMENTS)
-          .filter(([role, req]) => !(role === "sisyphus" && req.requiresAnyModel))
+        $schema: SCHEMA_URL,
+        agents: Object.fromEntries(
+          Object.entries(CLI_AGENT_MODEL_REQUIREMENTS)
+          .filter(([role, req]) => !(role === "orchestrator" && req.requiresAnyModel))
           .map(([role]) => [role, { model: ULTIMATE_FALLBACK }])
       ),
       categories: Object.fromEntries(
@@ -51,7 +51,7 @@ export function generateModelConfig(config: InstallConfig): GeneratedOcoConfig {
   const categories: Record<string, CategoryConfig> = {}
 
   for (const [role, req] of Object.entries(CLI_AGENT_MODEL_REQUIREMENTS)) {
-    if (role === "sisyphus") {
+    if (role === "orchestrator") {
       const fallbackChain = getSisyphusFallbackChain()
       if (req.requiresAnyModel && !isAnyFallbackEntryAvailable(fallbackChain, avail)) {
         continue

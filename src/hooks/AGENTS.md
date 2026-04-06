@@ -47,8 +47,7 @@ hooks/
 
 ## REMOVED HOOKS (null-shimmed in create-hooks.ts)
 
-34 hooks removed and set to `null` for type compatibility:
-anthropicEffort, stopContinuationGuard, backgroundNotificationHook, keywordDetector, thinkMode, claudeCodeHooks, autoSlashCommand, noSisyphusGpt, startWork, ralphLoop, sessionNotification, todoContinuationEnforcer, unstableAgentBabysitter, contextWindowMonitor, anthropicContextWindowLimitRecovery, agentUsageReminder, categorySkillReminder, interactiveBashSession, compactionTodoPreserver, compactionContextInjector, preemptiveCompaction, commentChecker, emptyTaskResponseDetector, delegateTaskRetry, atlasHook, taskResumeInfo, readImageResizer, jsonErrorRecovery, questionLabelTruncator, nonInteractiveEnv, tasksTodowriteDisabler, prometheusMdOnly, sisyphusJuniorNotepad, thinkingBlockValidator
+34 hooks removed and set to `null` for type compatibility, including retired continuation and planner-era hooks.
 
 ## HOW TO ADD A HOOK
 

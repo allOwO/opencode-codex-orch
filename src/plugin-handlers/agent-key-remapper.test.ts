@@ -31,32 +31,26 @@ describe("remapAgentKeysToDisplayNames", () => {
     expect(result["custom-agent"]).toBeDefined()
   })
 
-  it("remaps all core agents to display names", () => {
-    // given all core agents
+  it("remaps active agents to display names and leaves retired names alone", () => {
     const agents = {
       sisyphus: {},
+      reviewer: {},
+      deepsearch: {},
       prometheus: {},
       atlas: {},
       metis: {},
-      momus: {},
-      "sisyphus-junior": {},
     }
 
     // when remapping
     const result = remapAgentKeysToDisplayNames(agents)
 
-    // then all get display name keys without lowercase duplicates
+    // then active agents get display names while retired keys stay literal
     expect(result.Orchestrator).toBeDefined()
     expect(result["sisyphus"]).toBeUndefined()
-    expect(result["Prometheus (Plan Builder)"]).toBeDefined()
-    expect(result["prometheus"]).toBeUndefined()
-    expect(result["Atlas (Plan Executor)"]).toBeDefined()
-    expect(result["atlas"]).toBeUndefined()
-    expect(result["Metis (Plan Consultant)"]).toBeDefined()
-    expect(result["metis"]).toBeUndefined()
     expect(result.Reviewer).toBeDefined()
-    expect(result["momus"]).toBeUndefined()
-    expect(result.Executor).toBeDefined()
-    expect(result["sisyphus-junior"]).toBeUndefined()
+    expect(result.DeepSearch).toBeDefined()
+    expect(result["prometheus"]).toBeDefined()
+    expect(result["atlas"]).toBeDefined()
+    expect(result["metis"]).toBeDefined()
   })
 })

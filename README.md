@@ -76,10 +76,10 @@ bunx opencode-codex-orch install
 ```bash
 opencode
 # then type:
-ulw fix the failing tests
+fix the failing tests
 ```
 
-`ulw` triggers autonomous execution mode. The agent explores, plans, implements, and verifies on its own.
+The orchestrator explores, plans, implements, and verifies on its own.
 
 ## Documentation
 

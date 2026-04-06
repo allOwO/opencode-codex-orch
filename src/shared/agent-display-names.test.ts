@@ -43,28 +43,6 @@ describe("getAgentDisplayName", () => {
     expect(result).toBe("custom-agent")
   })
 
-  it("returns display name for atlas", () => {
-    // given config key "atlas"
-    const configKey = "atlas"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns "Atlas (Plan Executor)"
-    expect(result).toBe("Atlas (Plan Executor)")
-  })
-
-  it("returns display name for prometheus", () => {
-    // given config key "prometheus"
-    const configKey = "prometheus"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns "Prometheus (Plan Builder)"
-    expect(result).toBe("Prometheus (Plan Builder)")
-  })
-
   it("returns display name for sisyphus-junior", () => {
     // given config key "sisyphus-junior"
     const configKey = "sisyphus-junior"
@@ -74,17 +52,6 @@ describe("getAgentDisplayName", () => {
 
     // then returns canonical public name
     expect(result).toBe("Executor")
-  })
-
-  it("returns display name for metis", () => {
-    // given config key "metis"
-    const configKey = "metis"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns "Metis (Plan Consultant)"
-    expect(result).toBe("Metis (Plan Consultant)")
   })
 
   it("returns display name for momus", () => {
@@ -131,15 +98,11 @@ describe("getAgentDisplayName", () => {
     expect(result).toBe("explore")
   })
 
-  it("returns display name for multimodal-looker", () => {
-    // given config key "multimodal-looker"
-    const configKey = "multimodal-looker"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns "multimodal-looker"
-    expect(result).toBe("multimodal-looker")
+  it("does not expose retired agent display names in the active surface", () => {
+    expect(getAgentDisplayName("atlas")).toBe("atlas")
+    expect(getAgentDisplayName("prometheus")).toBe("prometheus")
+    expect(getAgentDisplayName("metis")).toBe("metis")
+    expect(getAgentDisplayName("multimodal-looker")).toBe("multimodal-looker")
   })
 })
 
@@ -156,18 +119,16 @@ describe("getAgentConfigKey", () => {
     expect(getAgentConfigKey("Sisyphus (Ultraworker)")).toBe("orchestrator")
   })
 
-  it("resolves display name case-insensitively", () => {
-    // given display name in different case
-    // when getAgentConfigKey called
-    // then returns "atlas"
-    expect(getAgentConfigKey("atlas (plan executor)")).toBe("atlas")
+  it("resolves unknown retired display names as plain lowercase strings", () => {
+    expect(getAgentConfigKey("atlas (plan executor)")).toBe("atlas (plan executor)")
+    expect(getAgentConfigKey("prometheus (plan builder)")).toBe("prometheus (plan builder)")
+    expect(getAgentConfigKey("metis (plan consultant)")).toBe("metis (plan consultant)")
   })
 
-  it("passes through lowercase config keys unchanged", () => {
-    // given lowercase config key "prometheus"
-    // when getAgentConfigKey called
-    // then returns "prometheus"
+  it("passes through lowercase retired config keys unchanged", () => {
     expect(getAgentConfigKey("prometheus")).toBe("prometheus")
+    expect(getAgentConfigKey("atlas")).toBe("atlas")
+    expect(getAgentConfigKey("metis")).toBe("metis")
   })
 
   it("returns lowercased unknown agents", () => {
@@ -177,12 +138,9 @@ describe("getAgentConfigKey", () => {
     expect(getAgentConfigKey("Custom-Agent")).toBe("custom-agent")
   })
 
-  it("resolves all core agent display names", () => {
-    // given all core display names
-    // when/then each resolves to its config key
-    expect(getAgentConfigKey("Prometheus (Plan Builder)")).toBe("prometheus")
-    expect(getAgentConfigKey("Atlas (Plan Executor)")).toBe("atlas")
-    expect(getAgentConfigKey("Metis (Plan Consultant)")).toBe("metis")
+  it("resolves active canonical and compatibility display names", () => {
+    expect(getAgentConfigKey("Orchestrator")).toBe("orchestrator")
+    expect(getAgentConfigKey("Reviewer")).toBe("reviewer")
     expect(getAgentConfigKey("Momus (Plan Critic)")).toBe("reviewer")
     expect(getAgentConfigKey("Sisyphus-Junior")).toBe("executor")
   })
@@ -199,20 +157,23 @@ describe("AGENT_DISPLAY_NAMES", () => {
     const expectedMappings = {
       orchestrator: "Orchestrator",
       deepsearch: "DeepSearch",
-      prometheus: "Prometheus (Plan Builder)",
-      atlas: "Atlas (Plan Executor)",
       executor: "Executor",
-      metis: "Metis (Plan Consultant)",
       reviewer: "Reviewer",
       oracle: "oracle",
       librarian: "librarian",
       explore: "explore",
-      "multimodal-looker": "multimodal-looker",
       build: "build",
     }
 
     // when checking the constant
     // then contains all expected mappings
     expect(AGENT_DISPLAY_NAMES).toEqual(expectedMappings)
+  })
+
+  it("does not include retired agent names", () => {
+    expect(AGENT_DISPLAY_NAMES).not.toHaveProperty("prometheus")
+    expect(AGENT_DISPLAY_NAMES).not.toHaveProperty("atlas")
+    expect(AGENT_DISPLAY_NAMES).not.toHaveProperty("metis")
+    expect(AGENT_DISPLAY_NAMES).not.toHaveProperty("multimodal-looker")
   })
 })

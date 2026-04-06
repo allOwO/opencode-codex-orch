@@ -2176,7 +2176,7 @@ describe("runtime-fallback", () => {
         },
       })
 
-      //#then - should detect sisyphus from sessionID and use its fallback
+      //#then - should detect legacy sisyphus from sessionID and use orchestrator fallback compatibility
       const fallbackLog = logCalls.find((c) => c.msg.includes("Preparing fallback"))
       expect(fallbackLog).toBeDefined()
       expect(fallbackLog?.data).toMatchObject({ to: "openai/gpt-5.4" })
@@ -2203,7 +2203,7 @@ describe("runtime-fallback", () => {
         }),
         {
           config: createMockConfig({ notify_on_fallback: false }),
-          pluginConfig: createMockPluginConfigWithAgentFallback("prometheus", ["github-copilot/claude-opus-4.6"]),
+          pluginConfig: createMockPluginConfigWithAgentFallback("reviewer", ["github-copilot/claude-opus-4.6"]),
         },
       )
       const sessionID = "test-preserve-agent-on-retry"
@@ -2215,14 +2215,14 @@ describe("runtime-fallback", () => {
             sessionID,
             model: "anthropic/claude-opus-4-6",
             error: { statusCode: 503, message: "Service unavailable" },
-            agent: "prometheus",
+            agent: "reviewer",
           },
         },
       })
 
       expect(promptCalls.length).toBe(1)
       const callBody = promptCalls[0]?.body as Record<string, unknown>
-      expect(callBody?.agent).toBe("prometheus")
+      expect(callBody?.agent).toBe("reviewer")
       expect(callBody?.model).toEqual({ providerID: "github-copilot", modelID: "claude-opus-4.6" })
     })
   })

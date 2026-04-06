@@ -3,7 +3,7 @@ import type { RunOptions } from "./types"
 import type { OpenCodeCodexOrchConfig } from "../../config"
 import { getAgentConfigKey, getAgentDisplayName } from "../../shared/agent-display-names"
 
-const CORE_AGENT_ORDER = ["orchestrator", "prometheus", "atlas"] as const
+const CORE_AGENT_ORDER = ["orchestrator", "reviewer", "executor"] as const
 const DEFAULT_AGENT = "orchestrator"
 
 type EnvVars = Record<string, string | undefined>
