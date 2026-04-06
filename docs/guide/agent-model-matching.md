@@ -10,22 +10,22 @@ This isn't a bug. It's the foundation of the entire system.
 
 opencode-codex-orch assigns each agent a model that matches its _working style_ — like building a team where each person is in the role that fits their personality.
 
-### Sisyphus: The Sociable Lead
+### Orchestrator: The Sociable Lead
 
-Sisyphus is the developer who knows everyone, goes everywhere, and gets things done through communication and coordination. Talks to other agents, understands context across the whole codebase, delegates work intelligently, and codes well too. But deep, purely technical problems? He'll struggle a bit.
+The orchestrator is the developer who knows everyone, goes everywhere, and gets things done through communication and coordination. Talks to other agents, understands context across the whole codebase, delegates work intelligently, and codes well too. But deep, purely technical problems? It will still lean on specialists.
 
-**This is why Sisyphus uses Claude / Kimi / GLM.** These models excel at:
+**This is why the orchestrator uses Claude / Kimi / GLM.** These models excel at:
 
-- Following complex, multi-step instructions (Sisyphus's prompt is ~1,100 lines)
+- Following complex, multi-step orchestration instructions
 - Maintaining conversation flow across many tool calls
 - Understanding nuanced delegation and orchestration patterns
 - Producing well-structured, communicative output
 
-Using Sisyphus with older GPT models would be like taking your best project manager — the one who coordinates everyone, runs standups, and keeps the whole team aligned — and sticking them in a room alone to debug a race condition. Wrong fit. GPT-5.4 now has a dedicated Sisyphus prompt path, but GPT is still not the default recommendation for the orchestrator.
+Using the orchestrator with older GPT models would be like taking your best project manager and sticking them in a room alone to debug a race condition. Wrong fit. GPT support exists where useful, but GPT is still not the default recommendation for the orchestrator.
 
 ### GPT-heavy execution paths
 
-This fork no longer ships a separate GPT-native deep-worker agent, but it still uses GPT-style reasoning in the places where it fits best: GPT-specialized categories, Sisyphus-Junior GPT executors, Oracle, and Momus.
+This fork no longer ships a separate GPT-native deep-worker agent, but it still uses GPT-style reasoning where it fits best: GPT-heavy categories, Executor variants, Oracle, Reviewer, and DeepSearch.
 
 **This is why GPT-5.3 Codex and GPT-5.4 still matter here:**
 
@@ -50,9 +50,9 @@ This matters for understanding why some agents support both model families while
 
 **GPT** (especially 5.2+) responds to **principle-driven** prompts — concise principles, XML structure, explicit decision criteria. More rules = more contradiction surface = more drift. GPT works best when you state the goal and let it figure out the mechanics.
 
-Real example: Prometheus's Claude prompt is ~1,100 lines across 7 files. The GPT prompt achieves the same behavior with 3 principles in ~121 lines. Same outcome, completely different approach.
+Real example: plan-oriented prompts can often be much shorter on GPT-family models than on Claude-family models while achieving the same outcome.
 
-Agents that support both families (Prometheus, Atlas) auto-detect your model at runtime and switch prompts via `isGptModel()`. You don't have to think about it.
+Agents that support both families auto-detect your model at runtime and switch prompt paths where necessary. You don't have to think about it.
 
 ---
 
@@ -64,17 +64,16 @@ These agents have Claude-optimized prompts — long, detailed, mechanics-driven.
 
 | Agent        | Role              | Fallback Chain                         | Notes                                                                                             |
 | ------------ | ----------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Sisyphus** | Main orchestrator | Claude Opus → K2P5 → Kimi K2.5 → GPT-5.4 → GLM 5 → Big Pickle | Claude-family first. GPT-5.4 has dedicated prompt support. Kimi/GLM as intermediate fallbacks. |
-| **Metis**    | Plan gap analyzer | Claude Opus → GPT-5.4 → Gemini 3.1 Pro | Claude preferred, GPT acceptable fallback.                                                        |
+| **Orchestrator** | Main orchestrator | Claude Opus → K2P5 → Kimi K2.5 → GPT-5.4 → GLM 5 → Big Pickle | Claude-family first. GPT-5.4 has dedicated prompt support. Kimi/GLM as intermediate fallbacks. |
 
-### Dual-Prompt Agents → Claude preferred, GPT supported
+### Review / research agents
 
-These agents ship separate prompts for Claude and GPT families. They auto-detect your model and switch at runtime.
+These agents lean on GPT-style reasoning for verification and synthesis.
 
 | Agent          | Role              | Fallback Chain                         | Notes                                                                |
 | -------------- | ----------------- | -------------------------------------- | -------------------------------------------------------------------- |
-| **Prometheus** | Strategic planner | Claude Opus → GPT-5.4 → Gemini 3.1 Pro | Interview-mode planning. GPT prompt is compact and principle-driven. |
-| **Atlas**      | Todo orchestrator | Claude Sonnet 4.6 → GPT-5.4            | Claude first, GPT-5.4 as the current fallback path.                  |
+| **Reviewer**   | Review / verification  | GPT-5.4 → Claude Opus → Gemini 3.1 Pro | Verifies plans and implementations. |
+| **DeepSearch** | Research orchestration | GPT / Gemini / GLM multimodal fallbacks | Synthesizes broad research into reports. |
 
 ### GPT-Preferred Specialists
 
@@ -83,7 +82,7 @@ These agents are built for GPT's principle-driven style. Their prompts assume au
 | Agent          | Role                    | Fallback Chain                         | Notes                                            |
 | -------------- | ----------------------- | -------------------------------------- | ------------------------------------------------ |
 | **Oracle**     | Architecture consultant | GPT-5.4 → Gemini 3.1 Pro → Claude Opus | Read-only high-IQ consultation.                  |
-| **Momus**      | Ruthless reviewer       | GPT-5.4 → Claude Opus → Gemini 3.1 Pro | Verification and plan review.                    |
+| **Reviewer**   | Ruthless reviewer       | GPT-5.4 → Claude Opus → Gemini 3.1 Pro | Verification and plan review.                    |
 
 ### Utility Runners → Speed over Intelligence
 
@@ -93,7 +92,7 @@ These agents do grep, search, and retrieval. They intentionally use the fastest,
 | --------------------- | ------------------ | ---------------------------------------------- | ----------------------------------------------------- |
 | **Explore**           | Fast codebase grep | Grok Code Fast → MiniMax → Haiku → GPT-5-Nano  | Speed is everything. Fire 10 in parallel.             |
 | **Librarian**         | Docs/code search   | Gemini Flash → MiniMax → Big Pickle            | Doc retrieval doesn't need deep reasoning.            |
-| **Multimodal Looker** | Vision/screenshots | GPT-5.3 Codex → K2P5 → Gemini Flash → GLM-4.6v | Uses the first available multimodal-capable fallback. |
+| **DeepSearch**        | Research / multimodal synthesis | GPT-5.3 Codex → K2P5 → Gemini Flash → GLM-4.6v | Uses multimodal-capable fallbacks when needed. |
 
 ---
 
@@ -105,7 +104,7 @@ Communicative, instruction-following, structured output. Best for agents that ne
 
 | Model                 | Strengths                                                                    |
 | --------------------- | ---------------------------------------------------------------------------- |
-| **Claude Opus 4.6**   | Best overall. Highest compliance with complex prompts. Default for Sisyphus. |
+| **Claude Opus 4.6**   | Best overall. Highest compliance with complex prompts. Default for the orchestrator. |
 | **Claude Sonnet 4.6** | Faster, cheaper. Good balance for everyday tasks.                            |
 | **Claude Haiku 4.5**  | Fast and cheap. Good for quick tasks and utility work.                       |
 | **Kimi K2.5**         | Behaves very similarly to Claude. Great all-rounder at lower cost.           |
@@ -119,14 +118,14 @@ Principle-driven, explicit reasoning, deep technical capability. Best for agents
 | ----------------- | ----------------------------------------------------------------------------------------------- |
 | **GPT-5.3 Codex** | Deep coding powerhouse. Autonomous exploration. Used by GPT-heavy task categories and executors. |
 | **GPT-5.4**       | High intelligence, strategic reasoning. Default for Oracle.                                     |
-| **GPT-5.4**       | Strong principle-driven reasoning. Default for Momus and a key fallback for Prometheus / Atlas. |
+| **GPT-5.4**       | Strong principle-driven reasoning. Default for Reviewer and a key fallback for research/review paths. |
 | **GPT-5-Nano**    | Ultra-cheap, fast. Good for simple utility tasks.                                               |
 
 ### Other Models
 
 | Model                | Strengths                                                                                                    |
 | -------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Gemini 3.1 Pro**   | Excels at visual/frontend tasks. Different reasoning style. Default for `visual-engineering` and `artistry`. |
+| **Gemini 3.1 Pro**   | Excels at visual/frontend tasks. Different reasoning style. Default for `designer`. |
 | **Gemini 3 Flash**   | Fast. Good for doc search and light tasks.                                                                   |
 | **Grok Code Fast 1** | Blazing fast code grep. Default for Explore agent.                                                           |
 | **MiniMax M2.5**     | Fast and smart. Good for utility tasks and search/retrieval.                                                 |
@@ -145,14 +144,9 @@ When agents delegate work, they don't pick a model name — they pick a **catego
 
 | Category             | When Used                  | Fallback Chain                               |
 | -------------------- | -------------------------- | -------------------------------------------- |
-| `visual-engineering` | Frontend, UI, CSS, design  | Gemini 3.1 Pro → GLM 5 → Claude Opus         |
-| `ultrabrain`         | Maximum reasoning needed   | GPT-5.3 Codex → Gemini 3.1 Pro → Claude Opus |
-| `deep`               | Deep coding, complex logic | GPT-5.3 Codex → Claude Opus → Gemini 3.1 Pro |
-| `artistry`           | Creative, novel approaches | Gemini 3.1 Pro → Claude Opus → GPT-5.4       |
+| `designer`           | Frontend, UI, CSS, design  | Gemini 3.1 Pro → GLM 5 → Claude Opus         |
+| `hard`               | Maximum reasoning needed   | GPT-5.4 → Claude Opus → GLM 5 → K2P5         |
 | `quick`              | Simple, fast tasks         | Claude Haiku → Gemini Flash → GPT-5-Nano     |
-| `unspecified-high`   | General complex work       | GPT-5.4 → Claude Opus → GLM 5 → K2P5         |
-| `unspecified-low`    | General standard work      | Claude Sonnet → GPT-5.3 Codex → Gemini Flash |
-| `writing`            | Text, docs, prose          | Gemini Flash → Claude Sonnet                 |
 
 See the [Orchestration System Guide](./orchestration.md) for how agents dispatch tasks to categories.
 
@@ -166,25 +160,23 @@ See the [Orchestration System Guide](./orchestration.md) for how agents dispatch
 {
   "$schema": "https://raw.githubusercontent.com/allOwO/opencode-codex-orch/main/assets/opencode-codex-orch.schema.json",
   "agents": {
-    "sisyphus": {
+    "orchestrator": {
       "model": "kimi-for-coding/k2p5"
     },
     "librarian": { "model": "google/gemini-3-flash" },
     "explore": { "model": "github-copilot/grok-code-fast-1" },
     "oracle": { "model": "openai/gpt-5.4", "variant": "high" },
-    "prometheus": {
-      "prompt_append": "Leverage deep & quick agents heavily, always in parallel."
+    "reviewer": {
+      "prompt_append": "Review for clarity and verification."
     }
   },
   "categories": {
     "quick": { "model": "opencode/gpt-5-nano" },
-    "unspecified-low": { "model": "anthropic/claude-sonnet-4-6" },
-    "unspecified-high": { "model": "openai/gpt-5.4-high" },
-    "visual-engineering": {
+    "hard": { "model": "openai/gpt-5.4", "variant": "high" },
+    "designer": {
       "model": "google/gemini-3.1-pro",
       "variant": "high"
-    },
-    "writing": { "model": "google/gemini-3-flash" }
+    }
   },
   "background_task": {
     "providerConcurrency": {
@@ -207,13 +199,13 @@ Run `opencode models` to see available models, `opencode auth login` to authenti
 
 **Safe** — same personality type:
 
-- Sisyphus: Opus → Sonnet, Kimi K2.5, GLM 5 (all communicative models)
-- Prometheus: Opus → GPT-5.4 (auto-switches to the GPT prompt)
-- Atlas: Claude Sonnet 4.6 → GPT-5.4 (auto-switches to the GPT prompt)
+- Orchestrator: Opus → Sonnet, Kimi K2.5, GLM 5 (all communicative models)
+- Reviewer: GPT-5.4 → Claude Opus
+- DeepSearch: GPT / Gemini / GLM multimodal-capable fallbacks
 
 **Dangerous** — personality mismatch:
 
-- Sisyphus → older GPT models: **Still a bad fit. GPT-5.4 is the only dedicated GPT prompt path.**
+- Orchestrator → older GPT models: **Still a bad fit. Claude/Kimi/GLM remain the best default family.**
 - GPT-heavy executor paths → Claude: **Possible, but you lose the intended Codex/GPT-style autonomy.**
 - Explore → Opus: **Massive cost waste. Explore needs speed, not intelligence.**
 - Librarian → Opus: **Same. Doc search doesn't need Opus-level reasoning.**

@@ -2,32 +2,26 @@
 
 ## Agents
 
-opencode-codex-orch provides 10 specialized AI agents. Each has distinct expertise, optimized models, and tool permissions.
+opencode-codex-orch provides specialized AI agents. Each has distinct expertise, optimized models, and tool permissions.
 
 ### Core Agents
 
-| Agent                 | Model              | Purpose                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sisyphus**          | `claude-opus-4-6`  | The default orchestrator. Plans, delegates, and executes complex tasks using specialized subagents with aggressive parallel execution. Todo-driven workflow with extended thinking (32k budget). Fallback: `glm-5` → `big-pickle`.                                                                                                                               |
-| **Oracle**            | `gpt-5.4`          | Architecture decisions, code review, debugging. Read-only consultation with stellar logical reasoning and deep analysis. Inspired by AmpCode. Fallback: `gemini-3.1-pro` → `claude-opus-4-6`.                                                                                                                                                                    |
-| **Librarian**         | `gemini-3-flash`   | Multi-repo analysis, documentation lookup, OSS implementation examples. Deep codebase understanding with evidence-based answers. Fallback: `minimax-m2.5-free` → `big-pickle`.                                                                                                                                                                                   |
-| **Explore**           | `grok-code-fast-1` | Fast codebase exploration and contextual grep. Fallback: `minimax-m2.5-free` → `claude-haiku-4-5` → `gpt-5-nano`.                                                                                                                                                                                                                                                |
-| **Multimodal-Looker** | `gpt-5.3-codex`    | Visual content specialist. Analyzes PDFs, images, diagrams to extract information. Fallback: `k2p5` → `gemini-3-flash` → `glm-4.6v` → `gpt-5-nano`.                                                                                                                                                                                                              |
+| Agent            | Model              | Purpose                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Orchestrator** | `claude-opus-4-6`  | The default main agent. Plans, delegates, and executes complex tasks using specialized subagents with aggressive parallel execution. Todo-driven workflow with extended thinking (32k budget). Fallback: `glm-5` → `big-pickle`.                                                                                                                               |
+| **Oracle**       | `gpt-5.4`          | Architecture decisions, code review, debugging. Read-only consultation with stellar logical reasoning and deep analysis. Inspired by AmpCode. Fallback: `gemini-3.1-pro` → `claude-opus-4-6`.                                                                                                                                                                    |
+| **Librarian**    | `gemini-3-flash`   | Multi-repo analysis, documentation lookup, OSS implementation examples. Deep codebase understanding with evidence-based answers. Fallback: `minimax-m2.5-free` → `big-pickle`.                                                                                                                                                                                   |
+| **Explore**      | `grok-code-fast-1` | Fast codebase exploration and contextual grep. Fallback: `minimax-m2.5-free` → `claude-haiku-4-5` → `gpt-5-nano`.                                                                                                                                                                                                                                                |
+| **DeepSearch**   | `gpt-5.3-codex`    | Deep research orchestrator. Breaks broad research into parallel sub-questions, dispatches librarian/explore work, and writes structured reports. Fallback: `k2p5` → `gemini-3-flash` → `glm-4.6v` → `gpt-5-nano`.                                                                                                                                                 |
 
-### Planning Agents
+### Supporting Agents
 
-| Agent          | Model             | Purpose                                                                                                                                            |
-| -------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Prometheus** | `claude-opus-4-6` | Strategic planner with interview mode. Creates detailed work plans through iterative questioning. Fallback: `gpt-5.4` → `gemini-3.1-pro`.          |
-| **Metis**      | `claude-opus-4-6` | Plan consultant — pre-planning analysis. Identifies hidden intentions, ambiguities, and AI failure points. Fallback: `gpt-5.4` → `gemini-3.1-pro`. |
-| **Momus**      | `gpt-5.4`         | Plan reviewer — validates plans against clarity, verifiability, and completeness standards. Fallback: `claude-opus-4-6` → `gemini-3.1-pro`.        |
+| Agent         | Model                  | Purpose                                                                                                                                                                                     |
+| ------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Reviewer**  | `gpt-5.4`              | Plan and implementation reviewer — validates clarity, verifiability, and completeness before or after execution. Fallback: `claude-opus-4-6` → `gemini-3.1-pro`.                         |
+| **Executor**  | _(category-dependent)_ | Category-spawned executor. Model is selected automatically from the canonical task categories (`designer`, `hard`, `quick`) when the main agent delegates work via the `task` tool.       |
 
-### Orchestration Agents
-
-| Agent               | Model                  | Purpose                                                                                                                                                                                     |
-| ------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Atlas**           | `claude-sonnet-4-6`    | Todo-list orchestrator. Executes planned tasks systematically, managing todo items and coordinating work. Fallback: `gpt-5.4` (medium).                                                     |
-| **Sisyphus-Junior** | _(category-dependent)_ | Category-spawned executor. Model is selected automatically based on the task category (visual-engineering, quick, deep, etc.). Used when the main agent delegates work via the `task` tool. |
+> **Compatibility note**: Legacy names such as `sisyphus`, `momus`, and `sisyphus-junior` are accepted only through migration and compatibility layers.
 
 ### Invoking Agents
 
@@ -41,14 +35,13 @@ Ask @explore for the policy on this feature
 
 ### Tool Restrictions
 
-| Agent             | Restrictions                                                                            |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| oracle            | Read-only: cannot write, edit, or delegate (blocked: write, edit, task, call_oco_agent) |
-| librarian         | Cannot write, edit, or delegate (blocked: write, edit, task, call_oco_agent)            |
-| explore           | Cannot write, edit, or delegate (blocked: write, edit, task, call_oco_agent)            |
-| multimodal-looker | Allowlist: `read` only                                                                  |
-| atlas             | Cannot delegate (blocked: task, call_oco_agent)                                         |
-| momus             | Cannot write, edit, or delegate (blocked: write, edit, task)                            |
+| Agent       | Restrictions                                                                            |
+| ----------- | --------------------------------------------------------------------------------------- |
+| oracle      | Read-only: cannot write, edit, or delegate (blocked: write, edit, task, call_oco_agent) |
+| librarian   | Cannot write, edit, or delegate (blocked: write, edit, task, call_oco_agent)            |
+| explore     | Cannot write, edit, or delegate (blocked: write, edit, task, call_oco_agent)            |
+| deepsearch  | Research-focused orchestration allowlist: question, read, write, call_oco_agent         |
+| reviewer    | Cannot write, edit, or delegate (blocked: write, edit, task)                            |
 
 ### Background Agents
 
@@ -104,16 +97,11 @@ By combining these two concepts, you can generate optimal agents through `task`.
 
 ### Built-in Categories
 
-| Category             | Default Model                   | Use Cases                                                                                                                   |
-| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `visual-engineering` | `google/gemini-3.1-pro`         | Frontend, UI/UX, design, styling, animation                                                                                 |
-| `ultrabrain`         | `openai/gpt-5.3-codex` (xhigh)  | Deep logical reasoning, complex architecture decisions requiring extensive analysis                                         |
-| `deep`               | `openai/gpt-5.3-codex` (medium) | Goal-oriented autonomous problem-solving. Thorough research before action. For hairy problems requiring deep understanding. |
-| `artistry`           | `google/gemini-3.1-pro` (high)  | Highly creative/artistic tasks, novel ideas                                                                                 |
-| `quick`              | `anthropic/claude-haiku-4-5`    | Trivial tasks - single file changes, typo fixes, simple modifications                                                       |
-| `unspecified-low`    | `anthropic/claude-sonnet-4-6`   | Tasks that don't fit other categories, low effort required                                                                  |
-| `unspecified-high`   | `openai/gpt-5.4` (high)         | Tasks that don't fit other categories, high effort required                                                                 |
-| `writing`            | `google/gemini-3-flash`         | Documentation, prose, technical writing                                                                                     |
+| Category   | Default Model                | Use Cases                                                           |
+| ---------- | ---------------------------- | ------------------------------------------------------------------- |
+| `designer` | `google/gemini-3.1-pro`      | Frontend, UI/UX, design, styling, animation                         |
+| `hard`     | `openai/gpt-5.4` (high)      | Complex implementation, architecture, debugging, deep research      |
+| `quick`    | `anthropic/claude-haiku-4-5` | Trivial tasks, typo fixes, simple modifications                     |
 
 ### Usage
 
@@ -121,7 +109,7 @@ Specify the `category` parameter when invoking the `task` tool.
 
 ```typescript
 task({
-  category: "visual-engineering",
+  category: "designer",
   prompt: "Add a responsive chart component to the dashboard page",
 });
 ```
@@ -157,11 +145,11 @@ You can define custom categories in `opencode-codex-orch.json`.
       "temperature": 0.5,
       "prompt_append": "You are a Korean technical writer. Maintain a friendly and clear tone."
     },
-    "visual-engineering": {
+    "designer": {
       "model": "openai/gpt-5.4",
       "temperature": 0.8
     },
-    "deep-reasoning": {
+    "hard": {
       "model": "anthropic/claude-opus-4-6",
       "thinking": {
         "type": "enabled",
@@ -175,9 +163,9 @@ You can define custom categories in `opencode-codex-orch.json`.
 }
 ```
 
-### Sisyphus-Junior as Delegated Executor
+### Executor as Delegated Agent
 
-When you use a Category, a special agent called **Sisyphus-Junior** performs the work.
+When you use a Category, a special agent called **Executor** performs the work.
 
 - **Characteristic**: Cannot **re-delegate** tasks to other agents.
 - **Purpose**: Prevents infinite delegation loops and ensures focus on the assigned task.
@@ -319,13 +307,13 @@ You can create powerful specialized agents by combining Categories and Skills.
 
 #### The Designer (UI Implementation)
 
-- **Category**: `visual-engineering`
+- **Category**: `designer`
 - **load_skills**: `["frontend-ui-ux", "playwright"]`
 - **Effect**: Implements aesthetic UI and verifies rendering results directly in browser.
 
 #### The Architect (Design Review)
 
-- **Category**: `ultrabrain`
+- **Category**: `hard`
 - **load_skills**: `[]` (pure reasoning)
 - **Effect**: Leverages GPT-5.3 Codex's logical reasoning for in-depth system architecture analysis.
 
@@ -369,11 +357,11 @@ Commands are slash-triggered workflows that execute predefined templates.
 | -------------------- | ------------------------------------------------------------------------------------------ |
 | `/autopilot`         | Enable autopilot mode explicitly for this request                                          |
 | `/init-deep`         | Initialize hierarchical AGENTS.md knowledge base                                           |
-| `/ralph-loop`        | Start self-referential development loop until completion                                   |
-| `/ulw-loop`          | Start ultrawork loop - continues with ultrawork mode                                       |
+| `/ralph-loop`        | Start self-referential development loop until completion *(legacy, retained for compatibility)* |
+| `/ulw-loop`          | Legacy continuation command retained for compatibility only |
 | `/cancel-ralph`      | Cancel active Ralph Loop                                                                   |
 | `/refactor`          | Intelligent refactoring with LSP, AST-grep, architecture analysis, and TDD verification    |
-| `/start-work`        | Start Sisyphus work session from Prometheus plan                                           |
+| `/start-work`        | Start work session from the current canonical plan                                         |
 | `/stop-continuation` | Stop all continuation mechanisms (ralph loop, todo continuation, boulder) for this session |
 | `/handoff`           | Create a detailed context summary for continuing work in a new session                     |
 
@@ -418,6 +406,8 @@ project/
 
 **Purpose**: Self-referential development loop that runs until task completion
 
+**Status**: Legacy command, retained for compatibility. Prefer `/start-work` for structured task execution.
+
 **Named after**: Anthropic's Ralph Wiggum plugin
 
 **Usage**:
@@ -438,7 +428,9 @@ project/
 
 ### /ulw-loop
 
-**Purpose**: Same as ralph-loop but with ultrawork mode active
+**Purpose**: Legacy alias for an older continuation workflow
+
+**Status**: Legacy command, retained for compatibility.
 
 Everything runs at maximum intensity - parallel agents, background tasks, aggressive exploration.
 
@@ -462,7 +454,7 @@ Everything runs at maximum intensity - parallel agents, background tasks, aggres
 
 ### /start-work
 
-**Purpose**: Start execution from a Prometheus-generated plan
+**Purpose**: Start execution from a canonical plan under `docs/superpowers/plans/`
 
 **Usage**:
 
@@ -470,7 +462,7 @@ Everything runs at maximum intensity - parallel agents, background tasks, aggres
 /start-work [plan-name]
 ```
 
-Uses atlas agent to execute planned tasks systematically.
+Uses the orchestrator plus delegated executors to execute planned tasks systematically.
 
 ### /stop-continuation
 
@@ -532,7 +524,7 @@ Requires the `sg` CLI from `@ast-grep/cli` or a system install such as `brew ins
 | Tool                  | Description                                                                                                                                                                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **call_oco_agent**    | Spawn explore/librarian agents. Supports `run_in_background`.                                                                                                                                                                           |
-| **task**              | Category-based task delegation. Supports built-in categories like `visual-engineering`, `ultrabrain`, `deep`, `artistry`, `quick`, `unspecified-low`, `unspecified-high`, and `writing`, or direct agent targeting via `subagent_type`. |
+| **task**              | Category-based task delegation. Supports canonical categories `designer`, `hard`, and `quick`, or direct agent targeting via `subagent_type`. |
 | **background_output** | Retrieve background task results                                                                                                                                                                                                        |
 | **background_cancel** | Cancel running background tasks                                                                                                                                                                                                         |
 
@@ -540,7 +532,7 @@ Requires the `sg` CLI from `@ast-grep/cli` or a system install such as `brew ins
 
 | Tool        | Description                                                                                                                                                    |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **look_at** | Analyze media files (PDFs, images, diagrams) via Multimodal-Looker agent. Extracts specific information or summaries from documents, describes visual content. |
+| **look_at** | Analyze media files (PDFs, images, diagrams) and extract specific information or summaries from documents or visual content. |
 
 ### Skill Tools
 
@@ -618,7 +610,9 @@ TaskUpdate({ id: "T-002", status: "completed" });
 // T-003 now unblocked
 ```
 
-**Storage**: Tasks are stored as JSON files in `.sisyphus/tasks/`.
+**Storage**: Tasks are stored as JSON files in `.opencode/tasks/`.
+
+> **Migration note**: The legacy path `.sisyphus/tasks/` is still readable for backward compatibility.
 
 **Difference from TodoWrite**:
 
@@ -688,10 +682,9 @@ Hooks intercept and modify behavior at key points in the agent lifecycle across 
 
 | Hook                        | Event               | Description                                                                                                                                                 |
 | --------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **keyword-detector**        | Message + Transform | Detects keywords and activates modes: `ultrawork`/`ulw` (max performance), `search`/`find` (parallel exploration), `analyze`/`investigate` (deep analysis). |
-| **think-mode**              | Params              | Auto-detects extended thinking needs. Catches "think deeply", "ultrathink" and adjusts model settings.                                                      |
-| **ralph-loop**              | Event + Message     | Manages self-referential loop continuation.                                                                                                                 |
-| **start-work**              | Message             | Handles /start-work command execution.                                                                                                                      |
+| **keyword-detector**     | Message + Transform | Detects search/investigation cues and helps bias the turn toward exploration or analysis. |
+| **ralph-loop**           | Event + Message     | Manages self-referential loop continuation. *(legacy)*                                                                                                     |
+| **start-work**           | Message             | Handles /start-work command execution.                                                                                                                      |
 | **auto-slash-command**      | Message             | Automatically executes slash commands from prompts.                                                                                                         |
 | **stop-continuation-guard** | Event + Message     | Guards the stop-continuation mechanism.                                                                                                                     |
 | **category-skill-reminder** | Event + PostToolUse | Reminds agents about available category skills for delegation.                                                                                              |
@@ -728,7 +721,7 @@ Hooks intercept and modify behavior at key points in the agent lifecycle across 
 
 | Hook                         | Event               | Description                                                                                        |
 | ---------------------------- | ------------------- | -------------------------------------------------------------------------------------------------- |
-| **auto-update-checker**      | Event               | Checks for new versions on session creation, shows startup toast with version and Sisyphus status. |
+| **auto-update-checker**      | Event               | Checks for new versions on session creation and shows startup status. |
 | **background-notification**  | Event               | Notifies when background agent tasks complete.                                                     |
 | **session-notification**     | Event               | OS notifications when agents go idle. Works on macOS, Linux, Windows.                              |
 | **agent-usage-reminder**     | PostToolUse + Event | Reminds you to leverage specialized agents for better results.                                     |
@@ -756,17 +749,17 @@ Hooks intercept and modify behavior at key points in the agent lifecycle across 
 | Hook                         | Event               | Description                                             |
 | ---------------------------- | ------------------- | ------------------------------------------------------- |
 | **claude-code-hooks**        | All                 | Executes hooks from Claude Code's settings.json.        |
-| **atlas**                    | Multiple            | Main orchestration logic for todo-driven work sessions. |
-| **interactive-bash-session** | PostToolUse + Event | Manages tmux sessions for interactive CLI.              |
-| **non-interactive-env**      | PreToolUse          | Handles non-interactive environment constraints.        |
+| **atlas**                   | Multiple            | Main orchestration logic for todo-driven work sessions.                                 |
+| **interactive-bash-session**| PostToolUse + Event | Manages tmux sessions for interactive CLI.                                              |
+| **non-interactive-env**     | PreToolUse          | Handles non-interactive environment constraints.                                        |
 
 #### Specialized
 
-| Hook                        | Event      | Description                                                |
-| --------------------------- | ---------- | ---------------------------------------------------------- |
-| **prometheus-md-only**      | PreToolUse | Enforces markdown-only output for Prometheus planner.      |
-| **no-sisyphus-gpt**         | Message    | Prevents Sisyphus from running on incompatible GPT models. |
-| **sisyphus-junior-notepad** | PreToolUse | Manages notepad state for Sisyphus-Junior agents.          |
+| Hook                        | Event      | Description                                                      |
+| --------------------------- | ---------- | ---------------------------------------------------------------- |
+| **prometheus-md-only**      | PreToolUse | Legacy markdown-only planner hook retained only for compatibility notes. |
+| **no-orchestrator-gpt**     | Message    | Prevents the orchestrator from running on incompatible GPT models. |
+| **executor-notepad**        | PreToolUse | Manages notepad state for Executor agents.                       |
 
 ### Claude Code Hooks Integration
 

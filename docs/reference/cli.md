@@ -98,7 +98,7 @@ Installation
 
 Configuration
   ✓ opencode-codex-orch.json is valid
-  ⚠ categories.visual-engineering: using default model
+  ⚠ categories.designer: using default model
 
 Authentication
   ✓ Anthropic API key configured
@@ -236,17 +236,19 @@ Plugin config files use strict JSON. Comments and trailing commas are rejected. 
 
 ```json
 {
-  "sisyphus_agent": {
+  "orchestrator_agent": {
     "disabled": false,
     "planner_enabled": true
   },
   "categories": {
-    "visual-engineering": {
+    "designer": {
       "model": "google/gemini-3.1-pro"
     }
   }
 }
 ```
+
+> **Note**: The canonical config key is `orchestrator_agent`. Legacy `sisyphus_agent` is still migrated for compatibility.
 
 ---
 

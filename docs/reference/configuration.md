@@ -15,8 +15,8 @@ Complete reference for `opencode-codex-orch.json` configuration. This document c
   - [Model Resolution](#model-resolution)
 - [Task System](#task-system)
   - [Background Tasks](#background-tasks)
-  - [Sisyphus Agent](#sisyphus-agent)
-  - [Sisyphus Tasks](#sisyphus-tasks)
+  - [Orchestrator Agent](#orchestrator-agent)
+  - [Task Storage](#task-storage)
 - [Features](#features)
   - [Skills](#skills)
   - [Hooks](#hooks)
@@ -71,25 +71,23 @@ Here's a practical starting configuration:
 {
   "$schema": "https://raw.githubusercontent.com/allOwO/opencode-codex-orch/main/assets/opencode-codex-orch.schema.json",
   "agents": {
-    "sisyphus": {
+    "orchestrator": {
       "model": "kimi-for-coding/k2p5"
     },
     "librarian": { "model": "google/gemini-3-flash" },
     "explore": { "model": "github-copilot/grok-code-fast-1" },
     "oracle": { "model": "openai/gpt-5.4", "variant": "high" },
-    "prometheus": {
-      "prompt_append": "Leverage deep & quick agents heavily, always in parallel."
+    "reviewer": {
+      "prompt_append": "Review plans for clarity, verification, and completeness."
     }
   },
   "categories": {
-    "quick": { "model": "opencode/gpt-5-nano" },
-    "unspecified-low": { "model": "anthropic/claude-sonnet-4-6" },
-    "unspecified-high": { "model": "openai/gpt-5.4-high" },
-    "writing": { "model": "google/gemini-3-flash" },
-    "visual-engineering": {
+    "designer": {
       "model": "google/gemini-3.1-pro",
       "variant": "high"
     },
+    "hard": { "model": "openai/gpt-5.4", "variant": "high" },
+    "quick": { "model": "opencode/gpt-5-nano" },
     "git": {
       "model": "opencode/gpt-5-nano",
       "description": "All git operations",
@@ -119,18 +117,18 @@ Here's a practical starting configuration:
 
 ### Agents
 
-Override built-in agent settings. Available agents: `sisyphus`, `prometheus`, `oracle`, `librarian`, `explore`, `multimodal-looker`, `metis`, `momus`, `atlas`.
+Override built-in agent settings. Available agents: `orchestrator`, `reviewer`, `executor`, `oracle`, `librarian`, `explore`, `deepsearch`, plus internal support agents such as `build` and `plan`. Legacy aliases like `sisyphus`, `momus`, and `sisyphus-junior` are accepted only for migration.
 
 ```json
 {
   "agents": {
     "explore": { "model": "anthropic/claude-haiku-4-5", "temperature": 0.5 },
-    "multimodal-looker": { "disable": true }
+    "deepsearch": { "disable": true }
   }
 }
 ```
 
-Disable agents entirely: `{ "disabled_agents": ["oracle", "multimodal-looker"] }`
+Disable agents entirely: `{ "disabled_agents": ["oracle", "deepsearch"] }`
 
 #### Agent Options
 
@@ -193,20 +191,15 @@ Control what tools an agent can use:
 
 ### Categories
 
-Domain-specific model delegation used by the `task()` tool. When Sisyphus delegates work, it picks a category, not a model name.
+Domain-specific model delegation used by the `task()` tool. When the orchestrator delegates work, it picks a category, not a model name.
 
 #### Built-in Categories
 
-| Category             | Default Model                   | Description                                    |
-| -------------------- | ------------------------------- | ---------------------------------------------- |
-| `visual-engineering` | `google/gemini-3.1-pro` (high)  | Frontend, UI/UX, design, animation             |
-| `ultrabrain`         | `openai/gpt-5.3-codex` (xhigh)  | Deep logical reasoning, complex architecture   |
-| `deep`               | `openai/gpt-5.3-codex` (medium) | Autonomous problem-solving, thorough research  |
-| `artistry`           | `google/gemini-3.1-pro` (high)  | Creative/unconventional approaches             |
-| `quick`              | `anthropic/claude-haiku-4-5`    | Trivial tasks, typo fixes, single-file changes |
-| `unspecified-low`    | `anthropic/claude-sonnet-4-6`   | General tasks, low effort                      |
-| `unspecified-high`   | `openai/gpt-5.4` (high)         | General tasks, high effort                     |
-| `writing`            | `google/gemini-3-flash`         | Documentation, prose, technical writing        |
+| Category     | Default Model                  | Description                                         |
+| ------------ | ------------------------------ | --------------------------------------------------- |
+| `designer`   | `google/gemini-3.1-pro` (high) | Frontend, UI/UX, design, styling, animation         |
+| `hard`       | `openai/gpt-5.4` (high)        | Complex implementation, architecture, deep research |
+| `quick`      | `anthropic/claude-haiku-4-5`   | Trivial tasks, typo fixes, single-file changes      |
 
 > **Note**: Built-in defaults only apply if the category is present in your config. Otherwise the system default model is used.
 
@@ -228,7 +221,7 @@ Domain-specific model delegation used by the `task()` tool. When Sisyphus delega
 | `description`       | string        | -       | Shown in `task()` tool prompt                                       |
 | `is_unstable_agent` | boolean       | `false` | Force background mode + monitoring. Auto-enabled for Gemini models. |
 
-Disable categories: `{ "disabled_categories": ["ultrabrain"] }`
+Disable categories: `{ "disabled_categories": ["hard"] }`
 
 ### Model Resolution
 
@@ -242,28 +235,21 @@ Disable categories: `{ "disabled_categories": ["ultrabrain"] }`
 
 | Agent                 | Default Model       | Provider Priority                                                            |
 | --------------------- | ------------------- | ---------------------------------------------------------------------------- |
-| **Sisyphus**          | `claude-opus-4-6`   | `claude-opus-4-6` → `glm-5` → `big-pickle`                                   |
+| **Orchestrator**      | `claude-opus-4-6`   | `claude-opus-4-6` → `glm-5` → `big-pickle`                                   |
 | **oracle**            | `gpt-5.4`           | `gpt-5.4` → `gemini-3.1-pro` → `claude-opus-4-6`                             |
 | **librarian**         | `gemini-3-flash`    | `gemini-3-flash` → `minimax-m2.5-free` → `big-pickle`                        |
 | **explore**           | `grok-code-fast-1`  | `grok-code-fast-1` → `minimax-m2.5-free` → `claude-haiku-4-5` → `gpt-5-nano` |
-| **multimodal-looker** | `gpt-5.3-codex`     | `gpt-5.3-codex` → `k2p5` → `gemini-3-flash` → `glm-4.6v` → `gpt-5-nano`      |
-| **Prometheus**        | `claude-opus-4-6`   | `claude-opus-4-6` → `gpt-5.4` → `gemini-3.1-pro`                             |
-| **Metis**             | `claude-opus-4-6`   | `claude-opus-4-6` → `gpt-5.4` → `gemini-3.1-pro`                             |
-| **Momus**             | `gpt-5.4`           | `gpt-5.4` → `claude-opus-4-6` → `gemini-3.1-pro`                             |
-| **Atlas**             | `claude-sonnet-4-6` | `claude-sonnet-4-6` → `gpt-5.4`                                              |
+| **DeepSearch**        | `gpt-5.3-codex`     | `gpt-5.3-codex` → `k2p5` → `gemini-3-flash` → `glm-4.6v` → `gpt-5-nano`      |
+| **Reviewer**          | `gpt-5.4`           | `gpt-5.4` → `claude-opus-4-6` → `gemini-3.1-pro`                             |
+| **Executor**          | category-driven     | selected from `designer` / `hard` / `quick` at delegation time               |
 
 #### Category Provider Chains
 
-| Category               | Default Model       | Provider Priority                                              |
-| ---------------------- | ------------------- | -------------------------------------------------------------- |
-| **visual-engineering** | `gemini-3.1-pro`    | `gemini-3.1-pro` → `glm-5` → `claude-opus-4-6`                 |
-| **ultrabrain**         | `gpt-5.3-codex`     | `gpt-5.3-codex` → `gemini-3.1-pro` → `claude-opus-4-6`         |
-| **deep**               | `gpt-5.3-codex`     | `gpt-5.3-codex` → `claude-opus-4-6` → `gemini-3.1-pro`         |
-| **artistry**           | `gemini-3.1-pro`    | `gemini-3.1-pro` → `claude-opus-4-6` → `gpt-5.4`               |
-| **quick**              | `claude-haiku-4-5`  | `claude-haiku-4-5` → `gemini-3-flash` → `gpt-5-nano`           |
-| **unspecified-low**    | `claude-sonnet-4-6` | `claude-sonnet-4-6` → `gpt-5.3-codex` → `gemini-3-flash`       |
-| **unspecified-high**   | `gpt-5.4`           | `gpt-5.4` → `claude-opus-4-6` → `glm-5` → `k2p5` → `kimi-k2.5` |
-| **writing**            | `gemini-3-flash`    | `gemini-3-flash` → `claude-sonnet-4-6`                         |
+| Category     | Default Model      | Provider Priority                                              |
+| ------------ | ------------------ | -------------------------------------------------------------- |
+| **designer** | `gemini-3.1-pro`   | `gemini-3.1-pro` → `glm-5` → `claude-opus-4-6`                 |
+| **hard**     | `gpt-5.4`          | `gpt-5.4` → `claude-opus-4-6` → `glm-5` → `k2p5` → `kimi-k2.5` |
+| **quick**    | `claude-haiku-4-5` | `claude-haiku-4-5` → `gemini-3-flash` → `gpt-5-nano`           |
 
 Run `bunx opencode-codex-orch doctor --verbose` to see effective model resolution for your config.
 
@@ -295,40 +281,42 @@ Control parallel agent execution and concurrency limits.
 
 Priority: `modelConcurrency` > `providerConcurrency` > `defaultConcurrency`
 
-### Sisyphus Agent
+### Orchestrator Agent
 
 Configure the main orchestration system.
 
 ```json
 {
-  "sisyphus_agent": {
+  "orchestrator_agent": {
     "disabled": false,
     "default_builder_enabled": false,
-    "planner_enabled": true,
-    "replace_plan": true
+    "planner_enabled": false,
+    "replace_plan": false
   }
 }
 ```
 
 | Option                    | Default | Description                                                     |
 | ------------------------- | ------- | --------------------------------------------------------------- |
-| `disabled`                | `false` | Disable all Sisyphus orchestration, restore original build/plan |
+| `disabled`                | `false` | Disable all orchestrator orchestration, restore original build/plan |
 | `default_builder_enabled` | `false` | Enable OpenCode-Builder agent (off by default)                  |
-| `planner_enabled`         | `true`  | Enable Prometheus (Planner) agent                               |
-| `replace_plan`            | `true`  | Demote default plan agent to subagent mode                      |
+| `planner_enabled`         | `false` | Legacy planner compatibility toggle                             |
+| `replace_plan`            | `false` | Legacy plan-agent demotion toggle                               |
 
-Sisyphus agents can also be customized under `agents` using their names: `Sisyphus`, `OpenCode-Builder`, `Prometheus (Planner)`, `Metis (Plan Consultant)`.
+> **Note**: `orchestrator_agent` is the canonical config key. Legacy `sisyphus_agent` is migration-only.
 
-### Sisyphus Tasks
+Orchestrator-related behavior can also be customized under `agents` using canonical names such as `orchestrator`, `reviewer`, `executor`, and `OpenCode-Builder`.
 
-Enable the Sisyphus Tasks system for cross-session task tracking.
+### Task Storage
+
+Enable the task system for cross-session task tracking.
 
 ```json
 {
   "sisyphus": {
     "tasks": {
       "enabled": false,
-      "storage_path": ".sisyphus/tasks",
+      "storage_path": ".opencode/tasks",
       "claude_code_compat": false
     }
   }
@@ -337,9 +325,11 @@ Enable the Sisyphus Tasks system for cross-session task tracking.
 
 | Option               | Default           | Description                                |
 | -------------------- | ----------------- | ------------------------------------------ |
-| `enabled`            | `false`           | Enable Sisyphus Tasks system               |
-| `storage_path`       | `.sisyphus/tasks` | Storage path (relative to project root)    |
+| `enabled`            | `false`           | Enable task system                         |
+| `storage_path`       | `.opencode/tasks` | Storage path (relative to project root)    |
 | `claude_code_compat` | `false`           | Enable Claude Code path compatibility mode |
+
+> **Migration note**: The legacy path `.sisyphus/tasks` is still readable for backward compatibility.
 
 ---
 
@@ -395,12 +385,12 @@ Disable built-in hooks via `disabled_hooks`:
 { "disabled_hooks": ["comment-checker", "agent-usage-reminder"] }
 ```
 
-Available hooks: `todo-continuation-enforcer`, `context-window-monitor`, `session-recovery`, `session-notification`, `comment-checker`, `grep-output-truncator`, `tool-output-truncator`, `directory-agents-injector`, `directory-readme-injector`, `empty-task-response-detector`, `think-mode`, `anthropic-context-window-limit-recovery`, `rules-injector`, `background-notification`, `auto-update-checker`, `startup-toast`, `keyword-detector`, `agent-usage-reminder`, `non-interactive-env`, `interactive-bash-session`, `compaction-context-injector`, `thinking-block-validator`, `claude-code-hooks`, `ralph-loop`, `preemptive-compaction`, `auto-slash-command`, `sisyphus-junior-notepad`, `no-sisyphus-gpt`, `start-work`, `runtime-fallback`
+Available hooks: `todo-continuation-enforcer`, `context-window-monitor`, `session-recovery`, `session-notification`, `comment-checker`, `grep-output-truncator`, `tool-output-truncator`, `directory-agents-injector`, `directory-readme-injector`, `empty-task-response-detector`, `think-mode`, `anthropic-context-window-limit-recovery`, `rules-injector`, `background-notification`, `auto-update-checker`, `startup-toast`, `keyword-detector`, `agent-usage-reminder`, `non-interactive-env`, `interactive-bash-session`, `compaction-context-injector`, `thinking-block-validator`, `claude-code-hooks`, `ralph-loop`, `preemptive-compaction`, `auto-slash-command`, `executor-notepad`, `no-orchestrator-gpt`, `start-work`, `runtime-fallback`
 
 **Notes:**
 
 - `directory-agents-injector` — auto-disabled on OpenCode 1.1.37+ (native AGENTS.md support)
-- `no-sisyphus-gpt` — **do not disable**. It blocks incompatible GPT models for Sisyphus while allowing the dedicated GPT-5.4 prompt path.
+- `no-orchestrator-gpt` — **do not disable**. It blocks incompatible GPT models for the orchestrator while allowing the dedicated GPT-5.4 prompt path.
 - `startup-toast` is a sub-feature of `auto-update-checker`. Disable just the toast by adding `startup-toast` to `disabled_hooks`.
 
 ### Commands
@@ -412,6 +402,8 @@ Disable built-in commands via `disabled_commands`:
 ```
 
 Available commands: `init-deep`, `ralph-loop`, `ulw-loop`, `cancel-ralph`, `refactor`, `start-work`, `stop-continuation`, `handoff`
+
+> **Note**: `ralph-loop` and `ulw-loop` commands are retained for compatibility. The canonical commands are `/init-deep`, `/refactor`, `/start-work`, `/stop-continuation`, and `/handoff`.
 
 ### Browser Automation
 
@@ -554,7 +546,7 @@ Define `fallback_models` per agent or category:
 ```json
 {
   "agents": {
-    "sisyphus": {
+    "orchestrator": {
       "model": "anthropic/claude-opus-4-6",
       "fallback_models": ["openai/gpt-5.4", "google/gemini-3.1-pro"]
     }
@@ -611,7 +603,7 @@ When enabled, two companion hooks are active: `hashline-read-enhancer` (annotate
 | `aggressive_truncation`                  | `false`    | Aggressively truncate when token limit exceeded                                      |
 | `auto_resume`                            | `false`    | Auto-resume after thinking block recovery                                            |
 | `disable_oco_env`                        | `false`    | Disable auto-injected `<oco-env>` block (date/time/locale). Improves cache hit rate. |
-| `task_system`                            | `false`    | Enable Sisyphus task system                                                          |
+| `task_system`                            | `false`    | Enable the task system used by the orchestrator and delegated executors              |
 | `dynamic_context_pruning.enabled`        | `false`    | Auto-prune old tool outputs to manage context window                                 |
 | `dynamic_context_pruning.notification`   | `detailed` | Pruning notifications: `off` / `minimal` / `detailed`                                |
 | `turn_protection.turns`                  | `3`        | Recent turns protected from pruning (1–10)                                           |
