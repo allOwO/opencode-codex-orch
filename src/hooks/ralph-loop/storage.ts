@@ -17,13 +17,17 @@ export interface RalphLoopState {
   verification_session_id?: string
 }
 
-function getStatePath(directory: string): string {
+function getCanonicalStatePath(directory: string): string {
+  return join(directory, ".opencode", "ralph-loop-state.json")
+}
+
+function getLegacyStatePath(directory: string): string {
   return join(directory, ".sisyphus", "ralph-loop-state.json")
 }
 
 export function readState(directory: string): RalphLoopState | null {
-  const statePath = getStatePath(directory)
-  if (!existsSync(statePath)) return null
+  const statePath = [getCanonicalStatePath(directory), getLegacyStatePath(directory)].find((candidate) => existsSync(candidate))
+  if (!statePath) return null
 
   try {
     return JSON.parse(readFileSync(statePath, "utf-8")) as RalphLoopState
@@ -33,11 +37,12 @@ export function readState(directory: string): RalphLoopState | null {
 }
 
 export function writeState(directory: string, state: RalphLoopState): void {
-  const statePath = getStatePath(directory)
-  mkdirSync(join(directory, ".sisyphus"), { recursive: true })
+  const statePath = getCanonicalStatePath(directory)
+  mkdirSync(join(directory, ".opencode"), { recursive: true })
   writeFileSync(statePath, `${JSON.stringify(state, null, 2)}\n`, "utf-8")
 }
 
 export function clearState(directory: string): void {
-  rmSync(getStatePath(directory), { force: true })
+  rmSync(getCanonicalStatePath(directory), { force: true })
+  rmSync(getLegacyStatePath(directory), { force: true })
 }
