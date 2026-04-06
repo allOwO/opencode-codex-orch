@@ -70,7 +70,7 @@ Ask the user these questions to determine CLI options:
 
 **Provider Priority**: Native (anthropic/, openai/, google/) > GitHub Copilot > OpenCode Zen > Z.ai Coding Plan
 
-MUST STRONGLY WARNING, WHEN USER SAID THEY DON'T HAVE CLAUDE SUBSCRIPTION, SISYPHUS AGENT MIGHT NOT WORK IDEALLY.
+You should strongly warn the user that the canonical `orchestrator` agent works best with Claude-family access.
 
 ### Step 1: Install OpenCode (if not installed)
 
@@ -155,7 +155,7 @@ The `opencode-antigravity-auth` plugin uses different model names than the built
 ```json
 {
   "agents": {
-    "multimodal-looker": { "model": "google/antigravity-gemini-3-flash" }
+    "librarian": { "model": "google/antigravity-gemini-3-flash" }
   }
 }
 ```
@@ -199,7 +199,7 @@ When GitHub Copilot is the best available provider, opencode-codex-orch uses the
 
 | Agent         | Model                             |
 | ------------- | --------------------------------- |
-| **Sisyphus**  | `github-copilot/claude-opus-4-6`  |
+| **Orchestrator**  | `github-copilot/claude-opus-4-6`  |
 | **Oracle**    | `github-copilot/gpt-5.4`          |
 | **Explore**   | `github-copilot/grok-code-fast-1` |
 | **Librarian** | `github-copilot/gemini-3-flash`   |
@@ -214,10 +214,10 @@ If Z.ai is your main provider, the most important fallbacks are:
 
 | Agent                  | Model                      |
 | ---------------------- | -------------------------- |
-| **Sisyphus**           | `zai-coding-plan/glm-5`    |
-| **visual-engineering** | `zai-coding-plan/glm-5`    |
-| **unspecified-high**   | `zai-coding-plan/glm-5`    |
-| **Multimodal-Looker**  | `zai-coding-plan/glm-4.6v` |
+| **Orchestrator**       | `zai-coding-plan/glm-5`    |
+| **designer**           | `zai-coding-plan/glm-5`    |
+| **hard**               | `zai-coding-plan/glm-5`    |
+| **DeepSearch**         | `zai-coding-plan/glm-4.6v` |
 
 #### OpenCode Zen
 
@@ -227,7 +227,7 @@ When OpenCode Zen is the best available provider (no native or Copilot), these m
 
 | Agent         | Model                                                |
 | ------------- | ---------------------------------------------------- |
-| **Sisyphus**  | `opencode/claude-opus-4-6`                           |
+| **Orchestrator**  | `opencode/claude-opus-4-6`                           |
 | **Oracle**    | `opencode/gpt-5.4`                                   |
 | **Explore**   | `opencode/gpt-5-nano`                                |
 | **Librarian** | `opencode/minimax-m2.5-free` / `opencode/big-pickle` |
@@ -267,10 +267,10 @@ Not all models behave the same way. Understanding which models are "similar" hel
 
 | Model                    | Provider(s)                         | Notes                                                                   |
 | ------------------------ | ----------------------------------- | ----------------------------------------------------------------------- |
-| **Claude Opus 4.6**      | anthropic, github-copilot, opencode | Best overall. Default for Sisyphus.                                     |
+| **Claude Opus 4.6**      | anthropic, github-copilot, opencode | Best overall. Default for the Orchestrator.                             |
 | **Claude Sonnet 4.6**    | anthropic, github-copilot, opencode | Faster, cheaper. Good balance.                                          |
 | **Claude Haiku 4.5**     | anthropic, opencode                 | Fast and cheap. Good for quick tasks.                                   |
-| **Kimi K2.5**            | kimi-for-coding                     | Behaves very similarly to Claude. Great all-rounder. Default for Atlas. |
+| **Kimi K2.5**            | kimi-for-coding                     | Behaves very similarly to Claude. Great all-rounder for orchestration.  |
 | **Kimi K2.5 Free**       | opencode                            | Free-tier Kimi. Rate-limited but functional.                            |
 | **GLM 5**                | zai-coding-plan, opencode           | Claude-like behavior. Good for broad tasks.                             |
 | **Big Pickle (GLM 4.6)** | opencode                            | Free-tier GLM. Decent fallback.                                         |
@@ -279,7 +279,7 @@ Not all models behave the same way. Understanding which models are "similar" hel
 
 | Model             | Provider(s)                      | Notes                                             |
 | ----------------- | -------------------------------- | ------------------------------------------------- |
-| **GPT-5.3-codex** | openai, github-copilot, opencode | Deep coding powerhouse. Used by GPT-heavy categories such as `ultrabrain` and `deep`. |
+| **GPT-5.3-codex** | openai, github-copilot, opencode | Deep coding powerhouse. Used by GPT-heavy execution and research paths. |
 | **GPT-5.4**       | openai, github-copilot, opencode | High intelligence. Default for Oracle.            |
 | **GPT-5-Nano**    | opencode                         | Ultra-cheap, fast. Good for simple utility tasks. |
 
@@ -309,26 +309,21 @@ Based on your subscriptions, here's how the agents were configured:
 
 | Agent        | Role             | Default Chain                                   | What It Does                                                                             |
 | ------------ | ---------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **Sisyphus** | Main ultraworker | Opus (max) → Kimi K2.5 → GLM 5 → Big Pickle     | Primary coding agent. Orchestrates everything. **Never use GPT — no GPT prompt exists.** |
-| **Metis**    | Plan review      | Opus (max) → Kimi K2.5 → GPT-5.4 → Gemini 3 Pro | Reviews Prometheus plans for gaps.                                                       |
+| **Orchestrator** | Main orchestrator | Opus (max) → Kimi K2.5 → GLM 5 → Big Pickle | Primary coding agent. Orchestrates everything. |
 
-**Dual-Prompt Agents** (auto-switch between Claude and GPT prompts):
+**Canonical supporting agents**:
 
-These agents detect your model family at runtime and switch to the appropriate prompt. If you have GPT access, these agents can use it effectively.
-
-Priority: **Claude > GPT > Claude-like models**
-
-| Agent          | Role              | Default Chain                                              | GPT Prompt?                                                      |
-| -------------- | ----------------- | ---------------------------------------------------------- | ---------------------------------------------------------------- |
-| **Prometheus** | Strategic planner | Opus (max) → **GPT-5.4 (high)** → Kimi K2.5 → Gemini 3 Pro | Yes — XML-tagged, principle-driven (~300 lines vs ~1,100 Claude) |
-| **Atlas**      | Todo orchestrator | **Kimi K2.5** → Sonnet → GPT-5.4                           | Yes — GPT-optimized todo management                              |
+| Agent          | Role                    | Default Chain                                        | Notes                                    |
+| -------------- | ----------------------- | ---------------------------------------------------- | ---------------------------------------- |
+| **Reviewer**   | Review / critique       | GPT-5.4 (medium) → Opus → Gemini 3 Pro               | Verification-heavy review agent          |
+| **DeepSearch** | Research orchestration  | GPT / Gemini / GLM multimodal-capable fallbacks      | Structured research and comparative work |
 
 **GPT-Preferred Agents** (best results when GPT-class models are available):
 
 | Agent          | Role                   | Default Chain                          | Notes                                                  |
 | -------------- | ---------------------- | -------------------------------------- | ------------------------------------------------------ |
 | **Oracle**     | Architecture/debugging | GPT-5.4 (high) → Gemini 3 Pro → Opus   | High-IQ strategic backup. GPT preferred.               |
-| **Momus**      | High-accuracy reviewer | GPT-5.4 (medium) → Opus → Gemini 3 Pro | Verification agent. GPT preferred.                     |
+| **Reviewer**   | High-accuracy reviewer | GPT-5.4 (medium) → Opus → Gemini 3 Pro | Verification agent. GPT preferred.                     |
 
 **Utility Agents** (speed over intelligence):
 
@@ -338,7 +333,7 @@ These agents do search, grep, and retrieval. They intentionally use fast, cheap 
 | --------------------- | ------------------ | ---------------------------------------------------------------------- | -------------------------------------------------------------- |
 | **Explore**           | Fast codebase grep | MiniMax M2.5 Free → Grok Code Fast → MiniMax M2.5 → Haiku → GPT-5-Nano | Speed is everything. Grok is blazing fast for grep.            |
 | **Librarian**         | Docs/code search   | MiniMax M2.5 Free → Gemini Flash → Big Pickle                          | Entirely free-tier. Doc retrieval doesn't need deep reasoning. |
-| **Multimodal Looker** | Vision/screenshots | Kimi K2.5 → Kimi Free → Gemini Flash → GPT-5.4 → GLM-4.6v              | Kimi excels at multimodal understanding.                       |
+| **DeepSearch**        | Research synthesis | GPT / Gemini / GLM multimodal-capable fallbacks                          | Uses multimodal-capable fallbacks when research needs them.    |
 
 #### Why Different Models Need Different Prompts
 
@@ -349,11 +344,11 @@ Claude and GPT models have fundamentally different instruction-following behavio
 
 Key insight from Codex Plan Mode analysis:
 
-- Codex Plan Mode achieves the same results with 3 principles in ~121 lines that Prometheus's Claude prompt needs ~1,100 lines across 7 files
+- Codex-style planning can often achieve the same results with a much smaller principle set than older planner prompts
 - The core concept is **"Decision Complete"** — a plan must leave ZERO decisions to the implementer
 - GPT follows this literally when stated as a principle; Claude needs enforcement mechanisms
 
-This is why Prometheus and Atlas ship separate prompts per model family — they auto-detect and switch at runtime via `isGptModel()`.
+This is why the orchestrator and supporting review/research agents use model-family-aware prompt paths where needed.
 
 #### Custom Model Configuration
 
@@ -362,8 +357,8 @@ If the user wants to override which model an agent uses, you can customize in `o
 ```json
 {
   "agents": {
-    "sisyphus": { "model": "kimi-for-coding/k2p5" },
-    "prometheus": { "model": "openai/gpt-5.4" }
+    "orchestrator": { "model": "kimi-for-coding/k2p5" },
+    "reviewer": { "model": "openai/gpt-5.4" }
   }
 }
 ```
@@ -386,13 +381,13 @@ GPT (5.3-codex, 5.2) > Claude Opus (decent fallback) > Gemini (acceptable)
 
 **Safe** (same family):
 
-- Sisyphus: Opus → Sonnet, Kimi K2.5, GLM 5
-- Prometheus: Opus → GPT-5.4 (auto-switches prompt)
-- Atlas: Kimi K2.5 → Sonnet, GPT-5.4 (auto-switches)
+- Orchestrator: Opus → Sonnet, Kimi K2.5, GLM 5
+- Reviewer: GPT-5.4 → Opus
+- DeepSearch: GPT / Gemini / GLM multimodal-capable fallbacks
 
 **Dangerous** (no prompt support):
 
-- Sisyphus → GPT: **No GPT prompt. Will degrade significantly.**
+- Orchestrator → GPT: **No GPT prompt. Will degrade significantly.**
 - GPT-heavy category executors → Claude: **Possible, but you'll lose the intended GPT-specific reasoning style.**
 - Explore → Opus: **Massive cost waste. Explore needs speed, not intelligence.**
 - Librarian → Opus: **Same. Doc search doesn't need Opus-level reasoning.**
@@ -445,11 +440,11 @@ gh api --silent --method PUT /user/starred/allOwO/opencode-codex-orch >/dev/null
 
 Tell the user of following:
 
-1. **Sisyphus agent strongly recommends Opus 4.6 model. Using other models may result in significantly degraded experience.**
+1. **The Orchestrator strongly prefers Opus 4.6. Using weaker substitutes may noticeably degrade orchestration quality.**
 
-2. **Feeling lazy?** Just include `ultrawork` (or `ulw`) in your prompt. That's it. The agent figures out the rest.
+2. **For direct autonomous execution**, just ask for the work directly. The orchestrator figures out the rest.
 
-3. **Need precision?** Press **Tab** to enter Prometheus (Planner) mode, create a work plan through an interview process, then run `/start-work` to execute it with full orchestration.
+3. **Need precision?** Create or review a plan under `docs/superpowers/plans/`, then run `/start-work` to execute it with full orchestration.
 
 4. You wanna have your own agent- catalog setup? I can read the [docs](docs/guide/agent-model-matching.md) and set up for you after interviewing!
 

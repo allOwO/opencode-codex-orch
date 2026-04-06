@@ -53,7 +53,7 @@ cli/
 
 No single global priority. CLI install-time resolution uses per-agent fallback chains from `model-fallback-requirements.ts`.
 
-Common patterns: Claude/OpenAI/Gemini are preferred when an agent chain includes them, `librarian` prefers ZAI, `sisyphus` falls back through Kimi then GLM-5, and GPT-first roles such as `oracle`/`momus` prefer OpenAI-compatible providers when available.
+Common patterns: Claude/OpenAI/Gemini are preferred when an agent chain includes them, `librarian` prefers ZAI, the `orchestrator` falls back through Kimi then GLM-5, and GPT-first roles such as `oracle`/`reviewer` prefer OpenAI-compatible providers when available.
 
 ## DOCTOR CHECKS
 
