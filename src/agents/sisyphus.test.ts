@@ -69,10 +69,8 @@ describe("createSisyphusAgent fallback prompt", () => {
 		const result = createSisyphusAgent("kimi-for-coding/k2p5");
 		const prompt = result.prompt ?? "";
 
-		expect(prompt).toContain(
-			"You are OpenCode, an interactive general AI agent running on a user's computer.",
-		);
-		expect(prompt).toContain("Sisyphus Kimi orchestration profile");
+		expect(prompt).toContain("You are operating as a specialized subagent on a Kimi model.");
+		expect(prompt).not.toContain("Sisyphus Kimi orchestration profile");
 		expect(prompt).toContain("<Role>");
 	});
 
@@ -80,10 +78,8 @@ describe("createSisyphusAgent fallback prompt", () => {
 		const result = createSisyphusAgent("opencode/kimi-k2.5-free");
 		const prompt = result.prompt ?? "";
 
-		expect(prompt).toContain(
-			"You are OpenCode, an interactive general AI agent running on a user's computer.",
-		);
-		expect(prompt).toContain("Sisyphus Kimi orchestration profile");
+		expect(prompt).toContain("You are operating as a specialized subagent on a Kimi model.");
+		expect(prompt).not.toContain("Sisyphus Kimi orchestration profile");
 		expect(prompt).toContain("<Role>");
 	});
 
