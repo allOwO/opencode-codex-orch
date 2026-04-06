@@ -122,9 +122,18 @@ export type BuiltinAgentName =
   | "deepsearch"
   | "momus";
 
-export type OverridableAgentName = "build" | BuiltinAgentName;
+export type CanonicalAgentName =
+  | "orchestrator"
+  | "oracle"
+  | "librarian"
+  | "explore"
+  | "deepsearch"
+  | "reviewer"
+  | "executor";
 
-export type AgentName = BuiltinAgentName;
+export type OverridableAgentName = "build" | BuiltinAgentName | CanonicalAgentName;
+
+export type AgentName = CanonicalAgentName;
 
 export type AgentOverrideConfig = Partial<AgentConfig> & {
   prompt_append?: string;

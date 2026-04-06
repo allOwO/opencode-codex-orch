@@ -25,6 +25,12 @@ import { buildCustomAgentMetadata, parseRegisteredAgentSummaries } from "./custo
 
 type AgentSource = AgentFactory | AgentConfig
 
+function getRuntimeBuiltinAgentName(agentName: BuiltinAgentName): string {
+  if (agentName === "sisyphus") return "orchestrator"
+  if (agentName === "momus") return "reviewer"
+  return agentName
+}
+
 const agentSources: Record<BuiltinAgentName, AgentSource> = {
   sisyphus: createSisyphusAgent,
   oracle: createOracleAgent,
@@ -105,7 +111,13 @@ export async function createBuiltinAgents(
   })
 
   const registeredAgents = parseRegisteredAgentSummaries(customAgentSummaries)
-  const builtinAgentNames = new Set(Object.keys(agentSources).map((name) => name.toLowerCase()))
+  const builtinAgentNames = new Set(
+    Object.keys(agentSources).flatMap((name) => {
+      const lowered = name.toLowerCase()
+      const runtimeName = getRuntimeBuiltinAgentName(name as BuiltinAgentName).toLowerCase()
+      return lowered === runtimeName ? [lowered] : [lowered, runtimeName]
+    })
+  )
   const disabledAgentNames = new Set(disabledAgents.map((name) => name.toLowerCase()))
 
   for (const agent of registeredAgents) {
@@ -138,7 +150,7 @@ export async function createBuiltinAgents(
     disableOcoEnv,
   })
   if (sisyphusConfig) {
-    result["sisyphus"] = sisyphusConfig
+    result["orchestrator"] = sisyphusConfig
   }
 
 

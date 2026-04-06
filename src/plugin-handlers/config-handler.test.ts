@@ -22,7 +22,7 @@ import * as modelResolver from "../shared/model-resolver"
 
 beforeEach(() => {
   spyOn(agents, "createBuiltinAgents" as any).mockResolvedValue({
-    sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
+    orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
     oracle: { name: "oracle", prompt: "test", mode: "subagent" },
   })
 
@@ -158,6 +158,42 @@ describe("Sisyphus-Junior model inheritance", () => {
     expect(agentConfig[getAgentDisplayName("sisyphus-junior")]?.model).toBe(
       "openai/gpt-5.3-codex"
     )
+  })
+})
+
+describe("canonical builtin runtime names", () => {
+  test("accepts canonical builtin agent keys from createBuiltinAgents", async () => {
+    const createBuiltinAgentsMock = agents.createBuiltinAgents as unknown as {
+      mockResolvedValue: (value: Record<string, unknown>) => void
+    }
+    createBuiltinAgentsMock.mockResolvedValue({
+      orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
+      reviewer: { name: "reviewer", prompt: "review", mode: "subagent" },
+      deepsearch: { name: "deepsearch", prompt: "research", mode: "subagent" },
+    })
+
+    const pluginConfig: OpenCodeCodexOrchConfig = {}
+    const config: Record<string, unknown> = {
+      model: "anthropic/claude-opus-4-6",
+      agent: {},
+    }
+    const handler = createConfigHandler({
+      ctx: { directory: "/tmp" },
+      pluginConfig,
+      modelCacheState: {
+        anthropicContext1MEnabled: false,
+        modelContextLimitsCache: new Map(),
+      },
+    })
+
+    await handler(config)
+
+    const agentConfig = config.agent as Record<string, unknown>
+    expect(agentConfig.Orchestrator).toBeDefined()
+    expect(agentConfig.Reviewer).toBeDefined()
+    expect(agentConfig.DeepSearch).toBeDefined()
+    expect(agentConfig.Executor).toBeDefined()
+    expect(config.default_agent).toBe(getAgentDisplayName("orchestrator"))
   })
 })
 

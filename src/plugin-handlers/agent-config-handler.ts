@@ -43,6 +43,22 @@ function getConfiguredDefaultAgent(config: Record<string, unknown>): string | un
   return trimmedDefaultAgent.length > 0 ? trimmedDefaultAgent : undefined;
 }
 
+function getBuiltinPrimaryAgent(
+  builtinAgents: Record<string, unknown>
+): Record<string, unknown> | undefined {
+  const orchestrator = builtinAgents.orchestrator
+  if (orchestrator && typeof orchestrator === "object") {
+    return orchestrator as Record<string, unknown>
+  }
+
+  const sisyphus = builtinAgents.sisyphus
+  if (sisyphus && typeof sisyphus === "object") {
+    return sisyphus as Record<string, unknown>
+  }
+
+  return undefined
+}
+
 export async function applyAgentConfig(params: {
   config: Record<string, unknown>;
   pluginConfig: OpenCodeCodexOrchConfig;
@@ -144,20 +160,22 @@ export async function applyAgentConfig(params: {
 
   const configAgent = params.config.agent as AgentConfigRecord | undefined;
 
-  if (isSisyphusEnabled && builtinAgents.sisyphus) {
+  const builtinPrimaryAgent = getBuiltinPrimaryAgent(builtinAgents)
+
+  if (isSisyphusEnabled && builtinPrimaryAgent) {
     if (configuredDefaultAgent) {
       (params.config as { default_agent?: string }).default_agent =
         getAgentDisplayName(configuredDefaultAgent);
     } else {
       (params.config as { default_agent?: string }).default_agent =
-        getAgentDisplayName("sisyphus");
+        getAgentDisplayName("orchestrator");
     }
 
     const agentConfig: Record<string, unknown> = {
-      sisyphus: builtinAgents.sisyphus,
+      orchestrator: builtinPrimaryAgent,
     };
 
-    agentConfig["sisyphus-junior"] = createSisyphusJuniorAgentWithOverrides(
+    agentConfig.executor = createSisyphusJuniorAgentWithOverrides(
       params.pluginConfig.agents?.executor,
       undefined,
       useTaskSystem,
@@ -183,6 +201,8 @@ export async function applyAgentConfig(params: {
             .filter(([key]) => {
               if (key === "build") return false;
               if (key in builtinAgents) return false;
+              if (key === "sisyphus" && "orchestrator" in builtinAgents) return false;
+              if (key === "sisyphus-junior") return false;
               return true;
             })
             .map(([key, value]) => [
@@ -198,9 +218,11 @@ export async function applyAgentConfig(params: {
 
     // Collect all builtin agent names to prevent user/project .md files from overriding them
     const builtinAgentNames = new Set([
-      ...Object.keys(agentConfig),
-      ...Object.keys(builtinAgents),
-    ]);
+        ...Object.keys(agentConfig),
+        ...Object.keys(builtinAgents),
+        "sisyphus",
+        "sisyphus-junior",
+      ]);
 
     // Filter user/project agents that duplicate builtin agents (they have mode: "subagent" hardcoded
     // in loadAgentsFromDir which would incorrectly override the builtin mode: "primary")
@@ -213,9 +235,9 @@ export async function applyAgentConfig(params: {
 
     params.config.agent = {
       ...agentConfig,
-      ...Object.fromEntries(
-        Object.entries(builtinAgents).filter(([key]) => key !== "sisyphus"),
-      ),
+        ...Object.fromEntries(
+          Object.entries(builtinAgents).filter(([key]) => key !== "sisyphus" && key !== "orchestrator"),
+        ),
       ...filterDisabledAgents(filteredUserAgents),
       ...filterDisabledAgents(filteredProjectAgents),
       ...filterDisabledAgents(pluginAgents),
