@@ -17,6 +17,7 @@ import type { BoulderState } from "./types"
 describe("boulder-state", () => {
   const TEST_DIR = join(tmpdir(), "boulder-state-test-" + Date.now())
   const SISYPHUS_DIR = join(TEST_DIR, ".sisyphus")
+  const OPENCODE_DIR = join(TEST_DIR, ".opencode")
 
   beforeEach(() => {
     if (!existsSync(TEST_DIR)) {
@@ -137,7 +138,7 @@ describe("boulder-state", () => {
   })
 
   describe("writeBoulderState", () => {
-    test("should write state and create .sisyphus directory if needed", () => {
+    test("should write state and create .opencode directory if needed", () => {
       // given - state to write
       const state: BoulderState = {
         active_plan: "/test/plan.md",
@@ -154,6 +155,27 @@ describe("boulder-state", () => {
       expect(success).toBe(true)
       expect(readBack).not.toBeNull()
       expect(readBack?.active_plan).toBe("/test/plan.md")
+      expect(existsSync(join(OPENCODE_DIR, "boulder.json"))).toBe(true)
+    })
+  })
+
+  describe("legacy path compatibility", () => {
+    test("reads legacy .sisyphus boulder state when canonical file is absent", () => {
+      const boulderFile = join(SISYPHUS_DIR, "boulder.json")
+      writeFileSync(
+        boulderFile,
+        JSON.stringify({
+          active_plan: "/path/to/legacy-plan.md",
+          started_at: "2026-01-02T10:00:00Z",
+          session_ids: ["legacy-session"],
+          plan_name: "legacy-plan",
+        })
+      )
+
+      const result = readBoulderState(TEST_DIR)
+
+      expect(result?.active_plan).toBe("/path/to/legacy-plan.md")
+      expect(result?.session_ids).toEqual(["legacy-session"])
     })
   })
 
@@ -382,6 +404,20 @@ describe("boulder-state", () => {
       const name = getPlanName(path)
       // then
       expect(name).toBe("my-feature")
+    })
+  })
+
+  describe("findPrometheusPlans", () => {
+    test("prefers canonical docs/superpowers/plans directory", () => {
+      const plansDir = join(TEST_DIR, "docs", "superpowers", "plans")
+      mkdirSync(plansDir, { recursive: true })
+      writeFileSync(join(plansDir, "plan-a.md"), "# A")
+      writeFileSync(join(plansDir, "plan-b.md"), "# B")
+
+      const plans = findPrometheusPlans(TEST_DIR)
+
+      expect(plans).toHaveLength(2)
+      expect(plans.every((entry) => entry.includes("docs/superpowers/plans"))).toBe(true)
     })
   })
 

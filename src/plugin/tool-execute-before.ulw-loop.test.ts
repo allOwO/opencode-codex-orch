@@ -19,7 +19,7 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 		}
 	}
 
-	test("#given ulw loop is awaiting verification #when oracle task runs #then oracle prompt is enforced and sync", async () => {
+	test("#given retired ulw state exists #when oracle task runs #then retired verification prompt is not injected", async () => {
 		const directory = join(tmpdir(), `tool-before-ulw-${Date.now()}`)
 		mkdirSync(directory, { recursive: true })
 		writeState(directory, {
@@ -48,10 +48,9 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 
 		await handler({ tool: "task", sessionID: "ses-main", callID: "call-1" }, output)
 
-		expect(readState(directory)?.verification_attempt_id).toBeTruthy()
-		expect(output.args.run_in_background).toBe(false)
-		expect(output.args.prompt).toContain("Ship feature")
-		expect(output.args.prompt).toContain(`<promise>${ULTRAWORK_VERIFICATION_PROMISE}</promise>`)
+		expect(readState(directory)?.verification_attempt_id).toBeUndefined()
+		expect(output.args.run_in_background).toBe(true)
+		expect(output.args.prompt).toBe("Check it")
 
 		clearState(directory)
 		rmSync(directory, { recursive: true, force: true })
@@ -80,7 +79,7 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 		rmSync(directory, { recursive: true, force: true })
 	})
 
-	test("#given ulw loop is awaiting verification #when oracle task finishes #then oracle session id is stored", async () => {
+	test("#given retired ulw verification state #when oracle task finishes #then verification session id is not stored", async () => {
 		const directory = join(tmpdir(), `tool-after-ulw-${Date.now()}`)
 		mkdirSync(directory, { recursive: true })
 		writeState(directory, {
@@ -126,13 +125,13 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 			},
 		)
 
-		expect(readState(directory)?.verification_session_id).toBe("ses-oracle")
+		expect(readState(directory)?.verification_session_id).toBeUndefined()
 
 		clearState(directory)
 		rmSync(directory, { recursive: true, force: true })
 	})
 
-	test("#given newer oracle attempt exists #when older oracle task finishes #then old session does not overwrite active verification", async () => {
+	test("#given retired ulw verification state #when repeated oracle tasks finish #then no verification session is recorded", async () => {
 		const directory = join(tmpdir(), `tool-race-ulw-${Date.now()}`)
 		mkdirSync(directory, { recursive: true })
 		writeState(directory, {
@@ -176,9 +175,8 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 		await beforeHandler({ tool: "task", sessionID: "ses-main", callID: "call-2" }, secondOutput)
 		const secondAttemptId = readState(directory)?.verification_attempt_id
 
-		expect(firstAttemptId).toBeTruthy()
-		expect(secondAttemptId).toBeTruthy()
-		expect(secondAttemptId).not.toBe(firstAttemptId)
+		expect(firstAttemptId).toBeUndefined()
+		expect(secondAttemptId).toBeUndefined()
 
 		await afterHandler(
 			{ tool: "task", sessionID: "ses-main", callID: "call-1" },
@@ -208,9 +206,36 @@ describe("tool.execute.before ultrawork oracle verification", () => {
 			},
 		)
 
-		expect(readState(directory)?.verification_session_id).toBe("ses-oracle-new")
+		expect(readState(directory)?.verification_session_id).toBeUndefined()
 
 		clearState(directory)
+		rmSync(directory, { recursive: true, force: true })
+	})
+
+	test("#given retired ulw-loop command #when skill tool runs #then ralph loop is not started", async () => {
+		const directory = join(tmpdir(), `tool-before-retired-ulw-${Date.now()}`)
+		mkdirSync(directory, { recursive: true })
+		const startLoopCalls: Array<Record<string, unknown>> = []
+
+		const handler = createToolExecuteBeforeHandler({
+			ctx: createCtx(directory) as unknown as Parameters<typeof createToolExecuteBeforeHandler>[0]["ctx"],
+			hooks: {
+				ralphLoop: {
+					startLoop: (sessionId: string, prompt: string, options?: Record<string, unknown>) => {
+						startLoopCalls.push({ sessionId, prompt, options })
+					},
+					cancelLoop: () => {},
+				},
+			} as unknown as Parameters<typeof createToolExecuteBeforeHandler>[0]["hooks"],
+		})
+
+		await handler(
+			{ tool: "skill", sessionID: "ses-main", callID: "call-ulw" },
+			{ args: { name: "ulw-loop" } },
+		)
+
+		expect(startLoopCalls).toHaveLength(0)
+
 		rmSync(directory, { recursive: true, force: true })
 	})
 })

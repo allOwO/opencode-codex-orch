@@ -155,7 +155,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     expect(output.parts[0].text).toContain("[BACKGROUND TASK COMPLETED]")
   })
 
-  test("injects lightweight execution bias when ultrawork intent is prefixed", async () => {
+  test("does not activate retired ultrawork mode when ulw intent is prefixed", async () => {
     // #given
     const args = createMockHandlerArgs()
     const handler = createChatMessageHandler(args)
@@ -168,13 +168,11 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     // #when
     await handler(input, output)
 
-    // #then - execution bias prepended to existing text part (upstream pattern)
+    // #then
     expect(output.parts).toHaveLength(1)
-    expect(output.parts[0].text).toContain("[SYSTEM DIRECTIVE: OCO - EXECUTION BIAS]")
-    expect(output.parts[0].text).toContain("optimize for execution over discussion")
-    expect(output.parts[0].text).toContain("ulw fix the failing tests")
+    expect(output.parts[0].text).toBe("ulw fix the failing tests")
     expect(output.parts[0].text).not.toContain("OCO_INTERNAL_INITIATOR")
-    expect(args._toastCalls.some((call) => call.body.title === "Ultrawork Mode Activated")).toBe(true)
+    expect(args._toastCalls.some((call) => call.body.title === "Ultrawork Mode Activated")).toBe(false)
   })
 
   test("does not inject lightweight execution bias for mid-sentence mentions", async () => {
@@ -194,7 +192,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     expect(output.parts[0].text).not.toContain("[SYSTEM DIRECTIVE: OCO - EXECUTION BIAS]")
   })
 
-  test("injects lightweight execution bias when ulw is prefixed after whitespace", async () => {
+  test("does not activate retired ultrawork mode when ulw is prefixed after whitespace", async () => {
     // #given
     const args = createMockHandlerArgs()
     const handler = createChatMessageHandler(args)
@@ -207,10 +205,9 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     // #when
     await handler(input, output)
 
-    // #then - execution bias prepended to existing text part (upstream pattern)
+    // #then
     expect(output.parts).toHaveLength(1)
-    expect(output.parts[0].text).toContain("[SYSTEM DIRECTIVE: OCO - EXECUTION BIAS]")
-    expect(output.parts[0].text).toContain("ulw fix the failing tests")
+    expect(output.parts[0].text).toBe("\n  ulw fix the failing tests")
   })
 
   test("does not inject lightweight execution bias into image-only prompts", async () => {

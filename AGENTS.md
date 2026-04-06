@@ -128,7 +128,7 @@ If you touched broad shared infrastructure, run `bun run test` too.
 - Prefer `describe` and `test` names in given/when/then style
 - Add or update the nearest relevant test when changing behavior
 
-## Architecture Rules from `.sisyphus/rules/modular-code-enforcement.md`
+## Architecture Rules from the modular-code-enforcement ruleset
 
 - `index.ts` may only re-export, compose, or register modules
 - No catch-all utility files

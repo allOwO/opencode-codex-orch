@@ -13,7 +13,7 @@ describe("remapAgentKeysToDisplayNames", () => {
     const result = remapAgentKeysToDisplayNames(agents)
 
     // then known agents get display name keys only
-    expect(result["Sisyphus (Ultraworker)"]).toBeDefined()
+    expect(result.Orchestrator).toBeDefined()
     expect(result["oracle"]).toBeDefined()
     expect(result["sisyphus"]).toBeUndefined()
   })
@@ -46,7 +46,7 @@ describe("remapAgentKeysToDisplayNames", () => {
     const result = remapAgentKeysToDisplayNames(agents)
 
     // then all get display name keys without lowercase duplicates
-    expect(result["Sisyphus (Ultraworker)"]).toBeDefined()
+    expect(result.Orchestrator).toBeDefined()
     expect(result["sisyphus"]).toBeUndefined()
     expect(result["Prometheus (Plan Builder)"]).toBeDefined()
     expect(result["prometheus"]).toBeUndefined()
@@ -54,9 +54,9 @@ describe("remapAgentKeysToDisplayNames", () => {
     expect(result["atlas"]).toBeUndefined()
     expect(result["Metis (Plan Consultant)"]).toBeDefined()
     expect(result["metis"]).toBeUndefined()
-    expect(result["Momus (Plan Critic)"]).toBeDefined()
+    expect(result.Reviewer).toBeDefined()
     expect(result["momus"]).toBeUndefined()
-    expect(result["Sisyphus-Junior"]).toBeDefined()
+    expect(result.Executor).toBeDefined()
     expect(result["sisyphus-junior"]).toBeUndefined()
   })
 })

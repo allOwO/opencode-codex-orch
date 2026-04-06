@@ -206,26 +206,46 @@ You are NOT an interactive assistant. You are an autonomous problem-solver.
 
 
 
+export const CATEGORY_NAME_ALIASES: Record<string, string> = {
+  "visual-engineering": "designer",
+  deep: "hard",
+  writing: "hard",
+}
+
+export function getCanonicalCategoryName(categoryName: string): string {
+  const trimmed = categoryName.trim()
+  return CATEGORY_NAME_ALIASES[trimmed] ?? CATEGORY_NAME_ALIASES[trimmed.toLowerCase()] ?? trimmed
+}
+
 export const DEFAULT_CATEGORIES: Record<string, CategoryConfig> = {
-  "visual-engineering": { model: "google/gemini-3.1-pro", variant: "high" },
-  deep: { model: "openai/gpt-5.3-codex", variant: "medium" },
+  designer: { model: "google/gemini-3.1-pro", variant: "high" },
+  hard: { model: "openai/gpt-5.3-codex", variant: "medium" },
   quick: { model: "anthropic/claude-haiku-4-5" },
-  writing: { model: "kimi-for-coding/k2p5" },
 }
 
 export const CATEGORY_PROMPT_APPENDS: Record<string, string> = {
-  "visual-engineering": VISUAL_CATEGORY_PROMPT_APPEND,
-  deep: DEEP_CATEGORY_PROMPT_APPEND,
+  designer: VISUAL_CATEGORY_PROMPT_APPEND,
+  hard: DEEP_CATEGORY_PROMPT_APPEND,
   quick: QUICK_CATEGORY_PROMPT_APPEND,
-  writing: WRITING_CATEGORY_PROMPT_APPEND,
 }
 
 export const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  "visual-engineering": "Frontend, UI/UX, design, styling, animation",
-  deep: "Complex implementation, hard logic, and architecture-heavy work. Research first, then execute autonomously.",
+  designer: "Frontend, UI/UX, design, styling, animation",
+  hard: "Complex implementation, hard logic, and architecture-heavy work. Research first, then execute autonomously.",
   quick: "Trivial tasks - single file changes, typo fixes, simple modifications",
-  writing: "Documentation, prose, technical writing",
 }
+
+DEFAULT_CATEGORIES["visual-engineering"] = DEFAULT_CATEGORIES.designer
+DEFAULT_CATEGORIES.deep = DEFAULT_CATEGORIES.hard
+DEFAULT_CATEGORIES.writing = DEFAULT_CATEGORIES.hard
+
+CATEGORY_PROMPT_APPENDS["visual-engineering"] = CATEGORY_PROMPT_APPENDS.designer
+CATEGORY_PROMPT_APPENDS.deep = CATEGORY_PROMPT_APPENDS.hard
+CATEGORY_PROMPT_APPENDS.writing = CATEGORY_PROMPT_APPENDS.hard
+
+CATEGORY_DESCRIPTIONS["visual-engineering"] = CATEGORY_DESCRIPTIONS.designer
+CATEGORY_DESCRIPTIONS.deep = CATEGORY_DESCRIPTIONS.hard
+CATEGORY_DESCRIPTIONS.writing = CATEGORY_DESCRIPTIONS.hard
 
 /**
  * System prompt prepended to plan agent invocations.

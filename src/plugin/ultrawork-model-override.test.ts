@@ -11,16 +11,16 @@ import * as dbOverrideModule from "./ultrawork-db-model-override"
 import * as sessionStateModule from "../features/claude-code-session-state"
 
 describe("detectUltrawork", () => {
-  test("should detect ultrawork keyword", () => {
-    expect(detectUltrawork("ultrawork do something")).toBe(true)
+  test("returns false for retired ultrawork keyword", () => {
+    expect(detectUltrawork("ultrawork do something")).toBe(false)
   })
 
-  test("should detect ulw keyword", () => {
-    expect(detectUltrawork("ulw fix the bug")).toBe(true)
+  test("returns false for retired ulw keyword", () => {
+    expect(detectUltrawork("ulw fix the bug")).toBe(false)
   })
 
-  test("should be case insensitive", () => {
-    expect(detectUltrawork("ULTRAWORK do something")).toBe(true)
+  test("returns false for retired ultrawork keyword regardless of case", () => {
+    expect(detectUltrawork("ULTRAWORK do something")).toBe(false)
   })
 
   test("should not detect in code blocks", () => {
@@ -60,7 +60,7 @@ describe("resolveUltraworkOverride", () => {
     } as unknown as Parameters<typeof resolveUltraworkOverride>[0]
   }
 
-  test("should resolve override when ultrawork keyword detected", () => {
+  test("returns null for retired ultrawork overrides even when keyword is detected", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6", variant: "max" })
     const output = createOutput("ultrawork do something")
@@ -69,7 +69,7 @@ describe("resolveUltraworkOverride", () => {
     const result = resolveUltraworkOverride(config, "sisyphus", output)
 
     //#then
-    expect(result).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-6", variant: "max" })
+    expect(result).toBeNull()
   })
 
   test("should return null when no keyword detected", () => {
@@ -120,7 +120,7 @@ describe("resolveUltraworkOverride", () => {
     expect(result).toBeNull()
   })
 
-  test("should use message.agent when input agent is undefined", () => {
+  test("returns null when using message.agent after ultrawork retirement", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6" })
     const output = createOutput("ultrawork do something", "sisyphus")
@@ -129,7 +129,7 @@ describe("resolveUltraworkOverride", () => {
     const result = resolveUltraworkOverride(config, undefined, output)
 
     //#then
-    expect(result).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-6", variant: undefined })
+    expect(result).toBeNull()
   })
 
   test("should return null when agents config is missing", () => {
@@ -158,7 +158,7 @@ describe("resolveUltraworkOverride", () => {
     expect(result).toBeNull()
   })
 
-  test("should resolve variant-only override when ultrawork.model is not set", () => {
+  test("returns null for variant-only ultrawork override after retirement", () => {
     //#given
     const config = createConfig("sisyphus", { variant: "max" })
     const output = createOutput("ultrawork do something")
@@ -167,10 +167,10 @@ describe("resolveUltraworkOverride", () => {
     const result = resolveUltraworkOverride(config, "sisyphus", output)
 
     //#then
-    expect(result).toEqual({ variant: "max" })
+    expect(result).toBeNull()
   })
 
-  test("should handle model string with multiple slashes", () => {
+  test("returns null even when retired ultrawork config has multi-slash model", () => {
     //#given
     const config = createConfig("sisyphus", { model: "openai/gpt-5.3/codex" })
     const output = createOutput("ultrawork do something")
@@ -179,7 +179,7 @@ describe("resolveUltraworkOverride", () => {
     const result = resolveUltraworkOverride(config, "sisyphus", output)
 
     //#then
-    expect(result).toEqual({ providerID: "openai", modelID: "gpt-5.3/codex", variant: undefined })
+    expect(result).toBeNull()
   })
 
   test("should return null when model string has no slash", () => {
@@ -194,7 +194,7 @@ describe("resolveUltraworkOverride", () => {
     expect(result).toBeNull()
   })
 
-  test("should resolve display name to config key", () => {
+  test("returns null for legacy display names after ultrawork retirement", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6", variant: "max" })
     const output = createOutput("ulw do something")
@@ -203,10 +203,10 @@ describe("resolveUltraworkOverride", () => {
     const result = resolveUltraworkOverride(config, "Sisyphus (Ultraworker)", output)
 
     //#then
-    expect(result).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-6", variant: "max" })
+    expect(result).toBeNull()
   })
 
-  test("should handle multiple text parts by joining them", () => {
+  test("returns null for joined text parts after ultrawork retirement", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6" })
     const output = {
@@ -222,10 +222,10 @@ describe("resolveUltraworkOverride", () => {
     const result = resolveUltraworkOverride(config, "sisyphus", output)
 
     //#then
-    expect(result).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-6", variant: undefined })
+    expect(result).toBeNull()
   })
 
-  test("should use session agent when input and message agents are undefined", () => {
+  test("returns null without consulting session agent after ultrawork retirement", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6", variant: "max" })
     const output = createOutput("ultrawork do something")
@@ -235,8 +235,8 @@ describe("resolveUltraworkOverride", () => {
     const result = resolveUltraworkOverride(config, undefined, output, "ses_test")
 
     //#then
-    expect(getSessionAgentSpy).toHaveBeenCalledWith("ses_test")
-    expect(result).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-6", variant: "max" })
+    expect(getSessionAgentSpy).not.toHaveBeenCalled()
+    expect(result).toBeNull()
 
     getSessionAgentSpy.mockRestore()
   })
@@ -288,7 +288,7 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     } as unknown as Parameters<typeof applyUltraworkModelOverrideOnMessage>[0]
   }
 
-  test("should schedule deferred DB override when message ID present", () => {
+  test("does not schedule deferred DB override when ultrawork is retired", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6", variant: "max" })
     const output = createOutput("ultrawork do something", { messageId: "msg_123" })
@@ -298,14 +298,10 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     applyUltraworkModelOverrideOnMessage(config, "sisyphus", output, tui)
 
     //#then
-    expect(dbOverrideSpy).toHaveBeenCalledWith(
-      "msg_123",
-      { providerID: "anthropic", modelID: "claude-opus-4-6" },
-      "max",
-    )
+    expect(dbOverrideSpy).not.toHaveBeenCalled()
   })
 
-  test("should override keyword-detector variant with configured ultrawork variant on deferred path", () => {
+  test("does not apply retired ultrawork variant override on deferred path", () => {
     //#given
     const config = createConfig("sisyphus", {
       model: "anthropic/claude-opus-4-6",
@@ -320,13 +316,9 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     applyUltraworkModelOverrideOnMessage(config, "sisyphus", output, tui)
 
     //#then
-    expect(dbOverrideSpy).toHaveBeenCalledWith(
-      "msg_123",
-      { providerID: "anthropic", modelID: "claude-opus-4-6" },
-      "extended",
-    )
-    expect(output.message["variant"]).toBe("extended")
-    expect(output.message["thinking"]).toBe("extended")
+    expect(dbOverrideSpy).not.toHaveBeenCalled()
+    expect(output.message["variant"]).toBe("max")
+    expect(output.message["thinking"]).toBe("max")
   })
 
   test("should NOT mutate output.message.model when message ID present", () => {
@@ -346,7 +338,7 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     expect(output.message.model).toEqual(sonnetModel)
   })
 
-  test("should fall back to direct mutation when no message ID", () => {
+  test("does not fall back to direct mutation when ultrawork is retired", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6", variant: "max" })
     const output = createOutput("ultrawork do something")
@@ -356,12 +348,12 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     applyUltraworkModelOverrideOnMessage(config, "sisyphus", output, tui)
 
     //#then
-    expect(output.message.model).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-6" })
-    expect(output.message["variant"]).toBe("max")
+    expect(output.message.model).toBeUndefined()
+    expect(output.message["variant"]).toBeUndefined()
     expect(dbOverrideSpy).not.toHaveBeenCalled()
   })
 
-  test("should apply variant-only override when no message ID", () => {
+  test("does not apply variant-only ultrawork override when retired", () => {
     //#given
     const config = createConfig("sisyphus", { variant: "high" })
     const output = createOutput("ultrawork do something")
@@ -372,7 +364,7 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
 
     //#then
     expect(output.message.model).toBeUndefined()
-    expect(output.message["variant"]).toBe("high")
+    expect(output.message["variant"]).toBeUndefined()
     expect(dbOverrideSpy).not.toHaveBeenCalled()
   })
 
@@ -389,7 +381,7 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     expect(dbOverrideSpy).not.toHaveBeenCalled()
   })
 
-  test("should log the model transition with deferred DB tag", () => {
+  test("does not log retired ultrawork model transitions", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6" })
     const existingModel = { providerID: "anthropic", modelID: "claude-sonnet-4-6" }
@@ -403,13 +395,10 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     applyUltraworkModelOverrideOnMessage(config, "sisyphus", output, tui)
 
     //#then
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("deferred DB"),
-      expect.objectContaining({ agent: "sisyphus" }),
-    )
+    expect(logSpy).not.toHaveBeenCalled()
   })
 
-  test("should call showToast on override", () => {
+  test("does not call showToast for retired ultrawork override", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6" })
     const output = createOutput("ultrawork do something", { messageId: "msg_123" })
@@ -424,10 +413,10 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     applyUltraworkModelOverrideOnMessage(config, "sisyphus", output, tui)
 
     //#then
-    expect(toastCalled).toBe(true)
+    expect(toastCalled).toBe(false)
   })
 
-  test("should resolve display name to config key with deferred path", () => {
+  test("does not resolve legacy display name into retired ultrawork override", () => {
     //#given
     const config = createConfig("sisyphus", { model: "anthropic/claude-opus-4-6", variant: "max" })
     const output = createOutput("ulw do something", { messageId: "msg_123" })
@@ -437,11 +426,7 @@ describe("applyUltraworkModelOverrideOnMessage", () => {
     applyUltraworkModelOverrideOnMessage(config, "Sisyphus (Ultraworker)", output, tui)
 
     //#then
-    expect(dbOverrideSpy).toHaveBeenCalledWith(
-      "msg_123",
-      { providerID: "anthropic", modelID: "claude-opus-4-6" },
-      "max",
-    )
+    expect(dbOverrideSpy).not.toHaveBeenCalled()
   })
 
   test("should skip override trigger when current model already matches ultrawork model", () => {

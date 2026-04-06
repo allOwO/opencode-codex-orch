@@ -67,8 +67,8 @@ describe("createWriteExistingFileGuardHook compatibility behavior", () => {
     }
   })
 
-  test("#given existing file under .sisyphus #when write executes #then always allows", async () => {
-    const existingFile = harness.createFile(".sisyphus/plans/plan.txt")
+  test("#given existing file under .opencode #when write executes #then always allows", async () => {
+    const existingFile = harness.createFile(".opencode/plans/plan.txt")
 
     await expect(
       harness.invoke({
@@ -76,6 +76,17 @@ describe("createWriteExistingFileGuardHook compatibility behavior", () => {
         outputArgs: { filePath: existingFile, content: "new plan" },
       })
     ).resolves.toBeDefined()
+  })
+
+  test("#given existing file under .sisyphus #when write executes #then no longer bypasses the guard", async () => {
+    const existingFile = harness.createFile(".sisyphus/plans/plan.txt")
+
+    await expect(
+      harness.runBefore({
+        tool: "write",
+        outputArgs: { filePath: existingFile, content: "new plan" },
+      })
+    ).rejects.toThrow(READ_REQUIRED_MESSAGE)
   })
 
   test("#given non-tracked tool #when it executes #then does not grant baseline", async () => {

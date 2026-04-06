@@ -1,5 +1,5 @@
 import type { CategoryConfig, CategoriesConfig } from "../../config/schema"
-import { DEFAULT_CATEGORIES, CATEGORY_PROMPT_APPENDS } from "./constants"
+import { DEFAULT_CATEGORIES, CATEGORY_PROMPT_APPENDS, getCanonicalCategoryName } from "./constants"
 import { resolveModel } from "../../shared/model-resolver"
 import { isModelAvailable } from "../../shared/model-availability"
 import { CATEGORY_MODEL_REQUIREMENTS } from "../../shared/model-requirements"
@@ -27,23 +27,26 @@ export function resolveCategoryConfig(
   options: ResolveCategoryConfigOptions
 ): ResolveCategoryConfigResult | null {
   const { userCategories, inheritedModel: _inheritedModel, systemDefaultModel, availableModels } = options
+  const canonicalCategoryName = getCanonicalCategoryName(categoryName)
 
-  const defaultConfig = DEFAULT_CATEGORIES[categoryName]
-  const userConfig = userCategories?.[categoryName]
+  const normalizedUserConfig = userCategories?.[canonicalCategoryName] ?? userCategories?.[categoryName]
+
+  const defaultConfig = DEFAULT_CATEGORIES[canonicalCategoryName]
+  const userConfig = normalizedUserConfig
   const hasExplicitUserConfig = userConfig !== undefined
 
   if (userConfig?.disable) {
     return null
   }
 
-  const categoryReq = CATEGORY_MODEL_REQUIREMENTS[categoryName]
+  const categoryReq = CATEGORY_MODEL_REQUIREMENTS[canonicalCategoryName]
   if (categoryReq?.requiresModel && availableModels && !hasExplicitUserConfig) {
     if (!isModelAvailable(categoryReq.requiresModel, availableModels)) {
-      log(`[resolveCategoryConfig] Category ${categoryName} requires ${categoryReq.requiresModel} but not available`)
+      log(`[resolveCategoryConfig] Category ${canonicalCategoryName} requires ${categoryReq.requiresModel} but not available`)
       return null
     }
   }
-  const defaultPromptAppend = CATEGORY_PROMPT_APPENDS[categoryName] ?? ""
+  const defaultPromptAppend = CATEGORY_PROMPT_APPENDS[canonicalCategoryName] ?? ""
 
   if (!defaultConfig && !userConfig) {
     return null

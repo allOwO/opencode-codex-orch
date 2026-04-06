@@ -9,7 +9,7 @@ import { formatFullSession } from "./full-session-format"
 import { formatTaskResult } from "./task-result-format"
 import { formatTaskStatus } from "./task-status-format"
 
-import { getAgentDisplayName } from "../../shared/agent-display-names"
+import { getAgentConfigKey, getAgentDisplayName } from "../../shared/agent-display-names"
 
 const SISYPHUS_JUNIOR_AGENT = getAgentDisplayName("sisyphus-junior")
 
@@ -29,7 +29,8 @@ function resolveToolCallID(ctx: ToolContextWithMetadata): string | undefined {
 }
 
 function formatResolvedTitle(task: BackgroundTask): string {
-  const label = task.agent === SISYPHUS_JUNIOR_AGENT && task.category ? task.category : task.agent
+  const isExecutorAgent = task.agent === SISYPHUS_JUNIOR_AGENT || getAgentConfigKey(task.agent) === "executor"
+  const label = isExecutorAgent && task.category ? task.category : task.agent
   return `${label} - ${task.description}`
 }
 

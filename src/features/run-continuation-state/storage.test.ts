@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test"
-import { mkdtempSync, rmSync } from "node:fs"
+import { existsSync, mkdtempSync, rmSync } from "node:fs"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
 import {
@@ -43,6 +43,7 @@ describe("run-continuation-state storage", () => {
     expect(marker?.sources.todo?.state).toBe("active")
     expect(marker?.sources.todo?.reason).toBe("2 todos remaining")
     expect(marker?.sources.stop?.state).toBe("stopped")
+    expect(existsSync(join(directory, ".opencode", "run-continuation", `${sessionID}.json`))).toBe(true)
   })
 
   it("treats marker as active when any source is active", () => {

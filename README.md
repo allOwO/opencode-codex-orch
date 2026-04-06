@@ -10,13 +10,12 @@ On top of the slim foundation, this fork adds several practical skills and fork-
 
 ## What it does
 
-opencode-codex-orch turns a single AI agent session into a coordinated development team. Sisyphus orchestrates, specialized agents handle research, planning, code search, and execution in parallel across multiple model providers.
+opencode-codex-orch turns a single AI agent session into a coordinated development team. The Orchestrator routes work while specialized agents handle research, review, code search, and execution in parallel across multiple model providers.
 
 **Key capabilities:**
 
-- **Multi-agent orchestration** with 10 specialized agents (Sisyphus, Atlas, Oracle, Prometheus, Librarian, Explore, Metis, Momus, Multimodal-Looker, Sisyphus-Junior)
+- **Multi-agent orchestration** with the simplified agent surface (Orchestrator, Executor, Reviewer, Oracle, Librarian, Explore, DeepSearch)
 - **Multi-model routing** across GPT, Kimi, Gemini, GLM and more — **no Claude/Anthropic dependencies**
-- **`ultrawork` / `ulw`** prefix for autonomous, execution-biased operation
 - **Built-in slash commands** like `/autopilot`, `/refactor`, and `/handoff`
 - **Hash-anchored edits** (`LINE#ID` content hashing) for reliable file modifications
 - **Background agents** running 5+ tasks in parallel

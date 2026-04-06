@@ -1,19 +1,22 @@
-/**
- * Agent config keys to display names mapping.
- * Config keys are lowercase (e.g., "sisyphus", "atlas").
- * Display names include suffixes for UI/logs (e.g., "Sisyphus (Ultraworker)").
- */
 export const AGENT_DISPLAY_NAMES: Record<string, string> = {
-  sisyphus: "Sisyphus (Ultraworker)",
-  prometheus: "Prometheus (Plan Builder)",
-  atlas: "Atlas (Plan Executor)",
-  "sisyphus-junior": "Sisyphus-Junior",
-  metis: "Metis (Plan Consultant)",
-  momus: "Momus (Plan Critic)",
+  orchestrator: "Orchestrator",
+  reviewer: "Reviewer",
   oracle: "oracle",
   librarian: "librarian",
   explore: "explore",
+  deepsearch: "DeepSearch",
+  prometheus: "Prometheus (Plan Builder)",
+  atlas: "Atlas (Plan Executor)",
+  metis: "Metis (Plan Consultant)",
   "multimodal-looker": "multimodal-looker",
+  executor: "Executor",
+  build: "build",
+}
+
+const LEGACY_AGENT_DISPLAY_NAMES: Record<string, string> = {
+  sisyphus: "Orchestrator",
+  momus: "Reviewer",
+  "sisyphus-junior": "Executor",
 }
 
 /**
@@ -26,9 +29,15 @@ export function getAgentDisplayName(configKey: string): string {
   const exactMatch = AGENT_DISPLAY_NAMES[configKey]
   if (exactMatch !== undefined) return exactMatch
 
+  const legacyExactMatch = LEGACY_AGENT_DISPLAY_NAMES[configKey]
+  if (legacyExactMatch !== undefined) return legacyExactMatch
+
   // Fall back to case-insensitive search
   const lowerKey = configKey.toLowerCase()
   for (const [k, v] of Object.entries(AGENT_DISPLAY_NAMES)) {
+    if (k.toLowerCase() === lowerKey) return v
+  }
+  for (const [k, v] of Object.entries(LEGACY_AGENT_DISPLAY_NAMES)) {
     if (k.toLowerCase() === lowerKey) return v
   }
 
@@ -40,12 +49,23 @@ const REVERSE_DISPLAY_NAMES: Record<string, string> = Object.fromEntries(
   Object.entries(AGENT_DISPLAY_NAMES).map(([key, displayName]) => [displayName.toLowerCase(), key]),
 )
 
+const LEGACY_NAME_ALIASES: Record<string, string> = {
+  sisyphus: "orchestrator",
+  "sisyphus (ultraworker)": "orchestrator",
+  momus: "reviewer",
+  "momus (plan critic)": "reviewer",
+  "momus (plan reviewer)": "reviewer",
+  "sisyphus-junior": "executor",
+}
+
 /**
  * Resolve an agent name (display name or config key) to its lowercase config key.
  * "Atlas (Plan Executor)" → "atlas", "atlas" → "atlas", "unknown" → "unknown"
  */
 export function getAgentConfigKey(agentName: string): string {
   const lower = agentName.toLowerCase()
+  const legacyAlias = LEGACY_NAME_ALIASES[lower]
+  if (legacyAlias !== undefined) return legacyAlias
   const reversed = REVERSE_DISPLAY_NAMES[lower]
   if (reversed !== undefined) return reversed
   if (AGENT_DISPLAY_NAMES[lower] !== undefined) return lower

@@ -1,55 +1,58 @@
 export const AGENT_NAME_MAP: Record<string, string> = {
-  // Sisyphus variants → "sisyphus"
-  omo: "sisyphus",
-  OmO: "sisyphus",
-  Sisyphus: "sisyphus",
-  sisyphus: "sisyphus",
+  // Sisyphus variants → orchestrator
+  omo: "orchestrator",
+  sisyphus: "orchestrator",
+  orchestrator: "orchestrator",
 
-  // Prometheus variants → "prometheus"
-  "OmO-Plan": "prometheus",
+  // Planner / reviewer variants
+  "omo-plan": "prometheus",
   "oco-plan": "prometheus",
-  "Planner-Sisyphus": "prometheus",
   "planner-sisyphus": "prometheus",
-  "Prometheus (Planner)": "prometheus",
+  "prometheus (planner)": "prometheus",
   prometheus: "prometheus",
 
-  // Atlas variants → "atlas"
+  // Removed executor variants
   "orchestrator-sisyphus": "atlas",
-  Atlas: "atlas",
+  "atlas (plan executor)": "atlas",
   atlas: "atlas",
 
-  // Metis variants → "metis"
+  // Removed consultant variants
   "plan-consultant": "metis",
-  "Metis (Plan Consultant)": "metis",
+  "metis (plan consultant)": "metis",
   metis: "metis",
 
-  // Momus variants → "momus"
-  "Momus (Plan Reviewer)": "momus",
-  momus: "momus",
+  // Momus variants → reviewer
+  "momus (plan reviewer)": "reviewer",
+  "momus (plan critic)": "reviewer",
+  momus: "reviewer",
+  reviewer: "reviewer",
 
-  // Sisyphus-Junior → "sisyphus-junior"
-  "Sisyphus-Junior": "sisyphus-junior",
-  "sisyphus-junior": "sisyphus-junior",
+  // Executor variants
+  "sisyphus-junior": "executor",
+  executor: "executor",
 
-  // Already lowercase - passthrough
+  // Other kept agents
   build: "build",
   oracle: "oracle",
   librarian: "librarian",
   explore: "explore",
-  "multimodal-looker": "multimodal-looker",
+  deepsearch: "deepsearch",
+  "multimodal-looker": "librarian",
+}
+
+for (const [key, value] of Object.entries({ ...AGENT_NAME_MAP })) {
+  AGENT_NAME_MAP[key.toLowerCase()] = value
 }
 
 export const BUILTIN_AGENT_NAMES = new Set([
-  "sisyphus", // was "Sisyphus"
+  "orchestrator",
+  "reviewer",
   "oracle",
   "librarian",
   "explore",
-  "multimodal-looker",
-  "metis", // was "Metis (Plan Consultant)"
-  "momus", // was "Momus (Plan Reviewer)"
-  "prometheus", // was "Prometheus (Planner)"
-  "atlas", // was "Atlas"
+  "deepsearch",
   "build",
+  "executor",
 ])
 
 export function migrateAgentNames(

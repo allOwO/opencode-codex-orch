@@ -30,7 +30,7 @@ describe("resolveCategoryExecution", () => {
 	test("returns clear error when category exists but required model is not available", async () => {
 		//#given
 		const args = {
-			category: "deep",
+			category: "hard",
 			prompt: "test prompt",
 			description: "Test task",
 			run_in_background: false,
@@ -47,7 +47,7 @@ describe("resolveCategoryExecution", () => {
 
 		//#then
 		expect(result.error).toBeDefined()
-		expect(result.error).toContain("deep")
+		expect(result.error).toContain("hard")
 		expect(result.error).toMatch(/model.*not.*available|requires.*model/i)
 		expect(result.error).not.toContain("Unknown category")
 	})
@@ -79,7 +79,7 @@ describe("resolveCategoryExecution", () => {
 	test("uses category fallback_models for background/runtime fallback chain", async () => {
 		//#given
 		const args = {
-			category: "deep",
+			category: "hard",
 			prompt: "test prompt",
 			description: "Test task",
 			run_in_background: false,
@@ -89,7 +89,7 @@ describe("resolveCategoryExecution", () => {
 		}
 		const executorCtx = createMockExecutorContext()
 		executorCtx.userCategories = {
-			deep: {
+			hard: {
 				model: "quotio/claude-opus-4-6",
 				fallback_models: ["quotio/kimi-k2.5", "openai/gpt-5.2(high)"],
 			},
@@ -109,7 +109,7 @@ describe("resolveCategoryExecution", () => {
 	test("preserves user category runtime model settings over defaults", async () => {
 		//#given
 		const args = {
-			category: "deep",
+			category: "hard",
 			prompt: "test prompt",
 			description: "Test task",
 			run_in_background: false,
@@ -119,7 +119,7 @@ describe("resolveCategoryExecution", () => {
 		}
 		const executorCtx = createMockExecutorContext()
 		executorCtx.userCategories = {
-			deep: {
+			hard: {
 				model: "openai/gpt-5.3-codex",
 				variant: "high",
 				temperature: 0.2,

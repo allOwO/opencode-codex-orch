@@ -4,12 +4,15 @@ import { AGENT_NAME_MAP, migrateAgentNames } from "./agent-names"
 import { migrateHookNames } from "./hook-names"
 import { migrateModelVersions } from "./model-versions"
 
-const REMOVED_AGENT_NAMES = new Set(["hephaestus"])
+const REMOVED_AGENT_NAMES = new Set(["hephaestus", "atlas", "prometheus", "metis"])
 const REMOVED_CATEGORY_MAP: Record<string, string> = {
-  ultrabrain: "deep",
-  artistry: "visual-engineering",
+  ultrabrain: "hard",
+  artistry: "designer",
   "unspecified-low": "quick",
-  "unspecified-high": "deep",
+  "unspecified-high": "hard",
+  "visual-engineering": "designer",
+  deep: "hard",
+  writing: "hard",
 }
 
 function migrateRemovedCategories(record: Record<string, unknown>): {

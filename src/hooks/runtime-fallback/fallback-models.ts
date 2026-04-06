@@ -5,6 +5,12 @@ import { log } from "../../shared/logger"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
 import { normalizeFallbackModels } from "../../shared/model-resolver"
 
+const AGENT_FALLBACK_LOOKUP_ALIASES: Record<string, string[]> = {
+  orchestrator: ["sisyphus"],
+  reviewer: ["momus"],
+  executor: ["sisyphus-junior"],
+}
+
 export function getFallbackModelsForSession(
   sessionID: string,
   agent: string | undefined,
@@ -21,7 +27,10 @@ export function getFallbackModelsForSession(
   }
 
   const tryGetFallbackFromAgent = (agentName: string): string[] | undefined => {
-    const agentConfig = pluginConfig.agents?.[agentName as keyof typeof pluginConfig.agents]
+    const candidateNames = [agentName, ...(AGENT_FALLBACK_LOOKUP_ALIASES[agentName] ?? [])]
+    const agentConfig = candidateNames
+      .map((candidateName) => pluginConfig.agents?.[candidateName as keyof typeof pluginConfig.agents])
+      .find((config) => config !== undefined)
     if (!agentConfig) return undefined
     
     if (agentConfig?.fallback_models) {

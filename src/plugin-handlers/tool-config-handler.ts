@@ -53,37 +53,10 @@ export function applyToolConfig(params: {
   if (librarian) {
     librarian.permission = { ...librarian.permission, "grep_app_*": "allow" };
   }
-  const looker = agentByKey(params.agentResult, "multimodal-looker");
-  if (looker) {
-    looker.permission = { ...looker.permission, task: "deny", look_at: "deny" };
-  }
-  const atlas = agentByKey(params.agentResult, "atlas");
-  if (atlas) {
-    atlas.permission = {
-      ...atlas.permission,
-      task: "allow",
-      call_oco_agent: "deny",
-      "task_*": "allow",
-      teammate: "allow",
-      ...denyTodoTools,
-    };
-  }
   const sisyphus = agentByKey(params.agentResult, "sisyphus");
   if (sisyphus) {
     sisyphus.permission = {
       ...sisyphus.permission,
-      call_oco_agent: "deny",
-      task: "allow",
-      question: questionPermission,
-      "task_*": "allow",
-      teammate: "allow",
-      ...denyTodoTools,
-    };
-  }
-  const prometheus = agentByKey(params.agentResult, "prometheus");
-  if (prometheus) {
-    prometheus.permission = {
-      ...prometheus.permission,
       call_oco_agent: "deny",
       task: "allow",
       question: questionPermission,

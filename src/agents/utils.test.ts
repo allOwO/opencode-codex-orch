@@ -84,7 +84,7 @@ describe("createBuiltinAgents with model overrides", () => {
     expect(agents.sisyphus.thinking).toBeUndefined()
   })
 
-  test("Atlas uses uiSelectedModel", async () => {
+  test("retired atlas is not created even when uiSelectedModel is set", async () => {
     // #given
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
       new Set(["openai/gpt-5.4", "anthropic/claude-sonnet-4-6"])
@@ -107,8 +107,37 @@ describe("createBuiltinAgents with model overrides", () => {
       )
 
       // #then
-      expect(agents.atlas).toBeDefined()
-      expect(agents.atlas.model).toBe("openai/gpt-5.4")
+      expect(agents.atlas).toBeUndefined()
+    } finally {
+      fetchSpy.mockRestore()
+    }
+  })
+
+  test("retired metis and multimodal looker agents are not created", async () => {
+    const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
+      new Set(["anthropic/claude-opus-4-6", "openai/gpt-5.4"])
+    )
+
+    try {
+      const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL)
+
+      expect(agents.metis).toBeUndefined()
+      expect(agents["multimodal-looker"]).toBeUndefined()
+    } finally {
+      fetchSpy.mockRestore()
+    }
+  })
+
+  test("registers deepsearch and exposes it to the orchestrator prompt", async () => {
+    const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
+      new Set(["anthropic/claude-opus-4-6", "openai/gpt-5.4", "google/gemini-3.1-pro"])
+    )
+
+    try {
+      const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL)
+
+      expect(agents.deepsearch).toBeDefined()
+      expect(agents.sisyphus.prompt).toContain("deepsearch")
     } finally {
       fetchSpy.mockRestore()
     }
@@ -147,7 +176,7 @@ describe("createBuiltinAgents with model overrides", () => {
     }
   })
 
-  test("user config model takes priority over uiSelectedModel for atlas", async () => {
+  test("retired atlas ignores user overrides and remains absent", async () => {
     // #given
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
       new Set(["openai/gpt-5.4", "anthropic/claude-sonnet-4-6"])
@@ -173,8 +202,7 @@ describe("createBuiltinAgents with model overrides", () => {
       )
 
       // #then
-      expect(agents.atlas).toBeDefined()
-      expect(agents.atlas.model).toBe("google/antigravity-claude-opus-4-5-thinking")
+      expect(agents.atlas).toBeUndefined()
     } finally {
       fetchSpy.mockRestore()
     }
@@ -321,7 +349,6 @@ describe("createBuiltinAgents with model overrides", () => {
 
       // #then
       expect(agents.sisyphus.prompt).toContain("researcher")
-      expect(agents.atlas.prompt).toContain("researcher")
     } finally {
       fetchSpy.mockRestore()
     }
@@ -356,7 +383,6 @@ describe("createBuiltinAgents with model overrides", () => {
 
       // #then
       expect(agents.sisyphus.prompt).not.toContain("hidden-agent")
-      expect(agents.atlas.prompt).not.toContain("hidden-agent")
     } finally {
       fetchSpy.mockRestore()
     }
@@ -391,7 +417,6 @@ describe("createBuiltinAgents with model overrides", () => {
 
       // #then
       expect(agents.sisyphus.prompt).not.toContain("disabled-agent")
-      expect(agents.atlas.prompt).not.toContain("disabled-agent")
     } finally {
       fetchSpy.mockRestore()
     }
@@ -426,7 +451,6 @@ describe("createBuiltinAgents with model overrides", () => {
 
       // #then
       expect(agents.sisyphus.prompt).not.toContain("researcher")
-      expect(agents.atlas.prompt).not.toContain("researcher")
     } finally {
       fetchSpy.mockRestore()
     }
@@ -612,7 +636,7 @@ describe("Sisyphus and Librarian environment context toggle", () => {
   })
 })
 
-describe("Atlas is unaffected by environment context toggle", () => {
+describe("retired atlas remains absent across environment context settings", () => {
   let fetchSpy: ReturnType<typeof spyOn>
 
   beforeEach(() => {
@@ -625,7 +649,7 @@ describe("Atlas is unaffected by environment context toggle", () => {
     fetchSpy.mockRestore()
   })
 
-  test("atlas prompt is unchanged and never contains <oco-env>", async () => {
+  test("atlas is not created regardless of the oco env toggle", async () => {
     const agentsDefault = await createBuiltinAgents(
       [],
       {},
@@ -658,11 +682,8 @@ describe("Atlas is unaffected by environment context toggle", () => {
       true
     )
 
-    expect(agentsDefault.atlas).toBeDefined()
-    expect(agentsDisabled.atlas).toBeDefined()
-    expect(agentsDefault.atlas.prompt).not.toContain("<oco-env>")
-    expect(agentsDisabled.atlas.prompt).not.toContain("<oco-env>")
-    expect(agentsDisabled.atlas.prompt).toBe(agentsDefault.atlas.prompt)
+    expect(agentsDefault.atlas).toBeUndefined()
+    expect(agentsDisabled.atlas).toBeUndefined()
   })
 })
 
@@ -1128,7 +1149,7 @@ describe("override.category expansion in createBuiltinAgents", () => {
     expect(agents.sisyphus.variant).toBe("medium")
   })
 
-  test("atlas override with category expands category properties", async () => {
+  test("retired atlas override with category is ignored", async () => {
     // #given
     const overrides = {
       atlas: { category: "deep" } as any,
@@ -1137,10 +1158,8 @@ describe("override.category expansion in createBuiltinAgents", () => {
     // #when
     const agents = await createBuiltinAgents([], overrides, undefined, TEST_DEFAULT_MODEL)
 
-    // #then - deep category: model=openai/gpt-5.3-codex, variant=medium
-    expect(agents.atlas).toBeDefined()
-    expect(agents.atlas.model).toBe("openai/gpt-5.3-codex")
-    expect(agents.atlas.variant).toBe("medium")
+    // #then
+    expect(agents.atlas).toBeUndefined()
   })
 
   test("override with non-existent category has no effect on config", async () => {

@@ -15,7 +15,7 @@ export const PROJECT_RULE_SUBDIRS: [string, string][] = [
   [".github", "instructions"],
   [".cursor", "rules"],
   [".claude", "rules"],
-  [".sisyphus", "rules"],
+  [".opencode", "rules"],
 ];
 
 export const PROJECT_RULE_FILES: string[] = [

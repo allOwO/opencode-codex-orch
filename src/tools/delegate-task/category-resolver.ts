@@ -5,6 +5,7 @@ import type { FallbackEntry } from "../../shared/model-requirements"
 import { mergeCategories } from "../../shared/merge-categories"
 import { SISYPHUS_JUNIOR_AGENT } from "./sisyphus-junior-agent"
 import { resolveCategoryConfig } from "./categories"
+import { getCanonicalCategoryName } from "./constants"
 import { parseModelString } from "./model-string-parser"
 import { CATEGORY_MODEL_REQUIREMENTS } from "../../shared/model-requirements"
 import { normalizeFallbackModels } from "../../shared/model-resolver"
@@ -62,7 +63,7 @@ export async function resolveCategoryExecution(
 
   const availableModels = await getAvailableModelsForDelegateTask(client)
 
-  const categoryName = args.category!
+  const categoryName = getCanonicalCategoryName(args.category!)
   const enabledCategories = mergeCategories(userCategories)
   const categoryExists = enabledCategories[categoryName] !== undefined
 
@@ -108,14 +109,14 @@ Available categories: ${allCategoryNames}`,
     }
   }
 
-  const requirement = CATEGORY_MODEL_REQUIREMENTS[args.category!]
+  const requirement = CATEGORY_MODEL_REQUIREMENTS[categoryName]
   const normalizedConfiguredFallbackModels = normalizeFallbackModels(resolved.config.fallback_models)
   let actualModel: string | undefined
   let modelInfo: ModelFallbackInfo | undefined
   let categoryModel: DelegatedTaskModelConfig | undefined
 
   const overrideModel = sisyphusJuniorModel
-  const explicitCategoryModel = userCategories?.[args.category!]?.model
+  const explicitCategoryModel = userCategories?.[categoryName]?.model ?? userCategories?.[args.category!]?.model
 
   if (!requirement) {
     // Precedence: explicit category model > sisyphus-junior default > category resolved model
@@ -171,7 +172,7 @@ Available categories: ${allCategoryNames}`,
       modelInfo = { model: actualModel, type, source }
 
       const parsedModel = parseModelString(actualModel)
-      const variantToUse = userCategories?.[args.category!]?.variant ?? resolvedVariant ?? resolved.config.variant
+       const variantToUse = userCategories?.[categoryName]?.variant ?? userCategories?.[args.category!]?.variant ?? resolvedVariant ?? resolved.config.variant
       categoryModel = buildDelegatedTaskModelConfig(parsedModel ?? undefined, variantToUse, resolved.config)
     }
   }
@@ -193,14 +194,14 @@ Available categories: ${allCategoryNames}`,
       modelInfo: undefined,
       actualModel: undefined,
       isUnstableAgent: false,
-      error: `Model not configured for category "${args.category}".
+      error: `Model not configured for category "${categoryName}".
 
 Configure in one of:
 1. OpenCode: Set "model" in opencode.json
 2. opencode-codex-orch: Set category model in opencode-codex-orch.json
 3. Provider: Connect a provider with available models
 
-Current category: ${args.category}
+Current category: ${categoryName}
 Available categories: ${categoryNames.join(", ")}`,
     }
   }
