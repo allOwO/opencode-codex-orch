@@ -5,7 +5,7 @@ describe("remapAgentKeysToDisplayNames", () => {
   it("remaps known agent keys to display names", () => {
     // given agents with lowercase keys
     const agents = {
-      sisyphus: { prompt: "test", mode: "primary" },
+      orchestrator: { prompt: "test", mode: "primary" },
       oracle: { prompt: "test", mode: "subagent" },
     }
 
@@ -15,7 +15,7 @@ describe("remapAgentKeysToDisplayNames", () => {
     // then known agents get display name keys only
     expect(result.Orchestrator).toBeDefined()
     expect(result["oracle"]).toBeDefined()
-    expect(result["sisyphus"]).toBeUndefined()
+    expect(result["orchestrator"]).toBeUndefined()
   })
 
   it("preserves unknown agent keys unchanged", () => {
@@ -33,7 +33,7 @@ describe("remapAgentKeysToDisplayNames", () => {
 
   it("remaps active agents to display names and leaves retired names alone", () => {
     const agents = {
-      sisyphus: {},
+      orchestrator: {},
       reviewer: {},
       deepsearch: {},
       prometheus: {},
@@ -46,7 +46,7 @@ describe("remapAgentKeysToDisplayNames", () => {
 
     // then active agents get display names while retired keys stay literal
     expect(result.Orchestrator).toBeDefined()
-    expect(result["sisyphus"]).toBeUndefined()
+    expect(result["orchestrator"]).toBeUndefined()
     expect(result.Reviewer).toBeDefined()
     expect(result.DeepSearch).toBeDefined()
     expect(result["prometheus"]).toBeDefined()

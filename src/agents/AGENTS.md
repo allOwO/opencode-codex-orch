@@ -17,8 +17,6 @@ Agent factories following `createXXXAgent(model) → AgentConfig` pattern. Each 
 | **Reviewer**  | k2p5             | 0.1  | subagent | glm-5                              | Plan reviewer                    |
 | **Executor**  | gpt-5.4 xhigh    | 0.1  | all      | user-configurable                  | Category-spawned executor        |
 
-> **Note**: Legacy agent names (`sisyphus`, `momus`, `sisyphus-junior`, `multimodal-looker`) are accepted as aliases in configuration via the migration layer in `src/shared/migration/agent-names.ts`.
-
 ## TOOL RESTRICTIONS
 
 | Agent      | Denied Tools                                    |
@@ -52,7 +50,7 @@ agents/
 ├── utils.ts                # Agent utilities
 ├── builtin-agents.ts       # createBuiltinAgents() registry
 └── builtin-agents/         # maybeCreateXXXConfig conditional factories
-    ├── sisyphus-agent.ts   # Legacy config support
+    ├── orchestrator-agent.ts # Orchestrator config support
     └── general-agents.ts   # collectPendingBuiltinAgents
 ```
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import { createOracleAgent } from "./oracle"
-import { createMomusAgent } from "./momus"
+import { createReviewerAgent } from "./reviewer"
 import { createLibrarianAgent } from "./librarian"
 import { createExploreAgent } from "./explore"
 import { createDeepSearchAgent } from "./deepsearch"
@@ -116,8 +116,8 @@ describe("Kimi prompt integration with subagents", () => {
     expect(prompt).toContain("strategic technical advisor")
   })
 
-  test("Momus prepends compact Kimi intro while preserving Momus instructions", () => {
-    const prompt = createMomusAgent(KIMI_MODEL_ID).prompt ?? ""
+  test("Reviewer prepends compact Kimi intro while preserving reviewer instructions", () => {
+    const prompt = createReviewerAgent(KIMI_MODEL_ID).prompt ?? ""
 
     expect(prompt).toContain(KIMI_INTRO)
     expect(prompt).toContain("APPROVAL BIAS")

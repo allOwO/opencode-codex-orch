@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test"
 
-import { maybeCreateSisyphusConfig } from "./sisyphus-agent"
+import { maybeCreateOrchestratorConfig } from "./orchestrator-agent"
 
-describe("maybeCreateSisyphusConfig", () => {
+describe("maybeCreateOrchestratorConfig", () => {
   test("respects canonical orchestrator disable and override keys", () => {
-    const disabled = maybeCreateSisyphusConfig({
+    const disabled = maybeCreateOrchestratorConfig({
       disabledAgents: ["orchestrator"],
       agentOverrides: {},
       availableModels: new Set(["openai/gpt-5.4"]),
@@ -18,7 +18,7 @@ describe("maybeCreateSisyphusConfig", () => {
 
     expect(disabled).toBeUndefined()
 
-    const configured = maybeCreateSisyphusConfig({
+    const configured = maybeCreateOrchestratorConfig({
       disabledAgents: [],
       agentOverrides: {
         orchestrator: {

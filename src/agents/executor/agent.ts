@@ -1,5 +1,5 @@
 /**
- * Sisyphus-Junior - Focused Task Executor
+ * Executor - Focused Task Executor
  *
  * Executes delegated tasks directly without spawning other agents.
  * Category-spawned executor with domain-specific configurations.
@@ -20,27 +20,27 @@ import {
   type PermissionValue,
 } from "../../shared/permission-compat"
 
-import { buildDefaultSisyphusJuniorPrompt } from "./default"
-import { buildGptSisyphusJuniorPrompt } from "./gpt"
-import { buildGpt54SisyphusJuniorPrompt } from "./gpt-5-4"
-import { buildGpt53CodexSisyphusJuniorPrompt } from "./gpt-5-3-codex"
-import { buildGeminiSisyphusJuniorPrompt } from "./gemini"
-import { buildKimiSisyphusJuniorPrompt } from "./kimi"
+import { buildDefaultExecutorPrompt } from "./default"
+import { buildGptExecutorPrompt } from "./gpt"
+import { buildGpt54ExecutorPrompt } from "./gpt-5-4"
+import { buildGpt53CodexExecutorPrompt } from "./gpt-5-3-codex"
+import { buildGeminiExecutorPrompt } from "./gemini"
+import { buildKimiExecutorPrompt } from "./kimi"
 
 const MODE: AgentMode = "subagent"
 
-// Core tools that Sisyphus-Junior must NEVER have access to
+// Core tools that Executor must NEVER have access to
 // Note: call_oco_agent is ALLOWED so subagents can spawn explore/librarian
 const BLOCKED_TOOLS = ["task"]
 
-export const SISYPHUS_JUNIOR_DEFAULTS = {
+export const EXECUTOR_DEFAULTS = {
   model: "openai/gpt-5.3-codex",
   temperature: 0.1,
 } as const
 
-export type SisyphusJuniorPromptSource = "default" | "gpt" | "gpt-5-4" | "gpt-5-3-codex" | "gemini" | "kimi"
+export type ExecutorPromptSource = "default" | "gpt" | "gpt-5-4" | "gpt-5-3-codex" | "gemini" | "kimi"
 
-export function getSisyphusJuniorPromptSource(model?: string): SisyphusJuniorPromptSource {
+export function getExecutorPromptSource(model?: string): ExecutorPromptSource {
   if (model && isKimiModel(model)) {
     return "kimi"
   }
@@ -58,33 +58,33 @@ export function getSisyphusJuniorPromptSource(model?: string): SisyphusJuniorPro
 }
 
 /**
- * Builds the appropriate Sisyphus-Junior prompt based on model.
+ * Builds the appropriate Executor prompt based on model.
  */
-export function buildSisyphusJuniorPrompt(
+export function buildExecutorPrompt(
   model: string | undefined,
   useTaskSystem: boolean,
   promptAppend?: string
 ): string {
-  const source = getSisyphusJuniorPromptSource(model)
+  const source = getExecutorPromptSource(model)
 
   switch (source) {
     case "gpt-5-4":
-      return buildGpt54SisyphusJuniorPrompt(useTaskSystem, promptAppend)
+      return buildGpt54ExecutorPrompt(useTaskSystem, promptAppend)
     case "gpt-5-3-codex":
-      return buildGpt53CodexSisyphusJuniorPrompt(useTaskSystem, promptAppend)
+      return buildGpt53CodexExecutorPrompt(useTaskSystem, promptAppend)
     case "gpt":
-      return buildGptSisyphusJuniorPrompt(useTaskSystem, promptAppend)
+      return buildGptExecutorPrompt(useTaskSystem, promptAppend)
     case "gemini":
-      return buildGeminiSisyphusJuniorPrompt(useTaskSystem, promptAppend)
+      return buildGeminiExecutorPrompt(useTaskSystem, promptAppend)
     case "kimi":
-      return buildKimiSisyphusJuniorPrompt(useTaskSystem, promptAppend)
+      return buildKimiExecutorPrompt(useTaskSystem, promptAppend)
     case "default":
     default:
-      return buildDefaultSisyphusJuniorPrompt(useTaskSystem, promptAppend)
+      return buildDefaultExecutorPrompt(useTaskSystem, promptAppend)
   }
 }
 
-export function createSisyphusJuniorAgentWithOverrides(
+export function createExecutorAgentWithOverrides(
   override: AgentOverrideConfig | undefined,
   systemDefaultModel?: string,
   useTaskSystem = false
@@ -94,11 +94,11 @@ export function createSisyphusJuniorAgentWithOverrides(
   }
 
   const overrideModel = (override as { model?: string } | undefined)?.model
-  const model = overrideModel ?? systemDefaultModel ?? SISYPHUS_JUNIOR_DEFAULTS.model
-  const temperature = override?.temperature ?? SISYPHUS_JUNIOR_DEFAULTS.temperature
+  const model = overrideModel ?? systemDefaultModel ?? EXECUTOR_DEFAULTS.model
+  const temperature = override?.temperature ?? EXECUTOR_DEFAULTS.temperature
 
   const promptAppend = override?.prompt_append
-  const prompt = buildSisyphusJuniorPrompt(model, useTaskSystem, promptAppend)
+  const prompt = buildExecutorPrompt(model, useTaskSystem, promptAppend)
 
   const baseRestrictions = createAgentToolRestrictions(BLOCKED_TOOLS)
 
@@ -113,7 +113,7 @@ export function createSisyphusJuniorAgentWithOverrides(
 
   const base: AgentConfig = {
     description: override?.description ??
-      "Focused task executor. Same discipline, no delegation. (Sisyphus-Junior - opencode-codex-orch)",
+      "Focused task executor. Same discipline, no delegation. (Executor - opencode-codex-orch)",
     mode: MODE,
     model,
     temperature,
@@ -137,4 +137,4 @@ export function createSisyphusJuniorAgentWithOverrides(
   } as AgentConfig
 }
 
-createSisyphusJuniorAgentWithOverrides.mode = MODE
+createExecutorAgentWithOverrides.mode = MODE

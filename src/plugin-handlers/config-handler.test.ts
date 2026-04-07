@@ -7,7 +7,7 @@ import type { OpenCodeCodexOrchConfig } from "../config"
 import { getAgentDisplayName } from "../shared/agent-display-names"
 
 import * as agents from "../agents"
-import * as sisyphusJunior from "../agents/sisyphus-junior"
+import * as executor from "../agents/executor"
 import * as commandLoader from "../features/claude-code-command-loader"
 import * as builtinCommands from "../features/builtin-commands"
 import * as skillLoader from "../features/opencode-skill-loader"
@@ -74,7 +74,7 @@ beforeEach(() => {
 
 afterEach(() => {
   (agents.createBuiltinAgents as any)?.mockRestore?.()
-  ;(sisyphusJunior.createSisyphusJuniorAgentWithOverrides as any)?.mockRestore?.()
+  ;(executor.createExecutorAgentWithOverrides as any)?.mockRestore?.()
   ;(commandLoader.loadUserCommands as any)?.mockRestore?.()
   ;(commandLoader.loadProjectCommands as any)?.mockRestore?.()
   ;(commandLoader.loadOpencodeGlobalCommands as any)?.mockRestore?.()
@@ -101,7 +101,7 @@ afterEach(() => {
   ;(modelResolver.resolveModelWithFallback as any)?.mockRestore?.()
 })
 
-describe("Sisyphus-Junior model inheritance", () => {
+describe("Executor model inheritance", () => {
   test("does not inherit UI-selected model as system default", async () => {
     // #given
     const pluginConfig: OpenCodeCodexOrchConfig = {}
@@ -123,8 +123,8 @@ describe("Sisyphus-Junior model inheritance", () => {
 
     // #then
     const agentConfig = config.agent as Record<string, { model?: string }>
-    expect(agentConfig[getAgentDisplayName("sisyphus-junior")]?.model).toBe(
-      sisyphusJunior.SISYPHUS_JUNIOR_DEFAULTS.model
+    expect(agentConfig[getAgentDisplayName("executor")]?.model).toBe(
+      executor.EXECUTOR_DEFAULTS.model
     )
   })
 
@@ -155,7 +155,7 @@ describe("Sisyphus-Junior model inheritance", () => {
 
     // #then
     const agentConfig = config.agent as Record<string, { model?: string }>
-    expect(agentConfig[getAgentDisplayName("sisyphus-junior")]?.model).toBe(
+    expect(agentConfig[getAgentDisplayName("executor")]?.model).toBe(
       "openai/gpt-5.3-codex"
     )
   })
@@ -204,7 +204,7 @@ describe("retired planning agents", () => {
       mockResolvedValue: (value: Record<string, unknown>) => void
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
+      orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
       oracle: { name: "oracle", prompt: "test", mode: "subagent" },
     })
     const pluginConfig: OpenCodeCodexOrchConfig = {
@@ -230,8 +230,8 @@ describe("retired planning agents", () => {
 
     // #then
     const keys = Object.keys(config.agent as Record<string, unknown>)
-    expect(keys[0]).toBe(getAgentDisplayName("sisyphus"))
-    expect(keys).toContain(getAgentDisplayName("sisyphus-junior"))
+    expect(keys[0]).toBe(getAgentDisplayName("orchestrator"))
+    expect(keys).toContain(getAgentDisplayName("executor"))
     expect(keys).toContain(getAgentDisplayName("oracle"))
   })
 
@@ -434,7 +434,7 @@ describe("default_agent behavior with Sisyphus orchestration", () => {
     expect(config.default_agent).toBe(displayName)
   })
 
-  test("sets default_agent to sisyphus when missing", async () => {
+  test("sets default_agent to orchestrator when missing", async () => {
     // #given
     const pluginConfig: OpenCodeCodexOrchConfig = {}
     const config: Record<string, unknown> = {
@@ -454,10 +454,10 @@ describe("default_agent behavior with Sisyphus orchestration", () => {
     await handler(config)
 
     // #then
-    expect(config.default_agent).toBe(getAgentDisplayName("sisyphus"))
+    expect(config.default_agent).toBe(getAgentDisplayName("orchestrator"))
   })
 
-  test("sets default_agent to sisyphus when configured default_agent is empty after trim", async () => {
+  test("sets default_agent to orchestrator when configured default_agent is empty after trim", async () => {
     // given
     const pluginConfig: OpenCodeCodexOrchConfig = {}
     const config: Record<string, unknown> = {
@@ -478,7 +478,7 @@ describe("default_agent behavior with Sisyphus orchestration", () => {
     await handler(config)
 
     // then
-    expect(config.default_agent).toBe(getAgentDisplayName("sisyphus"))
+    expect(config.default_agent).toBe(getAgentDisplayName("orchestrator"))
   })
 
   test("preserves custom default_agent names while trimming whitespace", async () => {
@@ -826,8 +826,8 @@ describe("config-handler plugin loading error boundary (#1559)", () => {
 
 describe("per-agent todowrite/todoread deny when task_system enabled", () => {
   const AGENTS_WITH_TODO_DENY = new Set([
-    getAgentDisplayName("sisyphus"),
-    getAgentDisplayName("sisyphus-junior"),
+    getAgentDisplayName("orchestrator"),
+    getAgentDisplayName("executor"),
   ])
 
   test("denies todowrite and todoread for primary agents when task_system is enabled", async () => {
@@ -836,8 +836,8 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
       mockResolvedValue: (value: Record<string, unknown>) => void
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
-      "sisyphus-junior": { name: "sisyphus-junior", prompt: "test", mode: "subagent" },
+      orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
+      executor: { name: "executor", prompt: "test", mode: "subagent" },
       oracle: { name: "oracle", prompt: "test", mode: "subagent" },
     })
 
@@ -874,7 +874,7 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
       mockResolvedValue: (value: Record<string, unknown>) => void
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
+      orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
     })
 
     const pluginConfig: OpenCodeCodexOrchConfig = {
@@ -898,8 +898,8 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
 
     //#then
     const agentResult = config.agent as Record<string, { permission?: Record<string, unknown> }>
-    expect(agentResult[getAgentDisplayName("sisyphus")]?.permission?.todowrite).toBeUndefined()
-    expect(agentResult[getAgentDisplayName("sisyphus")]?.permission?.todoread).toBeUndefined()
+    expect(agentResult[getAgentDisplayName("orchestrator")]?.permission?.todowrite).toBeUndefined()
+    expect(agentResult[getAgentDisplayName("orchestrator")]?.permission?.todoread).toBeUndefined()
   })
 
   test("does not deny todowrite/todoread when task_system is undefined", async () => {
@@ -908,7 +908,7 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
       mockResolvedValue: (value: Record<string, unknown>) => void
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
+      orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
     })
 
     const pluginConfig: OpenCodeCodexOrchConfig = {}
@@ -930,8 +930,8 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
 
     //#then
     const agentResult = config.agent as Record<string, { permission?: Record<string, unknown> }>
-    expect(agentResult[getAgentDisplayName("sisyphus")]?.permission?.todowrite).toBeUndefined()
-    expect(agentResult[getAgentDisplayName("sisyphus")]?.permission?.todoread).toBeUndefined()
+    expect(agentResult[getAgentDisplayName("orchestrator")]?.permission?.todowrite).toBeUndefined()
+    expect(agentResult[getAgentDisplayName("orchestrator")]?.permission?.todoread).toBeUndefined()
   })
 })
 
@@ -943,7 +943,7 @@ describe("disable_oco_env pass-through", () => {
       mock: { calls: unknown[][] }
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "without-env", mode: "primary" },
+      orchestrator: { name: "orchestrator", prompt: "without-env", mode: "primary" },
     })
 
     const pluginConfig: OpenCodeCodexOrchConfig = {
@@ -979,7 +979,7 @@ describe("disable_oco_env pass-through", () => {
       mock: { calls: unknown[][] }
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "with-env", mode: "primary" },
+      orchestrator: { name: "orchestrator", prompt: "with-env", mode: "primary" },
     })
 
     const pluginConfig: OpenCodeCodexOrchConfig = {}

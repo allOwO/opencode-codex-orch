@@ -3,7 +3,7 @@ import { createOracleAgent } from "./oracle"
 import { createLibrarianAgent } from "./librarian"
 import { createExploreAgent } from "./explore"
 import { createDeepSearchAgent } from "./deepsearch"
-import { createMomusAgent } from "./momus"
+import { createReviewerAgent } from "./reviewer"
 
 const TEST_MODEL = "anthropic/claude-sonnet-4-5"
 
@@ -67,10 +67,10 @@ describe("read-only agent tool restrictions", () => {
     })
   })
 
-  describe("Momus", () => {
+  describe("Reviewer", () => {
     test("denies all file-writing tools", () => {
       // given
-      const agent = createMomusAgent(TEST_MODEL)
+      const agent = createReviewerAgent(TEST_MODEL)
 
       // when
       const permission = agent.permission as Record<string, string>

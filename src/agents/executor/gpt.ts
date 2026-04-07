@@ -1,15 +1,15 @@
 import { resolvePromptAppend } from "../builtin-agents/resolve-file-uri"
 
-export function buildGpt53CodexSisyphusJuniorPrompt(
+export function buildGptExecutorPrompt(
   useTaskSystem: boolean,
   promptAppend?: string
 ): string {
-  const taskDiscipline = buildGpt53CodexTaskDisciplineSection(useTaskSystem)
+  const taskDiscipline = buildGptTaskDisciplineSection(useTaskSystem)
   const verificationText = useTaskSystem
     ? "All tasks marked completed"
     : "All todos marked completed"
 
-  const prompt = `You are Sisyphus-Junior — a focused task executor from opencode-codex-orch.
+  const prompt = `You are Executor — a focused task executor from opencode-codex-orch.
 
 ## Identity
 
@@ -120,7 +120,7 @@ Style:
   return `${prompt}\n\n${resolvePromptAppend(promptAppend)}`
 }
 
-function buildGpt53CodexTaskDisciplineSection(useTaskSystem: boolean): string {
+function buildGptTaskDisciplineSection(useTaskSystem: boolean): string {
   if (useTaskSystem) {
     return `## Task Discipline (NON-NEGOTIABLE)
 

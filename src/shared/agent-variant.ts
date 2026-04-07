@@ -33,10 +33,10 @@ export function resolveAgentVariant(
 }
 
 const BUILTIN_AGENT_REASONING_EFFORT: Record<string, string> = {
-  sisyphus: "high",
+  orchestrator: "high",
   oracle: "medium",
-  momus: "medium",
-  "sisyphus-junior": "medium",
+  reviewer: "medium",
+  "executor": "medium",
 }
 
 export function resolveAgentReasoningEffort(

@@ -18,12 +18,12 @@ describe("resolveAgentVariant", () => {
     // given
     const config = {
       agents: {
-        sisyphus: { variant: "low" },
+        orchestrator: { variant: "low" },
       },
     } as OpenCodeCodexOrchConfig
 
     // when
-    const variant = resolveAgentVariant(config, "sisyphus")
+    const variant = resolveAgentVariant(config, "orchestrator")
 
     // then
     expect(variant).toBe("low")
@@ -33,7 +33,7 @@ describe("resolveAgentVariant", () => {
     // given
     const config = {
       agents: {
-        sisyphus: { category: "deep" },
+        orchestrator: { category: "deep" },
       },
       categories: {
         deep: { model: "openai/gpt-5.4", variant: "high" },
@@ -41,7 +41,7 @@ describe("resolveAgentVariant", () => {
     } as OpenCodeCodexOrchConfig
 
     // when
-    const variant = resolveAgentVariant(config, "sisyphus")
+    const variant = resolveAgentVariant(config, "orchestrator")
 
     // then
     expect(variant).toBe("high")
@@ -53,13 +53,13 @@ describe("applyAgentVariant", () => {
     // given
     const config = {
       agents: {
-        sisyphus: { variant: "low" },
+        orchestrator: { variant: "low" },
       },
     } as OpenCodeCodexOrchConfig
     const message: { variant?: string } = {}
 
     // when
-    applyAgentVariant(config, "sisyphus", message)
+    applyAgentVariant(config, "orchestrator", message)
 
     // then
     expect(message.variant).toBe("low")
@@ -69,13 +69,13 @@ describe("applyAgentVariant", () => {
     // given
     const config = {
       agents: {
-        sisyphus: { variant: "low" },
+        orchestrator: { variant: "low" },
       },
     } as OpenCodeCodexOrchConfig
     const message = { variant: "max" }
 
     // when
-    applyAgentVariant(config, "sisyphus", message)
+    applyAgentVariant(config, "orchestrator", message)
 
     // then
     expect(message.variant).toBe("max")
@@ -84,17 +84,17 @@ describe("applyAgentVariant", () => {
 
 describe("resolveVariantForModel", () => {
   test("returns agent override variant when configured", () => {
-    // given - use a model in sisyphus chain (claude-opus-4-6 has default variant "max")
+    // given - use a model in orchestrator chain (claude-opus-4-6 has default variant "max")
     // to verify override takes precedence over fallback chain
     const config = {
       agents: {
-        sisyphus: { variant: "high" },
+        orchestrator: { variant: "high" },
       },
     } as OpenCodeCodexOrchConfig
     const model = { providerID: "anthropic", modelID: "claude-opus-4-6" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBe("high")
@@ -106,19 +106,19 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "anthropic", modelID: "claude-opus-4-6" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBe("max")
   })
 
-  test("returns medium for openai/gpt-5.4 in sisyphus chain", () => {
-    // #given openai/gpt-5.4 is now in sisyphus fallback chain with variant medium
+  test("returns medium for openai/gpt-5.4 in orchestrator chain", () => {
+    // #given openai/gpt-5.4 is now in orchestrator fallback chain with variant medium
     const config = {} as OpenCodeCodexOrchConfig
     const model = { providerID: "openai", modelID: "gpt-5.4" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBe("medium")
@@ -130,7 +130,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "unknown-provider", modelID: "some-model" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBeUndefined()
@@ -154,7 +154,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "zai-coding-plan", modelID: "glm-5" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBeUndefined()

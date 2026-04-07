@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "bun:test"
 import type { AvailableAgent, AvailableTool } from "../dynamic-agent-prompt-builder"
-import { buildGpt54SisyphusPrompt } from "./gpt-5-4"
+import { buildGpt54OrchestratorPrompt } from "./gpt-5-4"
 
 function createAgent(name: string): AvailableAgent {
   return {
@@ -24,9 +24,9 @@ const searchTools: AvailableTool[] = [
   { name: "lsp_find_references", category: "lsp" },
 ]
 
-describe("buildGpt54SisyphusPrompt", () => {
+describe("buildGpt54OrchestratorPrompt", () => {
   it("uses task_create and task_update when task system is enabled", () => {
-    const result = buildGpt54SisyphusPrompt("openai/gpt-5.4", [], [], [], [], true)
+    const result = buildGpt54OrchestratorPrompt("openai/gpt-5.4", [], [], [], [], true)
 
     expect(result).toContain("`task_create / task_update`")
     expect(result).not.toContain("TaskCreate")
@@ -34,7 +34,7 @@ describe("buildGpt54SisyphusPrompt", () => {
   })
 
   it("uses repo-native search wording instead of rg", () => {
-    const result = buildGpt54SisyphusPrompt(
+    const result = buildGpt54OrchestratorPrompt(
       "openai/gpt-5.4",
       [],
       searchTools,
@@ -47,7 +47,7 @@ describe("buildGpt54SisyphusPrompt", () => {
   })
 
   it("removes explore and librarian guidance cleanly when those agents are unavailable", () => {
-    const result = buildGpt54SisyphusPrompt(
+    const result = buildGpt54OrchestratorPrompt(
       "openai/gpt-5.4",
       [],
       searchTools,
@@ -61,7 +61,7 @@ describe("buildGpt54SisyphusPrompt", () => {
 
   it("keeps explore and librarian guidance strong when both agents are available", () => {
     const agents = [createAgent("explore"), createAgent("librarian")]
-    const result = buildGpt54SisyphusPrompt(
+    const result = buildGpt54OrchestratorPrompt(
       "openai/gpt-5.4",
       agents,
       searchTools,

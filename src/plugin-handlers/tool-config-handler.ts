@@ -53,10 +53,10 @@ export function applyToolConfig(params: {
   if (librarian) {
     librarian.permission = { ...librarian.permission, "grep_app_*": "allow" };
   }
-  const sisyphus = agentByKey(params.agentResult, "sisyphus");
-  if (sisyphus) {
-    sisyphus.permission = {
-      ...sisyphus.permission,
+  const orchestrator = agentByKey(params.agentResult, "orchestrator");
+  if (orchestrator) {
+    orchestrator.permission = {
+      ...orchestrator.permission,
       call_oco_agent: "deny",
       task: "allow",
       question: questionPermission,
@@ -65,10 +65,10 @@ export function applyToolConfig(params: {
       ...denyTodoTools,
     };
   }
-  const junior = agentByKey(params.agentResult, "sisyphus-junior");
-  if (junior) {
-    junior.permission = {
-      ...junior.permission,
+  const executor = agentByKey(params.agentResult, "executor");
+  if (executor) {
+    executor.permission = {
+      ...executor.permission,
       task: "allow",
       "task_*": "allow",
       teammate: "allow",

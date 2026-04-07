@@ -23,13 +23,13 @@ const AGENT_RESTRICTIONS: Record<string, Record<string, boolean>> = {
     call_oco_agent: false,
   },
 
-  momus: {
+  reviewer: {
     write: false,
     edit: false,
     task: false,
   },
 
-  "sisyphus-junior": {
+  executor: {
     task: false,
   },
 }

@@ -143,7 +143,7 @@ describe("createBuiltinAgents with model overrides", () => {
     }
   })
 
-  test("user config model takes priority over uiSelectedModel for sisyphus", async () => {
+  test("user config model takes priority over uiSelectedModel for orchestrator", async () => {
     // #given
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
       new Set(["openai/gpt-5.4", "anthropic/claude-sonnet-4-6"])
@@ -548,7 +548,7 @@ describe("createBuiltinAgents without systemDefaultModel", () => {
      cacheSpy.mockRestore?.()
    })
 
-  test("sisyphus created via connected cache fallback when all providers available", async () => {
+  test("orchestrator created via connected cache fallback when all providers available", async () => {
     // #given
     const cacheSpy = spyOn(connectedProvidersCache, "readConnectedProvidersCache").mockReturnValue([
       "anthropic", "kimi-for-coding", "opencode", "zai-coding-plan"
@@ -608,7 +608,7 @@ describe("Sisyphus and Librarian environment context toggle", () => {
     )
   }
 
-  test("includes <oco-env> for sisyphus and librarian when disable flag is unset", async () => {
+  test("includes <oco-env> for orchestrator and librarian when disable flag is unset", async () => {
     const agents = await buildAgents(undefined)
 
     expect(agents.orchestrator).toBeDefined()
@@ -617,7 +617,7 @@ describe("Sisyphus and Librarian environment context toggle", () => {
     expect(agents.librarian.prompt).toContain("<oco-env>")
   })
 
-  test("includes <oco-env> for sisyphus and librarian when disable flag is false", async () => {
+  test("includes <oco-env> for orchestrator and librarian when disable flag is false", async () => {
     const agents = await buildAgents(false)
 
     expect(agents.orchestrator).toBeDefined()
@@ -626,7 +626,7 @@ describe("Sisyphus and Librarian environment context toggle", () => {
     expect(agents.librarian.prompt).toContain("<oco-env>")
   })
 
-  test("omits <oco-env> for sisyphus and librarian when disable flag is true", async () => {
+  test("omits <oco-env> for orchestrator and librarian when disable flag is true", async () => {
     const agents = await buildAgents(true)
 
     expect(agents.orchestrator).toBeDefined()
@@ -687,8 +687,8 @@ describe("retired atlas remains absent across environment context settings", () 
   })
 })
 
-describe("createBuiltinAgents with requiresAnyModel gating (sisyphus)", () => {
-  test("sisyphus is created when at least one fallback model is available", async () => {
+describe("createBuiltinAgents with requiresAnyModel gating (orchestrator)", () => {
+  test("orchestrator is created when at least one fallback model is available", async () => {
     // #given
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
       new Set(["anthropic/claude-opus-4-6"])
@@ -705,7 +705,7 @@ describe("createBuiltinAgents with requiresAnyModel gating (sisyphus)", () => {
     }
   })
 
-  test("sisyphus is created on first run when no availableModels or cache exist", async () => {
+  test("orchestrator is created on first run when no availableModels or cache exist", async () => {
     // #given
     const cacheSpy = spyOn(connectedProvidersCache, "readConnectedProvidersCache").mockReturnValue(null)
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(new Set())
@@ -723,7 +723,7 @@ describe("createBuiltinAgents with requiresAnyModel gating (sisyphus)", () => {
     }
   })
 
-  test("sisyphus is created when explicit config provided even if no models available", async () => {
+  test("orchestrator is created when explicit config provided even if no models available", async () => {
     // #given
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(new Set())
     const overrides = {
@@ -741,8 +741,8 @@ describe("createBuiltinAgents with requiresAnyModel gating (sisyphus)", () => {
     }
   })
 
-  test("sisyphus is not created when no fallback model is available and provider not connected", async () => {
-    // #given - only venice/deepseek-v3.2 available, not in sisyphus fallback chain
+  test("orchestrator is not created when no fallback model is available and provider not connected", async () => {
+    // #given - only venice/deepseek-v3.2 available, not in orchestrator fallback chain
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
       new Set(["venice/deepseek-v3.2"])
     )
@@ -760,7 +760,7 @@ describe("createBuiltinAgents with requiresAnyModel gating (sisyphus)", () => {
     }
   })
 
-  test("sisyphus uses user-configured plugin model even when not in cache or fallback chain", async () => {
+  test("orchestrator uses user-configured plugin model even when not in cache or fallback chain", async () => {
     // #given - user configures a model from a plugin provider (like antigravity)
     // that is NOT in the availableModels cache and NOT in the fallback chain
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
@@ -786,7 +786,7 @@ describe("createBuiltinAgents with requiresAnyModel gating (sisyphus)", () => {
     }
   })
 
-  test("sisyphus uses user-configured plugin model when availableModels is empty but cache exists", async () => {
+  test("orchestrator uses user-configured plugin model when availableModels is empty but cache exists", async () => {
     // #given - connected providers cache exists but models cache is empty
     // This reproduces the exact scenario where provider-models.json has models: {}
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
@@ -1134,7 +1134,7 @@ describe("override.category expansion in createBuiltinAgents", () => {
     expect(agents.oracle.reasoningEffort).toBe("high")
   })
 
-  test("sisyphus override with category expands category properties", async () => {
+  test("orchestrator override with category expands category properties", async () => {
     // #given
     const overrides = {
       orchestrator: { category: "hard" as const },
