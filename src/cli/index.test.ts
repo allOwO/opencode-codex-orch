@@ -14,4 +14,8 @@ describe("CLI version", () => {
     expect(typeof version).toBe("string")
     expect(version.length).toBeGreaterThan(0)
   })
+
+  it("does not publish a self-dependency", () => {
+    expect(packageJson.dependencies?.[packageJson.name as keyof typeof packageJson.dependencies]).toBeUndefined()
+  })
 })
