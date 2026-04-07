@@ -63,6 +63,21 @@ describe("migrateAgentNames", () => {
     expect(migrated.prometheus).toEqual({ model: "x" })
     expect(migrated.atlas).toEqual({ model: "y" })
   })
+
+  test("normalizes canonical builtin agent names case-insensitively", () => {
+    const { migrated, changed } = migrateAgentNames({
+      Reviewer: { model: "x" },
+      EXECUTOR: { model: "y" },
+      Oracle: { model: "z" },
+      BUILD: { model: "b" },
+    })
+
+    expect(changed).toBe(true)
+    expect(migrated.reviewer).toEqual({ model: "x" })
+    expect(migrated.executor).toEqual({ model: "y" })
+    expect(migrated.oracle).toEqual({ model: "z" })
+    expect(migrated.build).toEqual({ model: "b" })
+  })
 })
 
 describe("migrateHookNames", () => {
