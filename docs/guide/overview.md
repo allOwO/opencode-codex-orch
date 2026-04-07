@@ -167,8 +167,6 @@ You can override specific agents or categories in your config:
 }
 ```
 
-> **Note**: Legacy agent names like `sisyphus`, `momus`, and `sisyphus-junior` are accepted as config aliases.
-
 ### Model Families
 
 **Claude-like models** (instruction-following, structured output):

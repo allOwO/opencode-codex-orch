@@ -21,8 +21,6 @@ opencode-codex-orch provides specialized AI agents. Each has distinct expertise,
 | **Reviewer**  | `gpt-5.4`              | Plan and implementation reviewer — validates clarity, verifiability, and completeness before or after execution. Fallback: `claude-opus-4-6` → `gemini-3.1-pro`.                         |
 | **Executor**  | _(category-dependent)_ | Category-spawned executor. Model is selected automatically from the canonical task categories (`designer`, `hard`, `quick`) when the main agent delegates work via the `task` tool.       |
 
-> **Compatibility note**: Legacy names such as `sisyphus`, `momus`, and `sisyphus-junior` are accepted only through migration and compatibility layers.
-
 ### Invoking Agents
 
 The main agent invokes these automatically, but you can call them explicitly:
@@ -612,7 +610,7 @@ TaskUpdate({ id: "T-002", status: "completed" });
 
 **Storage**: Tasks are stored as JSON files in `.opencode/tasks/`.
 
-> **Migration note**: The legacy path `.sisyphus/tasks/` is still readable for backward compatibility.
+> **Migration note**: The legacy path `.orchestrator/tasks/` is still readable for backward compatibility.
 
 **Difference from TodoWrite**:
 

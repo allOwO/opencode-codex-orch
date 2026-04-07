@@ -63,7 +63,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     //#given - first message, no user-selected variant
     const args = createMockHandlerArgs({ shouldOverride: true })
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.3-codex" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.3-codex" })
     const output = createMockOutput() // no variant set
 
     //#when
@@ -77,7 +77,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     //#given - first message, user already selected "xhigh" variant in OpenCode UI
     const args = createMockHandlerArgs({ shouldOverride: true })
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.3-codex" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.3-codex" })
     const output = createMockOutput("xhigh") // user selected xhigh
 
     //#when
@@ -91,7 +91,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     //#given - not first message, variant already set
     const args = createMockHandlerArgs({ shouldOverride: false })
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.3-codex" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.3-codex" })
     const output = createMockOutput("xhigh")
 
     //#when
@@ -105,7 +105,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     //#given - not first message, no variant from TUI
     const args = createMockHandlerArgs({ shouldOverride: false })
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.3-codex" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.3-codex" })
     const output = createMockOutput() // no variant
 
     //#when
@@ -119,7 +119,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     //#given - first message with user-selected variant
     const args = createMockHandlerArgs({ shouldOverride: true })
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.3-codex" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.3-codex" })
     const output = createMockOutput("xhigh")
 
     //#when
@@ -144,7 +144,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
       },
     }
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.3-codex" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.3-codex" })
     const output = createMockOutput()
 
     //#when
@@ -159,7 +159,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     // #given
     const args = createMockHandlerArgs()
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.4" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.4" })
     const output: ChatMessageHandlerOutput = {
       message: {},
       parts: [{ type: "text", text: "ulw fix the failing tests" }],
@@ -179,7 +179,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     // #given
     const args = createMockHandlerArgs()
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.4" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.4" })
     const output: ChatMessageHandlerOutput = {
       message: {},
       parts: [{ type: "text", text: "why is ulw mode gone in this fork" }],
@@ -196,7 +196,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     // #given
     const args = createMockHandlerArgs()
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.4" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.4" })
     const output: ChatMessageHandlerOutput = {
       message: {},
       parts: [{ type: "text", text: "\n  ulw fix the failing tests" }],
@@ -214,7 +214,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     // #given
     const args = createMockHandlerArgs()
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.4" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.4" })
     const output: ChatMessageHandlerOutput = {
       message: {},
       parts: [{ type: "image", mime: "image/png" }],
@@ -232,7 +232,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     // #given
     const args = createMockHandlerArgs()
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.4" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.4" })
     const output: ChatMessageHandlerOutput = {
       message: {},
       parts: [{ type: "text", text: "ulw" }],
@@ -271,12 +271,12 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     const args = createMockHandlerArgs({
       pluginConfig: {
         agents: {
-          sisyphus: { reasoningEffort: "high" },
+          orchestrator: { reasoningEffort: "high" },
         },
       },
     })
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.4" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.4" })
     const output = createMockOutput()
 
     // #when
@@ -291,12 +291,12 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     const args = createMockHandlerArgs({
       pluginConfig: {
         agents: {
-          sisyphus: { reasoningEffort: "high" },
+          orchestrator: { reasoningEffort: "high" },
         },
       },
     })
     const handler = createChatMessageHandler(args)
-    const input = createMockInput("sisyphus", { providerID: "openai", modelID: "gpt-5.4" })
+    const input = createMockInput("orchestrator", { providerID: "openai", modelID: "gpt-5.4" })
     const output: ChatMessageHandlerOutput = {
       message: { reasoningEffort: "xhigh" },
       parts: [],
