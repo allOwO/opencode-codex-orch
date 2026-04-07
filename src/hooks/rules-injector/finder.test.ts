@@ -326,7 +326,7 @@ describe("findRuleFiles", () => {
 
 describe("findProjectRoot", () => {
   const TEST_DIR = join(tmpdir(), `project-root-test-${Date.now()}`);
-  const HOME_TEST_PREFIX = join(process.env.HOME ?? "/tmp", ".project-root-test-");
+  const NO_MARKER_TEST_PREFIX = join(tmpdir(), "project-root-no-marker-");
 
   beforeEach(() => {
     mkdirSync(TEST_DIR, { recursive: true });
@@ -366,9 +366,9 @@ describe("findProjectRoot", () => {
     expect(root).toBe(TEST_DIR);
   });
 
-  it("should return null when no project markers found", () => {
-    // given directory under a parent tree without project markers
-    const isolatedRoot = mkdtempSync(HOME_TEST_PREFIX);
+  it("should return null instead of treating the home directory as project root", () => {
+    // given directory under a temp tree that has no project markers in its ancestors
+    const isolatedRoot = mkdtempSync(NO_MARKER_TEST_PREFIX);
     try {
       const isolatedDir = join(isolatedRoot, "isolated");
       mkdirSync(isolatedDir, { recursive: true });
