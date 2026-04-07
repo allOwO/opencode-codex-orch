@@ -1,29 +1,17 @@
 import { getSessionAgent } from "../../features/claude-code-session-state"
 import { getAgentConfigKey } from "../../shared/agent-display-names"
 
-export const AGENT_NAMES = [
+export const CANONICAL_AGENT_NAMES = [
   "orchestrator",
+  "reviewer",
   "oracle",
   "librarian",
   "explore",
   "deepsearch",
-  "reviewer",
   "executor",
-  "build",
-  "plan",
-]
+] as const
 
-const LEGACY_RUNTIME_AGENT_ALIASES: Record<string, string> = {
-  sisyphus: "orchestrator",
-  "sisyphus (ultraworker)": "orchestrator",
-  momus: "reviewer",
-  "momus (plan critic)": "reviewer",
-  "momus (plan reviewer)": "reviewer",
-  "sisyphus-junior": "executor",
-  "multimodal-looker": "librarian",
-}
-
-const RUNTIME_AGENT_PATTERNS = [...AGENT_NAMES, ...Object.keys(LEGACY_RUNTIME_AGENT_ALIASES)]
+const RUNTIME_AGENT_PATTERNS = [...CANONICAL_AGENT_NAMES, "build", "plan"]
 
 export const agentPattern = new RegExp(
   `\\b(${RUNTIME_AGENT_PATTERNS
@@ -44,14 +32,8 @@ export function detectAgentFromSession(sessionID: string): string | undefined {
 export function normalizeAgentName(agent: string | undefined): string | undefined {
   if (!agent) return undefined
   const normalized = getAgentConfigKey(agent).toLowerCase().trim()
-  const legacyAlias = LEGACY_RUNTIME_AGENT_ALIASES[normalized]
-  const activeAgent = legacyAlias ?? normalized
-  if (AGENT_NAMES.includes(activeAgent)) {
-    return activeAgent
-  }
-  const match = activeAgent.match(agentPattern)
-  if (match) {
-    return match[1].toLowerCase()
+  if (RUNTIME_AGENT_PATTERNS.includes(normalized as (typeof RUNTIME_AGENT_PATTERNS)[number])) {
+    return normalized
   }
   return undefined
 }

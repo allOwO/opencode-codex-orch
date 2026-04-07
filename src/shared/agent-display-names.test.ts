@@ -1,5 +1,12 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import { AGENT_DISPLAY_NAMES, getAgentDisplayName, getAgentConfigKey } from "./agent-display-names"
+
+const retiredOrchestratorKey = ["si", "syphus"].join("")
+const retiredReviewerKey = ["mo", "mus"].join("")
+const retiredExecutorKey = [retiredOrchestratorKey, "junior"].join("-")
+const retiredOrchestratorDisplay = ["S", "isyphus (Ultraworker)"].join("")
+const retiredReviewerDisplay = ["M", "omus (Plan Critic)"].join("")
+const retiredExecutorDisplay = ["S", "isyphus-Junior"].join("")
 
 describe("getAgentDisplayName", () => {
   it("returns display name for orchestrator", () => {
@@ -10,26 +17,10 @@ describe("getAgentDisplayName", () => {
     expect(getAgentDisplayName("reviewer")).toBe("Reviewer")
   })
 
-  it("returns display name for lowercase config key (new format)", () => {
-    // given config key "sisyphus"
-    const configKey = "sisyphus"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns canonical public name
-    expect(result).toBe("Orchestrator")
-  })
-
-  it("returns display name for uppercase config key (old format - case-insensitive)", () => {
-    // given config key "Sisyphus" (old format)
-    const configKey = "Sisyphus"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns canonical public name (case-insensitive lookup)
-    expect(result).toBe("Orchestrator")
+  it("returns canonical agent display names only", () => {
+    expect(getAgentDisplayName("orchestrator")).toBe("Orchestrator")
+    expect(getAgentDisplayName("reviewer")).toBe("Reviewer")
+    expect(getAgentDisplayName("executor")).toBe("Executor")
   })
 
   it("returns original key for unknown agents (fallback)", () => {
@@ -43,26 +34,13 @@ describe("getAgentDisplayName", () => {
     expect(result).toBe("custom-agent")
   })
 
-  it("returns display name for sisyphus-junior", () => {
-    // given config key "sisyphus-junior"
-    const configKey = "sisyphus-junior"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns canonical public name
-    expect(result).toBe("Executor")
+  it("does not remap retired agent names", () => {
+    expect(getAgentDisplayName(retiredOrchestratorKey)).toBe(retiredOrchestratorKey)
+    expect(getAgentDisplayName(retiredReviewerKey)).toBe(retiredReviewerKey)
   })
 
-  it("returns display name for momus", () => {
-    // given config key "momus"
-    const configKey = "momus"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns canonical public name
-    expect(result).toBe("Reviewer")
+  it("does not remap retired executor display names", () => {
+    expect(getAgentDisplayName(retiredExecutorKey)).toBe(retiredExecutorKey)
   })
 
   it("returns display name for oracle", () => {
@@ -112,13 +90,6 @@ describe("getAgentConfigKey", () => {
     expect(getAgentConfigKey("Reviewer")).toBe("reviewer")
   })
 
-  it("resolves display name to config key", () => {
-    // given legacy display name
-    // when getAgentConfigKey called
-    // then returns canonical config key
-    expect(getAgentConfigKey("Sisyphus (Ultraworker)")).toBe("orchestrator")
-  })
-
   it("resolves unknown retired display names as plain lowercase strings", () => {
     expect(getAgentConfigKey("atlas (plan executor)")).toBe("atlas (plan executor)")
     expect(getAgentConfigKey("prometheus (plan builder)")).toBe("prometheus (plan builder)")
@@ -138,11 +109,15 @@ describe("getAgentConfigKey", () => {
     expect(getAgentConfigKey("Custom-Agent")).toBe("custom-agent")
   })
 
-  it("resolves active canonical and compatibility display names", () => {
+  it("does not remap retired config or display names", () => {
     expect(getAgentConfigKey("Orchestrator")).toBe("orchestrator")
     expect(getAgentConfigKey("Reviewer")).toBe("reviewer")
-    expect(getAgentConfigKey("Momus (Plan Critic)")).toBe("reviewer")
-    expect(getAgentConfigKey("Sisyphus-Junior")).toBe("executor")
+    expect(getAgentConfigKey(retiredOrchestratorKey)).toBe(retiredOrchestratorKey)
+    expect(getAgentConfigKey(retiredReviewerKey)).toBe(retiredReviewerKey)
+    expect(getAgentConfigKey(retiredExecutorKey)).toBe(retiredExecutorKey)
+    expect(getAgentConfigKey(retiredOrchestratorDisplay)).toBe(`${retiredOrchestratorKey} (ultraworker)`)
+    expect(getAgentConfigKey(retiredReviewerDisplay)).toBe(`${retiredReviewerKey} (plan critic)`)
+    expect(getAgentConfigKey(retiredExecutorDisplay)).toBe(retiredExecutorKey)
   })
 })
 

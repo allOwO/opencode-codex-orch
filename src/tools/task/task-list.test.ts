@@ -4,14 +4,26 @@ import { writeJsonAtomic } from "../../features/claude-tasks/storage"
 import type { TaskObject } from "./types"
 import { join } from "path"
 import { existsSync, rmSync } from "fs"
+import type { ToolContext } from "@opencode-ai/plugin/tool"
 
 const testProjectDir = "/tmp/task-list-test"
+
+const toolContext: ToolContext = {
+  sessionID: "test-session",
+  messageID: "test-message",
+  agent: "orchestrator",
+  directory: testProjectDir,
+  worktree: testProjectDir,
+  abort: new AbortController().signal,
+  metadata: () => {},
+  ask: async () => {},
+}
 
 describe("createTaskList", () => {
   let taskDir: string
 
   beforeEach(() => {
-    taskDir = join(testProjectDir, ".sisyphus/tasks")
+    taskDir = join(testProjectDir, ".opencode/tasks")
     if (existsSync(taskDir)) {
       rmSync(taskDir, { recursive: true })
     }
@@ -25,18 +37,18 @@ describe("createTaskList", () => {
 
   it("returns empty array when no tasks exist", async () => {
     //#given
-    const config = {
-      sisyphus: {
-        tasks: {
-          storage_path: join(testProjectDir, ".sisyphus/tasks"),
-          claude_code_compat: false,
+      const config = {
+        orchestrator: {
+          tasks: {
+            storage_path: join(testProjectDir, ".opencode/tasks"),
+            claude_code_compat: false,
+          },
         },
-      },
     }
     const tool = createTaskList(config)
 
     //#when
-    const result = await tool.execute({}, { sessionID: "test-session" })
+    const result = await tool.execute({}, toolContext)
 
     //#then
     const parsed = JSON.parse(result)
@@ -64,21 +76,21 @@ describe("createTaskList", () => {
       threadID: "test-session",
     }
 
-    writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-1.json"), task1)
-    writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-2.json"), task2)
+    writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-1.json"), task1)
+    writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-2.json"), task2)
 
-    const config = {
-      sisyphus: {
-        tasks: {
-          storage_path: join(testProjectDir, ".sisyphus/tasks"),
-          claude_code_compat: false,
+      const config = {
+        orchestrator: {
+          tasks: {
+            storage_path: join(testProjectDir, ".opencode/tasks"),
+            claude_code_compat: false,
+          },
         },
-      },
     }
     const tool = createTaskList(config)
 
     //#when
-    const result = await tool.execute({}, { sessionID: "test-session" })
+    const result = await tool.execute({}, toolContext)
 
     //#then
     const parsed = JSON.parse(result)
@@ -107,13 +119,13 @@ describe("createTaskList", () => {
       threadID: "test-session",
     }
 
-    writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-1.json"), task1)
-    writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-2.json"), task2)
+    writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-1.json"), task1)
+    writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-2.json"), task2)
 
      const config = {
-       sisyphus: {
+       orchestrator: {
          tasks: {
-           storage_path: join(testProjectDir, ".sisyphus/tasks"),
+           storage_path: join(testProjectDir, ".opencode/tasks"),
            claude_code_compat: false,
          },
        },
@@ -121,7 +133,7 @@ describe("createTaskList", () => {
      const tool = createTaskList(config)
 
      //#when
-     const result = await tool.execute({}, { sessionID: "test-session" })
+     const result = await tool.execute({}, toolContext)
 
      //#then
      const parsed = JSON.parse(result)
@@ -136,18 +148,18 @@ describe("createTaskList", () => {
       subject: "Test task",
       description: "This is a long description that should not be included",
       status: "in_progress",
-      owner: "sisyphus",
+      owner: "orchestrator",
       blocks: [],
       blockedBy: ["T-2"],
       threadID: "test-session",
     }
 
-    writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-1.json"), task)
+    writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-1.json"), task)
 
      const config = {
-       sisyphus: {
+       orchestrator: {
          tasks: {
-           storage_path: join(testProjectDir, ".sisyphus/tasks"),
+           storage_path: join(testProjectDir, ".opencode/tasks"),
            claude_code_compat: false,
          },
        },
@@ -155,7 +167,7 @@ describe("createTaskList", () => {
      const tool = createTaskList(config)
 
      //#when
-     const result = await tool.execute({}, { sessionID: "test-session" })
+      const result = await tool.execute({}, toolContext)
 
      //#then
      const parsed = JSON.parse(result)
@@ -170,7 +182,7 @@ describe("createTaskList", () => {
     expect(summary.id).toBe("T-1")
     expect(summary.subject).toBe("Test task")
     expect(summary.status).toBe("in_progress")
-    expect(summary.owner).toBe("sisyphus")
+    expect(summary.owner).toBe("orchestrator")
     expect(summary.blockedBy).toEqual(["T-2"])
   })
 
@@ -204,14 +216,14 @@ describe("createTaskList", () => {
       threadID: "test-session",
     }
 
-    writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-blocker-completed.json"), blockerCompleted)
-    writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-blocker-pending.json"), blockerPending)
-    writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-main.json"), mainTask)
+    writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-blocker-completed.json"), blockerCompleted)
+    writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-blocker-pending.json"), blockerPending)
+    writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-main.json"), mainTask)
 
      const config = {
-       sisyphus: {
+       orchestrator: {
          tasks: {
-           storage_path: join(testProjectDir, ".sisyphus/tasks"),
+           storage_path: join(testProjectDir, ".opencode/tasks"),
            claude_code_compat: false,
          },
        },
@@ -219,7 +231,7 @@ describe("createTaskList", () => {
      const tool = createTaskList(config)
 
      //#when
-     const result = await tool.execute({}, { sessionID: "test-session" })
+      const result = await tool.execute({}, toolContext)
 
      //#then
      const parsed = JSON.parse(result)
@@ -248,21 +260,21 @@ describe("createTaskList", () => {
        threadID: "test-session",
      }
 
-     writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-1.json"), task1)
-     writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-2.json"), task2)
+      writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-1.json"), task1)
+      writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-2.json"), task2)
 
-     const config = {
-       sisyphus: {
-         tasks: {
-           storage_path: join(testProjectDir, ".sisyphus/tasks"),
-           claude_code_compat: false,
-         },
-       },
-     }
+      const config = {
+        orchestrator: {
+          tasks: {
+            storage_path: join(testProjectDir, ".opencode/tasks"),
+            claude_code_compat: false,
+          },
+        },
+      }
      const tool = createTaskList(config)
 
      //#when
-     const result = await tool.execute({}, { sessionID: "test-session" })
+      const result = await tool.execute({}, toolContext)
 
      //#then
      const parsed = JSON.parse(result)
@@ -281,20 +293,20 @@ describe("createTaskList", () => {
        threadID: "test-session",
      }
 
-     writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-1.json"), task)
+      writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-1.json"), task)
 
-     const config = {
-       sisyphus: {
-         tasks: {
-           storage_path: join(testProjectDir, ".sisyphus/tasks"),
-           claude_code_compat: false,
-         },
-       },
-     }
+      const config = {
+        orchestrator: {
+          tasks: {
+            storage_path: join(testProjectDir, ".opencode/tasks"),
+            claude_code_compat: false,
+          },
+        },
+      }
      const tool = createTaskList(config)
 
      //#when
-     const result = await tool.execute({}, { sessionID: "test-session" })
+      const result = await tool.execute({}, toolContext)
 
      //#then
      const parsed = JSON.parse(result)
@@ -313,20 +325,20 @@ describe("createTaskList", () => {
        threadID: "test-session",
      }
 
-     writeJsonAtomic(join(testProjectDir, ".sisyphus/tasks", "T-1.json"), task)
+      writeJsonAtomic(join(testProjectDir, ".opencode/tasks", "T-1.json"), task)
 
-     const config = {
-       sisyphus: {
-         tasks: {
-           storage_path: join(testProjectDir, ".sisyphus/tasks"),
-           claude_code_compat: false,
-         },
-       },
-     }
+      const config = {
+        orchestrator: {
+          tasks: {
+            storage_path: join(testProjectDir, ".opencode/tasks"),
+            claude_code_compat: false,
+          },
+        },
+      }
      const tool = createTaskList(config)
 
      //#when
-     const result = await tool.execute({}, { sessionID: "test-session" })
+      const result = await tool.execute({}, toolContext)
 
      //#then
      const parsed = JSON.parse(result)

@@ -7,7 +7,6 @@ import { clearState, readState, writeState, type RalphLoopState } from "./storag
 describe("ralph-loop storage", () => {
   const testDir = join(tmpdir(), `ralph-loop-storage-${Date.now()}`)
   const canonicalDir = join(testDir, ".opencode")
-  const legacyDir = join(testDir, ".sisyphus")
 
   const sampleState: RalphLoopState = {
     active: true,
@@ -32,24 +31,14 @@ describe("ralph-loop storage", () => {
     writeState(testDir, sampleState)
 
     expect(existsSync(join(canonicalDir, "ralph-loop-state.json"))).toBe(true)
-    expect(existsSync(join(legacyDir, "ralph-loop-state.json"))).toBe(false)
-  })
-
-  test("reads legacy .sisyphus state when canonical state is absent", () => {
-    mkdirSync(legacyDir, { recursive: true })
-    writeFileSync(join(legacyDir, "ralph-loop-state.json"), `${JSON.stringify(sampleState, null, 2)}\n`, "utf-8")
-
     expect(readState(testDir)).toEqual(sampleState)
   })
 
-  test("keeps legacy state untouched when canonical state is written", () => {
-    mkdirSync(legacyDir, { recursive: true })
-    const legacyState: RalphLoopState = { ...sampleState, session_id: "legacy-session" }
-    writeFileSync(join(legacyDir, "ralph-loop-state.json"), `${JSON.stringify(legacyState, null, 2)}\n`, "utf-8")
-
+  test("clearState removes only canonical .opencode state", () => {
     writeState(testDir, sampleState)
 
-    expect(JSON.parse(readFileSync(join(legacyDir, "ralph-loop-state.json"), "utf-8"))).toEqual(legacyState)
-    expect(JSON.parse(readFileSync(join(canonicalDir, "ralph-loop-state.json"), "utf-8"))).toEqual(sampleState)
+    clearState(testDir)
+
+    expect(existsSync(join(canonicalDir, "ralph-loop-state.json"))).toBe(false)
   })
 })

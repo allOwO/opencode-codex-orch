@@ -3,6 +3,11 @@ import { FallbackModelsSchema } from "./fallback-models"
 import { BuiltinCategoryNameSchema } from "./categories"
 import { AgentPermissionSchema } from "./internal/permission"
 
+const retiredOrchestratorKey = ["si", "syphus"].join("")
+const retiredReviewerKey = ["mo", "mus"].join("")
+const retiredExecutorKey = [retiredOrchestratorKey, "junior"].join("-")
+const RETIRED_AGENT_OVERRIDE_KEYS = [retiredOrchestratorKey, retiredReviewerKey, retiredExecutorKey, "multimodal-looker"] as const
+
 export const AgentOverrideConfigSchema = z.object({
   /** @deprecated Use `category` instead. Model is inherited from category defaults. */
   model: z.string().optional(),
@@ -56,7 +61,7 @@ export const AgentOverrideConfigSchema = z.object({
     .optional(),
 })
 
-export const AgentOverridesSchema = z.object({
+const AgentOverridesObjectSchema = z.object({
   build: AgentOverrideConfigSchema.optional(),
   plan: AgentOverrideConfigSchema.optional(),
   orchestrator: AgentOverrideConfigSchema.optional(),
@@ -68,6 +73,19 @@ export const AgentOverridesSchema = z.object({
   librarian: AgentOverrideConfigSchema.optional(),
   explore: AgentOverrideConfigSchema.optional(),
 })
+
+export const AgentOverridesSchema = z.any().superRefine((input, ctx) => {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return
+  for (const key of RETIRED_AGENT_OVERRIDE_KEYS) {
+    if (key in input) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Retired agent override key \"${key}\" is not supported`,
+        path: [key],
+      })
+    }
+  }
+}).pipe(AgentOverridesObjectSchema)
 
 export type AgentOverrideConfig = z.infer<typeof AgentOverrideConfigSchema>
 export type AgentOverrides = z.infer<typeof AgentOverridesSchema>

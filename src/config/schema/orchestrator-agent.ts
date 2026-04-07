@@ -7,7 +7,4 @@ export const OrchestratorAgentConfigSchema = z.object({
   replace_plan: z.boolean().optional(),
 })
 
-export const SisyphusAgentConfigSchema = OrchestratorAgentConfigSchema
-
 export type OrchestratorAgentConfig = z.infer<typeof OrchestratorAgentConfigSchema>
-export type SisyphusAgentConfig = OrchestratorAgentConfig

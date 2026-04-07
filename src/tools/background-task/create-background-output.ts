@@ -11,7 +11,7 @@ import { formatTaskStatus } from "./task-status-format"
 
 import { getAgentConfigKey, getAgentDisplayName } from "../../shared/agent-display-names"
 
-const SISYPHUS_JUNIOR_AGENT = getAgentDisplayName("sisyphus-junior")
+const EXECUTOR_AGENT = getAgentDisplayName("executor")
 
 type ToolContextWithMetadata = {
   sessionID: string
@@ -29,7 +29,7 @@ function resolveToolCallID(ctx: ToolContextWithMetadata): string | undefined {
 }
 
 function formatResolvedTitle(task: BackgroundTask): string {
-  const isExecutorAgent = task.agent === SISYPHUS_JUNIOR_AGENT || getAgentConfigKey(task.agent) === "executor"
+  const isExecutorAgent = task.agent === EXECUTOR_AGENT || getAgentConfigKey(task.agent) === "executor"
   const label = isExecutorAgent && task.category ? task.category : task.agent
   return `${label} - ${task.description}`
 }

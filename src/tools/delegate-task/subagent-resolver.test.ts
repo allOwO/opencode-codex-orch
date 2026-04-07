@@ -56,7 +56,7 @@ describe("resolveSubagentExecution", () => {
     })
 
     //#when
-    const result = await resolveSubagentExecution(args, executorCtx, "sisyphus", "deep")
+    const result = await resolveSubagentExecution(args, executorCtx, "orchestrator", "deep")
 
     //#then
     expect(result.agentToUse).toBe("")
@@ -72,7 +72,7 @@ describe("resolveSubagentExecution", () => {
     })
 
     //#when
-    await resolveSubagentExecution(args, executorCtx, "sisyphus", "deep")
+    await resolveSubagentExecution(args, executorCtx, "orchestrator", "deep")
 
     //#then
     expect(logSpy).toHaveBeenCalledTimes(1)
@@ -80,7 +80,7 @@ describe("resolveSubagentExecution", () => {
     expect(callArgs?.[0]).toBe("[delegate-task] Failed to resolve subagent execution")
     expect(callArgs?.[1]).toEqual({
       requestedAgent: "review",
-      parentAgent: "sisyphus",
+      parentAgent: "orchestrator",
       error: "network timeout",
     })
   })
@@ -98,7 +98,7 @@ describe("resolveSubagentExecution", () => {
     ]))
 
     //#when
-    const result = await resolveSubagentExecution(args, executorCtx, "sisyphus", "deep")
+    const result = await resolveSubagentExecution(args, executorCtx, "orchestrator", "deep")
 
     //#then
     expect(result.error).toBeUndefined()
@@ -128,7 +128,7 @@ describe("resolveSubagentExecution", () => {
     )
 
     //#when
-    const result = await resolveSubagentExecution(args, executorCtx, "sisyphus", "deep")
+    const result = await resolveSubagentExecution(args, executorCtx, "orchestrator", "deep")
 
     //#then
     expect(result.error).toBeUndefined()
@@ -154,11 +154,11 @@ describe("resolveSubagentExecution", () => {
       {
         agentOverrides: {
           explore: {
-            category: "research",
+            category: "hard",
           },
         } as ExecutorContext["agentOverrides"],
         userCategories: {
-          research: {
+          hard: {
             fallback_models: ["anthropic/claude-haiku-4-5"],
           },
         } as ExecutorContext["userCategories"],
@@ -166,7 +166,7 @@ describe("resolveSubagentExecution", () => {
     )
 
     //#when
-    const result = await resolveSubagentExecution(args, executorCtx, "sisyphus", "deep")
+    const result = await resolveSubagentExecution(args, executorCtx, "orchestrator", "deep")
 
     //#then
     expect(result.error).toBeUndefined()

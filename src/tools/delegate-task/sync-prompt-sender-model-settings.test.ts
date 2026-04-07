@@ -11,7 +11,7 @@ describe("sendSyncPrompt category model settings propagation", () => {
 
     const input = {
       sessionID: "test-session",
-      agentToUse: "sisyphus-junior",
+      agentToUse: "executor",
       args: {
         description: "test task",
         prompt: "test prompt",

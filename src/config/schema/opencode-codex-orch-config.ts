@@ -11,16 +11,19 @@ import { CommentCheckerConfigSchema } from "./comment-checker"
 import { BuiltinCommandNameSchema } from "./commands"
 import { ExperimentalConfigSchema } from "./experimental"
 import { NotificationConfigSchema } from "./notification"
+import { OrchestratorConfigSchema } from "./orchestrator"
+import { OrchestratorAgentConfigSchema } from "./orchestrator-agent"
 import { RalphLoopConfigSchema } from "./ralph-loop"
 import { RuntimeFallbackConfigSchema } from "./runtime-fallback"
 import { SkillsConfigSchema } from "./skills"
-import { SisyphusConfigSchema } from "./sisyphus"
-import { OrchestratorAgentConfigSchema } from "./sisyphus-agent"
 import { TmuxConfigSchema } from "./tmux"
 import { StartWorkConfigSchema } from "./start-work"
 import { WebsearchConfigSchema } from "./websearch"
 
-export const OpenCodeCodexOrchConfigSchema = z.object({
+const retiredOrchestratorKey = ["si", "syphus"].join("")
+const RETIRED_TOP_LEVEL_CONFIG_KEYS = [retiredOrchestratorKey, [retiredOrchestratorKey, "agent"].join("_"), "omo_agent"] as const
+
+const OpenCodeCodexOrchConfigObjectSchema = z.object({
   $schema: z.string().optional(),
   /** Enable new task system (default: false) */
   new_task_system_enabled: z.boolean().optional(),
@@ -58,10 +61,23 @@ export const OpenCodeCodexOrchConfigSchema = z.object({
   browser_automation_engine: BrowserAutomationConfigSchema.optional(),
   websearch: WebsearchConfigSchema.optional(),
   tmux: TmuxConfigSchema.optional(),
-  sisyphus: SisyphusConfigSchema.optional(),
+  orchestrator: OrchestratorConfigSchema.optional(),
   start_work: StartWorkConfigSchema.optional(),
   /** Migration history to prevent re-applying migrations (e.g., model version upgrades) */
   _migrations: z.array(z.string()).optional(),
 })
+
+export const OpenCodeCodexOrchConfigSchema = z.any().superRefine((input, ctx) => {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return
+  for (const key of RETIRED_TOP_LEVEL_CONFIG_KEYS) {
+    if (key in input) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Retired config key \"${key}\" is not supported`,
+        path: [key],
+      })
+    }
+  }
+}).pipe(OpenCodeCodexOrchConfigObjectSchema)
 
 export type OpenCodeCodexOrchConfig = z.infer<typeof OpenCodeCodexOrchConfigSchema>

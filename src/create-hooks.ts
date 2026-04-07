@@ -90,7 +90,7 @@ type RemovedHookShims = {
   nonInteractiveEnv: GenericAsyncHookMap | null
   tasksTodowriteDisabler: GenericAsyncHookMap | null
   prometheusMdOnly: GenericAsyncHookMap | null
-  sisyphusJuniorNotepad: GenericAsyncHookMap | null
+  executorNotepad: GenericAsyncHookMap | null
   thinkingBlockValidator: GenericAsyncHookMap | null
 }
 
@@ -127,7 +127,7 @@ const removedHooks: RemovedHookShims = {
   nonInteractiveEnv: null,
   tasksTodowriteDisabler: null,
   prometheusMdOnly: null,
-  sisyphusJuniorNotepad: null,
+  executorNotepad: null,
   thinkingBlockValidator: null,
 }
 

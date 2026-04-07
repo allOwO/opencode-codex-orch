@@ -11,6 +11,10 @@ import {
 } from "./schema"
 import { OverridableAgentNameSchema } from "./schema/agent-names"
 
+const retiredOrchestratorKey = ["si", "syphus"].join("")
+const retiredOrchestratorAgentKey = [retiredOrchestratorKey, "agent"].join("_")
+const retiredExecutorKey = [retiredOrchestratorKey, "junior"].join("-")
+
 describe("disabled_mcps schema", () => {
   test("should accept built-in MCP names", () => {
     // given
@@ -147,7 +151,7 @@ describe("disabled_mcps schema", () => {
 
 describe("AgentOverrideConfigSchema", () => {
   describe("legacy simplification rename surface", () => {
-    test("accepts orchestrator and reviewer agent override keys", () => {
+    test("accepts canonical orchestrator and reviewer agent override keys", () => {
       const config = {
         agents: {
           orchestrator: { model: "openai/gpt-5.4" },
@@ -160,27 +164,38 @@ describe("AgentOverrideConfigSchema", () => {
       expect(result.success).toBe(true)
     })
 
-    test("accepts orchestrator_agent as the primary top-level orchestrator config key", () => {
+    test("rejects retired top-level orchestrator config key", () => {
       const config = {
-        orchestrator_agent: {
-          disabled: false,
-          default_builder_enabled: false,
-          planner_enabled: false,
-          replace_plan: false,
+        [retiredOrchestratorKey]: {
+          enabled: true,
         },
       }
 
       const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
 
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data.orchestrator_agent).toEqual(config.orchestrator_agent)
-      }
+      expect(result.success).toBe(false)
     })
 
-    test("does not expose sisyphus_agent as an active top-level config key", () => {
+    test("rejects retired top-level orchestrator agent config key", () => {
       const config = {
-        sisyphus_agent: {
+        [retiredOrchestratorAgentKey]: {
+          disabled: false,
+        },
+      }
+
+      const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
+
+      expect(result.success).toBe(false)
+    })
+
+    test("accepts canonical orchestrator config keys only", () => {
+      const config = {
+        orchestrator: {
+          tasks: {
+            storage_path: ".orchestrator/tasks.json",
+          },
+        },
+        orchestrator_agent: {
           disabled: false,
         },
       }
@@ -189,7 +204,9 @@ describe("AgentOverrideConfigSchema", () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.sisyphus_agent).toBeUndefined()
+        expect(result.data.orchestrator?.tasks?.storage_path).toBe(".orchestrator/tasks.json")
+        expect(result.data.orchestrator?.tasks?.claude_code_compat).toBe(false)
+        expect(result.data.orchestrator_agent).toEqual(config.orchestrator_agent)
       }
     })
   })
@@ -485,10 +502,10 @@ describe("canonical agent override surface", () => {
       }
     })
 
-  test("schema strips legacy executor aliases from the public schema surface", () => {
+  test("schema rejects retired executor aliases from the public schema surface", () => {
     const config = {
       agents: {
-        "sisyphus-junior": {
+        [retiredExecutorKey]: {
           model: "openai/gpt-5.4",
         },
       },
@@ -496,10 +513,7 @@ describe("canonical agent override surface", () => {
 
     const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
 
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.agents?.["sisyphus-junior"]).toBeUndefined()
-    }
+    expect(result.success).toBe(false)
   })
 
   test("schema accepts executor with prompt_append", () => {

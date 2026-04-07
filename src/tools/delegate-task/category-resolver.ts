@@ -3,7 +3,7 @@ import type { DelegateTaskArgs, DelegatedTaskModelConfig } from "./types"
 import type { ExecutorContext } from "./executor-types"
 import type { FallbackEntry } from "../../shared/model-requirements"
 import { mergeCategories } from "../../shared/merge-categories"
-import { SISYPHUS_JUNIOR_AGENT } from "./sisyphus-junior-agent"
+import { EXECUTOR_AGENT } from "./executor-agent"
 import { resolveCategoryConfig } from "./categories"
 import { getCanonicalCategoryName } from "./constants"
 import { parseModelString } from "./model-string-parser"
@@ -59,7 +59,7 @@ export async function resolveCategoryExecution(
   inheritedModel: string | undefined,
   systemDefaultModel: string | undefined
 ): Promise<CategoryResolutionResult> {
-  const { client, userCategories, sisyphusJuniorModel } = executorCtx
+  const { client, userCategories, executorModel } = executorCtx
 
   const availableModels = await getAvailableModelsForDelegateTask(client)
 
@@ -115,12 +115,12 @@ Available categories: ${allCategoryNames}`,
   let modelInfo: ModelFallbackInfo | undefined
   let categoryModel: DelegatedTaskModelConfig | undefined
 
-  const overrideModel = sisyphusJuniorModel
+  const overrideModel = executorModel
   const explicitCategoryModel = userCategories?.[categoryName]?.model ?? userCategories?.[args.category!]?.model
 
   if (!requirement) {
-    // Precedence: explicit category model > sisyphus-junior default > category resolved model
-    // This keeps `sisyphus-junior.model` useful as a global default while allowing
+    // Precedence: explicit category model > executor default > category resolved model
+    // This keeps `executor.model` useful as a global default while allowing
     // per-category overrides via `categories[category].model`.
     actualModel = explicitCategoryModel ?? overrideModel ?? resolved.model
     if (actualModel) {
@@ -219,7 +219,7 @@ Available categories: ${categoryNames.join(", ")}`,
   )
 
   return {
-    agentToUse: SISYPHUS_JUNIOR_AGENT,
+    agentToUse: EXECUTOR_AGENT,
     categoryModel,
     categoryPromptAppend,
     maxPromptTokens: resolved.config.max_prompt_tokens,

@@ -2155,12 +2155,12 @@ describe("runtime-fallback", () => {
       expect(fallbackLog?.data).toMatchObject({ from: "anthropic/claude-opus-4-5", to: "openai/gpt-5.4" })
     })
 
-    test("should detect agent from sessionID pattern", async () => {
+    test("should detect canonical agent from sessionID pattern", async () => {
       const hook = createRuntimeFallbackHook(createMockPluginInput(), {
         config: createMockConfig({ notify_on_fallback: false }),
-        pluginConfig: createMockPluginConfigWithAgentFallback("sisyphus", ["openai/gpt-5.4"]),
+        pluginConfig: createMockPluginConfigWithAgentFallback("orchestrator", ["openai/gpt-5.4"]),
       })
-      const sessionID = "sisyphus-session-123"
+      const sessionID = "orchestrator-session-123"
 
       await hook.event({
         event: {
@@ -2176,7 +2176,7 @@ describe("runtime-fallback", () => {
         },
       })
 
-      //#then - should detect legacy sisyphus from sessionID and use orchestrator fallback compatibility
+      //#then - should detect canonical orchestrator from sessionID
       const fallbackLog = logCalls.find((c) => c.msg.includes("Preparing fallback"))
       expect(fallbackLog).toBeDefined()
       expect(fallbackLog?.data).toMatchObject({ to: "openai/gpt-5.4" })

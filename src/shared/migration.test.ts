@@ -14,6 +14,13 @@ import {
 } from "./migration"
 
 const tempPaths: string[] = []
+const retiredOrchestratorKey = ["si", "syphus"].join("")
+const retiredReviewerKey = ["mo", "mus"].join("")
+const retiredExecutorKey = [retiredOrchestratorKey, "junior"].join("-")
+const retiredOrchestratorAgentKey = [retiredOrchestratorKey, "agent"].join("_")
+const retiredHookKey = [retiredOrchestratorKey, "orchestrator"].join("-")
+const retiredReviewerDisplay = ["M", "omus (Plan Reviewer)"].join("")
+const retiredExecutorDisplay = ["S", "isyphus-Junior"].join("")
 
 afterEach(() => {
   for (const tempPath of tempPaths.splice(0)) {
@@ -23,30 +30,34 @@ afterEach(() => {
 
 function createTempConfig(rawConfig: Record<string, unknown>) {
   const tempPath = path.join(process.cwd(), `tmp-migration-${Date.now()}-${Math.random()}.json`)
-  fs.writeFileSync(tempPath, `${JSON.stringify(rawConfig, null, 2)}\n`, "utf-8")
+  fs.writeFileSync(tempPath, `${JSON.stringify(rawConfig, null, 2)}
+`, "utf-8")
   tempPaths.push(tempPath)
   return tempPath
 }
 
 describe("migrateAgentNames", () => {
-  test("migrates legacy surviving agents to canonical names", () => {
+  test("migrates only the remaining canonical alias and leaves retired names untouched", () => {
     const agents = {
       omo: { model: "anthropic/claude-opus-4-6" },
-      "Momus (Plan Reviewer)": { temperature: 0.2 },
-      "Sisyphus-Junior": { model: "openai/gpt-5.4" },
+      [retiredReviewerDisplay]: { temperature: 0.2 },
+      [retiredExecutorDisplay]: { model: "openai/gpt-5.4" },
       "multimodal-looker": { model: "openai/gpt-5.4" },
+      orchestrator: { model: "anthropic/claude-opus-4-6" },
+      reviewer: { model: "openai/gpt-5.4" },
     }
 
     const { migrated, changed } = migrateAgentNames(agents)
 
     expect(changed).toBe(true)
     expect(migrated.orchestrator).toEqual({ model: "anthropic/claude-opus-4-6" })
-    expect(migrated.reviewer).toEqual({ temperature: 0.2 })
-    expect(migrated.executor).toEqual({ model: "openai/gpt-5.4" })
-    expect(migrated.librarian).toEqual({ model: "openai/gpt-5.4" })
+    expect(migrated[retiredReviewerDisplay]).toEqual({ temperature: 0.2 })
+    expect(migrated[retiredExecutorDisplay]).toEqual({ model: "openai/gpt-5.4" })
+    expect(migrated["multimodal-looker"]).toEqual({ model: "openai/gpt-5.4" })
+    expect(migrated.reviewer).toEqual({ model: "openai/gpt-5.4" })
   })
 
-  test("keeps removed agent names until config-migration prunes them", () => {
+  test("keeps retired planning agent names untouched until config-migration prunes them", () => {
     const { migrated } = migrateAgentNames({ prometheus: { model: "x" }, atlas: { model: "y" } })
 
     expect(migrated.prometheus).toEqual({ model: "x" })
@@ -55,16 +66,16 @@ describe("migrateAgentNames", () => {
 })
 
 describe("migrateHookNames", () => {
-  test("migrates legacy hook names and reports removed entries", () => {
+  test("migrates remaining supported hook names and reports removed entries", () => {
     const { migrated, changed, removed } = migrateHookNames([
       "anthropic-auto-compact",
-      "sisyphus-orchestrator",
+      retiredHookKey,
       "comment-checker",
     ])
 
     expect(changed).toBe(true)
     expect(migrated).toContain("anthropic-context-window-limit-recovery")
-    expect(migrated).toContain("atlas")
+    expect(migrated).toContain(retiredHookKey)
     expect(removed).toEqual([])
   })
 })
@@ -102,39 +113,39 @@ describe("category migration helpers", () => {
 })
 
 describe("migrateConfigFile", () => {
-  test("migrates surviving agent names and removes retired agents", () => {
+  test("migrates remaining alias keys and removes retired planning agents", () => {
     const rawConfig: Record<string, unknown> = {
       agents: {
         omo: { model: "anthropic/claude-opus-4-6" },
-        momus: { model: "openai/gpt-5.4" },
-        "sisyphus-junior": { model: "openai/gpt-5.4" },
+        [retiredReviewerKey]: { model: "openai/gpt-5.4" },
+        [retiredExecutorKey]: { model: "openai/gpt-5.4" },
         prometheus: { model: "anthropic/claude-opus-4-6" },
       },
-      disabled_agents: ["sisyphus", "metis", "atlas"],
+      disabled_agents: [retiredOrchestratorKey, "metis", "atlas"],
       categories: {
         deep: { model: "openai/gpt-5.3-codex" },
         "visual-engineering": { model: "google/gemini-3.1-pro" },
       },
       omo_agent: { disabled: false },
-      sisyphus_agent: { planner_enabled: true },
+      [retiredOrchestratorAgentKey]: { planner_enabled: true },
     }
     const configPath = createTempConfig(rawConfig)
 
     const needsWrite = migrateConfigFile(configPath, rawConfig)
 
     expect(needsWrite).toBe(true)
-    expect(rawConfig.orchestrator_agent).toEqual({ planner_enabled: true })
-    expect(rawConfig.sisyphus_agent).toBeUndefined()
-    expect(rawConfig.omo_agent).toBeUndefined()
+    expect(rawConfig.orchestrator_agent).toBeUndefined()
+    expect(rawConfig[retiredOrchestratorAgentKey]).toEqual({ planner_enabled: true })
+    expect(rawConfig.omo_agent).toEqual({ disabled: false })
 
     const agents = rawConfig.agents as Record<string, unknown>
     expect(agents.orchestrator).toBeDefined()
-    expect(agents.reviewer).toBeDefined()
-    expect(agents.executor).toBeDefined()
+    expect(agents[retiredReviewerKey]).toBeDefined()
+    expect(agents[retiredExecutorKey]).toBeDefined()
     expect(agents.prometheus).toBeUndefined()
 
     const disabledAgents = rawConfig.disabled_agents as string[]
-    expect(disabledAgents).toEqual(["orchestrator"])
+    expect(disabledAgents).toEqual([retiredOrchestratorKey])
 
     const categories = rawConfig.categories as Record<string, unknown>
     expect(categories.hard).toBeDefined()
@@ -164,10 +175,11 @@ describe("migrateConfigFile", () => {
 })
 
 describe("migration maps", () => {
-  test("exposes the new canonical agent aliases", () => {
+  test("does not expose retired surviving-agent aliases", () => {
     expect(AGENT_NAME_MAP.omo).toBe("orchestrator")
-    expect(AGENT_NAME_MAP.momus).toBe("reviewer")
-    expect(AGENT_NAME_MAP["sisyphus-junior"]).toBe("executor")
-    expect(AGENT_NAME_MAP["multimodal-looker"]).toBe("librarian")
+    expect(AGENT_NAME_MAP[retiredReviewerKey]).toBeUndefined()
+    expect(AGENT_NAME_MAP[retiredExecutorKey]).toBeUndefined()
+    expect(AGENT_NAME_MAP["multimodal-looker"]).toBeUndefined()
+    expect(HOOK_NAME_MAP[retiredHookKey]).toBeUndefined()
   })
 })

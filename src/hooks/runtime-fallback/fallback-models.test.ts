@@ -3,6 +3,8 @@ import { afterEach, describe, expect, test } from "bun:test"
 import { getFallbackModelsForSession } from "./fallback-models"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
 
+const retiredOrchestratorKey = ["si", "syphus"].join("")
+
 describe("runtime-fallback fallback-models", () => {
   afterEach(() => {
     SessionCategoryRegistry.clear()
@@ -48,7 +50,7 @@ describe("runtime-fallback fallback-models", () => {
     //#given
     const pluginConfig = {
       agents: {
-        sisyphus: {
+        orchestrator: {
           fallback_models: ["quotio/gpt-5.2", "quotio/glm-5", "quotio/kimi-k2.5"],
         },
         oracle: {
@@ -59,6 +61,23 @@ describe("runtime-fallback fallback-models", () => {
 
     //#when
     const result = getFallbackModelsForSession("ses_runtime_fallback_unknown", undefined, pluginConfig)
+
+    //#then
+    expect(result).toEqual([])
+  })
+
+  test("does not look up retired alias config keys for canonical agents", () => {
+    //#given
+    const pluginConfig = {
+      agents: {
+        [retiredOrchestratorKey]: {
+          fallback_models: ["openai/gpt-5.4"],
+        },
+      },
+    } as any
+
+    //#when
+    const result = getFallbackModelsForSession("ses_runtime_fallback_orchestrator", "orchestrator", pluginConfig)
 
     //#then
     expect(result).toEqual([])

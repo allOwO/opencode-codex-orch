@@ -18,8 +18,8 @@ config/schema/
 ├── skills.ts                   # SkillsConfigSchema (sources, paths, recursive)
 ├── commands.ts                 # BuiltinCommandNameSchema
 ├── experimental.ts             # Feature flags (plugin_load_timeout_ms min 1000)
-├── sisyphus.ts                 # SisyphusConfigSchema (task system)
-├── sisyphus-agent.ts           # SisyphusAgentConfigSchema
+├── orchestrator.ts             # OrchestratorConfigSchema (task system)
+├── orchestrator-agent.ts       # OrchestratorAgentConfigSchema
 ├── tmux.ts                     # TmuxConfigSchema + TmuxLayoutSchema
 ├── websearch.ts                # provider: "exa" | "tavily"
 ├── claude-code.ts              # CC compatibility settings
@@ -38,7 +38,7 @@ config/schema/
 
 ## ROOT SCHEMA FIELDS (27)
 
-`$schema`, `new_task_system_enabled`, `default_run_agent`, `disabled_mcps`, `disabled_agents`, `disabled_skills`, `disabled_hooks`, `disabled_commands`, `disabled_tools`, `hashline_edit`, `agents`, `categories`, `claude_code`, `sisyphus_agent`, `comment_checker`, `experimental`, `auto_update`, `skills`, `ralph_loop`, `background_task`, `notification`, `babysitting`, `browser_automation_engine`, `websearch`, `tmux`, `sisyphus`, `start_work`, `_migrations`
+`$schema`, `new_task_system_enabled`, `default_run_agent`, `disabled_mcps`, `disabled_agents`, `disabled_skills`, `disabled_hooks`, `disabled_commands`, `disabled_tools`, `hashline_edit`, `agents`, `categories`, `claude_code`, `orchestrator_agent`, `comment_checker`, `experimental`, `auto_update`, `skills`, `ralph_loop`, `background_task`, `notification`, `babysitting`, `browser_automation_engine`, `websearch`, `tmux`, `orchestrator`, `start_work`, `_migrations`
 
 ## AGENT OVERRIDE FIELDS (21)
 

@@ -78,8 +78,8 @@ describe("createWriteExistingFileGuardHook compatibility behavior", () => {
     ).resolves.toBeDefined()
   })
 
-  test("#given existing file under .sisyphus #when write executes #then no longer bypasses the guard", async () => {
-    const existingFile = harness.createFile(".sisyphus/plans/plan.txt")
+  test("#given existing file outside .opencode #when write executes #then guard still applies", async () => {
+    const existingFile = harness.createFile("plans/plan.txt")
 
     await expect(
       harness.runBefore({
