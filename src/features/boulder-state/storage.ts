@@ -10,7 +10,7 @@ import type { BoulderState, PlanProgress } from "./types"
 import {
   BOULDER_DIR,
   BOULDER_FILE,
-  PROMETHEUS_PLANS_DIR,
+  WORK_PLANS_DIR,
 } from "./constants"
 
 export function getBoulderFilePath(directory: string): string {
@@ -87,11 +87,11 @@ export function clearBoulderState(directory: string): boolean {
 }
 
 /**
- * Find Prometheus plan files for this project.
- * Prometheus stores plans at: {project}/docs/superpowers/plans/{name}.md
+ * Find work plan files for this project.
+ * Work plans are stored at: {project}/docs/superpowers/plans/{name}.md
  */
-export function findPrometheusPlans(directory: string): string[] {
-  const plansDir = join(directory, PROMETHEUS_PLANS_DIR)
+export function findWorkPlans(directory: string): string[] {
+  const plansDir = join(directory, WORK_PLANS_DIR)
 
   if (!existsSync(plansDir)) {
     return []

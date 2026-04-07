@@ -8,7 +8,7 @@ import type { AgentConfig, CategoryConfig, GeneratedOcoConfig } from "./model-fa
 import { applyOpenAiOnlyModelCatalog, isOpenAiOnlyAvailability } from "./openai-only-model-catalog"
 import { toProviderAvailability } from "./provider-availability"
 import {
-	getSisyphusFallbackChain,
+	getOrchestratorFallbackChain,
 	isAnyFallbackEntryAvailable,
 	isRequiredModelAvailable,
 	isRequiredProviderAvailable,
@@ -52,7 +52,7 @@ export function generateModelConfig(config: InstallConfig): GeneratedOcoConfig {
 
   for (const [role, req] of Object.entries(CLI_AGENT_MODEL_REQUIREMENTS)) {
     if (role === "orchestrator") {
-      const fallbackChain = getSisyphusFallbackChain()
+      const fallbackChain = getOrchestratorFallbackChain()
       if (req.requiresAnyModel && !isAnyFallbackEntryAvailable(fallbackChain, avail)) {
         continue
       }

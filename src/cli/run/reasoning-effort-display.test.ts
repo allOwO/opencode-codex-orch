@@ -26,7 +26,7 @@ describe("reasoning effort display", () => {
             id: "msg_1",
             sessionID: "ses_main",
             role: "assistant",
-            agent: "Sisyphus",
+            agent: "Orchestrator",
             modelID: "gpt-5.4",
             reasoningEffort: "high",
           },
@@ -53,7 +53,7 @@ describe("reasoning effort display", () => {
     const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
 
     // when
-    renderAgentHeader("Sisyphus", "gpt-5.4", null, "high", {})
+    renderAgentHeader("Orchestrator", "gpt-5.4", null, "high", {})
 
     // then
     const output = stdoutSpy.mock.calls.map(call => String(call[0])).join("")

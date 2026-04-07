@@ -233,7 +233,7 @@ describe("resolveMultipleSkillsAsync", () => {
 		expect(result.notFound).toEqual([])
 		const gitCommitContent = result.resolved.get("git-commit")
 		expect(gitCommitContent).not.toContain("Ultraworked with")
-		expect(gitCommitContent).not.toContain("Co-authored-by: Sisyphus")
+  expect(gitCommitContent).not.toContain("Co-authored-by: Orchestrator")
 	})
 
 	it("should handle empty array", async () => {

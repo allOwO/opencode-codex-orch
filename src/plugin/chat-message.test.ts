@@ -247,7 +247,7 @@ describe("createChatMessageHandler - TUI variant passthrough", () => {
     expect(output.parts[0].text).not.toContain("OCO_INTERNAL_INITIATOR")
   })
 
-  test("does not inject lightweight execution bias for non-Sisyphus agents", async () => {
+  test("does not inject lightweight execution bias for non-orchestrator agents", async () => {
     // #given
     const args = createMockHandlerArgs()
     const handler = createChatMessageHandler(args)

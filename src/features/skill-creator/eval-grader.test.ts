@@ -10,7 +10,7 @@ describe("gradeEvalReport", () => {
       skill_name: "sample-skill",
       skill_path: "/tmp/sample-skill",
       eval_file_path: "/tmp/evals.json",
-      agent: "Sisyphus",
+      agent: "Orchestrator",
       cases: [{
         case_id: "smoke",
         prompt: "Summarize README",
@@ -45,7 +45,7 @@ describe("gradeEvalReport", () => {
       skill_name: "sample-skill",
       skill_path: "/tmp/sample-skill",
       eval_file_path: "/tmp/evals.json",
-      agent: "Sisyphus",
+      agent: "Orchestrator",
       cases: [{
         case_id: "smoke",
         prompt: "Summarize README",

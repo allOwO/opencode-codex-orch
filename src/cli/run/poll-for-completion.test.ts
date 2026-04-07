@@ -316,7 +316,7 @@ describe("pollForCompletion", () => {
   })
 
   it("simulates race condition: brief idle with 0 todos does not cause immediate exit", async () => {
-    //#given - simulate Sisyphus outputting text, session goes idle briefly, then tool fires
+  //#given - simulate the orchestrator outputting text, session goes idle briefly, then tool fires
     spyOn(console, "log").mockImplementation(() => {})
     spyOn(console, "error").mockImplementation(() => {})
     const ctx = createMockContext()

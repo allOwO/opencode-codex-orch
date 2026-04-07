@@ -10,7 +10,7 @@ import {
   getPlanProgress,
   getPlanName,
   createBoulderState,
-  findPrometheusPlans,
+  findWorkPlans,
 } from "./storage"
 import type { BoulderState } from "./types"
 
@@ -406,14 +406,14 @@ describe("boulder-state", () => {
     })
   })
 
-  describe("findPrometheusPlans", () => {
+  describe("findWorkPlans", () => {
     test("prefers canonical docs/superpowers/plans directory", () => {
       const plansDir = join(TEST_DIR, "docs", "superpowers", "plans")
       mkdirSync(plansDir, { recursive: true })
       writeFileSync(join(plansDir, "plan-a.md"), "# A")
       writeFileSync(join(plansDir, "plan-b.md"), "# B")
 
-      const plans = findPrometheusPlans(TEST_DIR)
+      const plans = findWorkPlans(TEST_DIR)
 
       expect(plans).toHaveLength(2)
       expect(plans.every((entry) => entry.includes("docs/superpowers/plans"))).toBe(true)

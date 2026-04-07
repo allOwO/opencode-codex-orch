@@ -1,5 +1,5 @@
 /**
- * GPT-optimized Sisyphus prompt — Codex prompt.md as foundation + OCO enhancements.
+ * GPT-optimized orchestrator prompt — Codex prompt.md as foundation + OCO enhancements.
  *
  * Design philosophy:
  * - Base: OpenAI Codex official prompt.md ("precise, safe, helpful", concise, direct, friendly)
@@ -160,7 +160,7 @@ Coding guidelines:
 - Delegate when ANY are true:
 ${researchDelegationThresholds}
   - architecture tradeoff, security/performance risk, or 2+ failed attempts → \`oracle\`
-  - user-facing UI/UX, layout, styling, animation, or polish → \`visual-engineering\`
+  - user-facing UI/UX, layout, styling, animation, or polish → \`designer\`
   - likely 2+ files, or one file plus tightly coupled tests/config/docs → delegate via category
   - 3+ independent edits or repetitive changes → delegate in parallel
 - Line count is a tie-breaker, not the primary rule.

@@ -47,8 +47,8 @@ Model Providers (Priority: Native > Copilot > OpenCode Zen > Z.ai > Kimi):
   Gemini        Native google/ models (Gemini 3 Pro, Flash)
   Copilot       github-copilot/ models (fallback)
   OpenCode Zen  opencode/ models (opencode/claude-opus-4-6, etc.)
-  Z.ai          zai-coding-plan/glm-5 (visual-engineering fallback)
-  Kimi          kimi-for-coding/k2p5 (Sisyphus/Prometheus fallback)
+  Z.ai          zai-coding-plan/glm-5 (designer fallback)
+  Kimi          kimi-for-coding/k2p5 (orchestrator/executor fallback)
 `)
   .action(async (options) => {
     const args: InstallArgs = {
@@ -71,7 +71,7 @@ program
   .allowUnknownOption()
   .passThroughOptions()
   .description("Run opencode with todo/background task completion enforcement")
-  .option("-a, --agent <name>", "Agent to use (default: from CLI/env/config, fallback: Sisyphus)")
+  .option("-a, --agent <name>", "Agent to use (default: from CLI/env/config, fallback: Orchestrator)")
   .option("-d, --directory <path>", "Working directory")
   .option("-p, --port <port>", "Server port (attaches if port already in use)", parseInt)
   .option("--attach <url>", "Attach to existing opencode server URL")
@@ -84,7 +84,7 @@ program
   .addHelpText("after", `
 Examples:
   $ bunx opencode-codex-orch run "Fix the bug in index.ts"
-  $ bunx opencode-codex-orch run --agent Sisyphus "Implement feature X"
+  $ bunx opencode-codex-orch run --agent orchestrator "Implement feature X"
   $ bunx opencode-codex-orch run --port 4321 "Fix the bug"
   $ bunx opencode-codex-orch run --attach http://127.0.0.1:4321 "Fix the bug"
   $ bunx opencode-codex-orch run --json "Fix the bug" | jq .sessionId
@@ -95,10 +95,10 @@ Agent resolution order:
   1) --agent flag
   2) OPENCODE_DEFAULT_AGENT
   3) opencode-codex-orch.json "default_run_agent"
-  4) Sisyphus (fallback)
+  4) Orchestrator (fallback)
 
-Available core agents:
-  Sisyphus, Prometheus, Atlas
+  Available core agents:
+  Orchestrator, Reviewer, Executor
 
 Unlike 'opencode run', this command waits until:
   - All todos are completed or cancelled
@@ -148,7 +148,7 @@ program
   .command("eval-skill <skillPath>")
   .description("Run a skill eval suite through explicit skill invocation")
   .requiredOption("--eval-file <path>", "Path to eval suite JSON/YAML file")
-  .option("-a, --agent <name>", "Agent to use for eval runs (default: Sisyphus)")
+  .option("-a, --agent <name>", "Agent to use for eval runs (default: Orchestrator)")
   .option("--timeout <seconds>", "Abort each eval case after the given number of seconds", Number)
   .option("--output <path>", "Write raw eval report JSON to this path")
   .option("--json", "Output combined run and grade report as JSON")

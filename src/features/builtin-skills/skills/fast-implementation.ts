@@ -19,7 +19,7 @@ This skill optimizes for minimal diffs, requirement traceability, and fast execu
 | Localized bug fix, text tweak, config change, validation fix | Yes | Implement directly with minimal diff |
 | Single workflow slice within one module boundary | Usually | Use only if scope and requirements are clear |
 | Minor non-visual UI text or wiring change | Sometimes | Allowed only if layout, styling, animation, and UX polish stay unchanged |
-| Layout, styling, animation, or UX polish | No | Use visual-engineering |
+| Layout, styling, animation, or UX polish | No | Use designer |
 | Architecture, auth, payment, security, migration, unclear scope | No | Escalate to the heavier planning/review flow |
 
 ## When to Use

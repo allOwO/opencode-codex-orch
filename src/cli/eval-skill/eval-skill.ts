@@ -29,7 +29,7 @@ export async function evalSkill(skillPath: string, options: EvalSkillOptions): P
     skillName: validation.skillName,
     evalFilePath: options.evalFile,
     suite,
-    agent: options.agent ?? "Sisyphus",
+    agent: options.agent ?? "orchestrator",
     keepWorkspace: options.keepWorkspace,
     timeoutMs: options.timeoutMs,
   })

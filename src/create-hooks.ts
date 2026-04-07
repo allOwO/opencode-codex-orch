@@ -49,7 +49,7 @@ type CompactionTodoPreserverHook = {
   event?: (input: unknown) => Promise<void>
 } | null
 
-type AtlasHook = (GenericAsyncHookMap & {
+type ExecutorHook = (GenericAsyncHookMap & {
   handler?: (input: unknown) => Promise<void>
 }) | null
 
@@ -66,6 +66,7 @@ type RemovedHookShims = {
   claudeCodeHooks: GenericAsyncHookMap | null
   autoSlashCommand: GenericAsyncHookMap | null
   noSisyphusGpt: GenericAsyncHookMap | null
+  noOrchestratorGpt: GenericAsyncHookMap | null
   startWork: GenericAsyncHookMap | null
   ralphLoop: RalphLoopHook
   sessionNotification: SessionNotificationHook
@@ -82,7 +83,8 @@ type RemovedHookShims = {
   commentChecker: GenericAsyncHookMap | null
   emptyTaskResponseDetector: GenericAsyncHookMap | null
   delegateTaskRetry: GenericAsyncHookMap | null
-  atlasHook: AtlasHook
+  atlasHook: ExecutorHook
+  executorHook: ExecutorHook
   taskResumeInfo: GenericAsyncHookMap | null
   readImageResizer: GenericAsyncHookMap | null
   jsonErrorRecovery: GenericAsyncHookMap | null
@@ -103,6 +105,7 @@ const removedHooks: RemovedHookShims = {
   claudeCodeHooks: null,
   autoSlashCommand: null,
   noSisyphusGpt: null,
+  noOrchestratorGpt: null,
   startWork: null,
   ralphLoop: null,
   sessionNotification: null,
@@ -120,6 +123,7 @@ const removedHooks: RemovedHookShims = {
   emptyTaskResponseDetector: null,
   delegateTaskRetry: null,
   atlasHook: null,
+  executorHook: null,
   taskResumeInfo: null,
   readImageResizer: null,
   jsonErrorRecovery: null,

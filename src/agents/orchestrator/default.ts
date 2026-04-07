@@ -1,5 +1,5 @@
 /**
- * Shared task/todo management section for Sisyphus prompt variants.
+ * Shared task/todo management section for orchestrator prompt variants.
  */
 
 export function buildTaskManagementSection(useTaskSystem: boolean): string {

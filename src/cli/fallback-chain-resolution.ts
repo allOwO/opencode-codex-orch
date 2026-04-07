@@ -22,7 +22,7 @@ export function resolveModelFromChain(
 	return null
 }
 
-export function getSisyphusFallbackChain(): FallbackEntry[] {
+export function getOrchestratorFallbackChain(): FallbackEntry[] {
 	return CLI_AGENT_MODEL_REQUIREMENTS.orchestrator.fallbackChain
 }
 

@@ -12,7 +12,7 @@
 runner.ts
   1. opencode-binary-resolver.ts → Find OpenCode binary
   2. server-connection.ts → Connect to OpenCode server (start if needed)
-  3. agent-resolver.ts → Flag → env → config → Sisyphus
+  3. agent-resolver.ts → Flag → env → config → orchestrator
   4. session-resolver.ts → Create new or resume existing session
   5. events.ts → Stream SSE events from session
   6. event-handlers.ts → Process each event type
@@ -26,7 +26,7 @@ runner.ts
 |------|---------|
 | `runner.ts` | Main orchestration — connects, resolves, runs, completes |
 | `server-connection.ts` | Start OpenCode server process, create SDK client |
-| `agent-resolver.ts` | Resolve agent: `--agent` flag → `OPENCODE_AGENT` env → config → Sisyphus |
+| `agent-resolver.ts` | Resolve agent: `--agent` flag → `OPENCODE_AGENT` env → config → orchestrator |
 | `session-resolver.ts` | Create new session or resume via `--attach` / `--session-id` |
 | `events.ts` | SSE event stream subscription |
 | `event-handlers.ts` | Route events to handlers (message, tool, error, idle) |
