@@ -1,6 +1,6 @@
 {
   "name": "opencode-codex-orch-windows-x64",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Platform-specific binary for opencode-codex-orch (windows-x64)",
   "license": "MIT",
   "repository": {

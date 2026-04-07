@@ -1,6 +1,6 @@
 {
   "name": "hashline-edit-benchmark",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Hashline edit tool benchmark using Vercel AI SDK with FriendliAI provider",
