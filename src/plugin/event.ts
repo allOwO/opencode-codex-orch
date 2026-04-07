@@ -346,7 +346,7 @@ export function createEventHandler(args: {
               // Prefer the agent/model/provider from the assistant message payload.
               let agentName = agent ?? getSessionAgent(sessionID);
               if (!agentName && sessionID === getMainSessionID()) {
-                agentName = "sisyphus";
+                agentName = "orchestrator";
               }
 
               if (agentName) {
@@ -395,7 +395,7 @@ export function createEventHandler(args: {
           if (shouldRetryError(errorInfo)) {
             let agentName = getSessionAgent(sessionID);
             if (!agentName && sessionID === getMainSessionID()) {
-              agentName = "sisyphus";
+              agentName = "orchestrator";
             }
 
             if (agentName) {
@@ -462,7 +462,7 @@ export function createEventHandler(args: {
           let agentName = getSessionAgent(sessionID);
 
           if (!agentName && sessionID === getMainSessionID()) {
-            agentName = "sisyphus";
+            agentName = "orchestrator";
           }
 
           if (agentName) {

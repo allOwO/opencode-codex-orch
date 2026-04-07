@@ -31,7 +31,7 @@ function createTestAvailableModels(): Set<string> {
   return new Set(TEST_AVAILABLE_MODELS)
 }
 
-describe("sisyphus-task", () => {
+  describe("delegate-task", () => {
   let cacheSpy: ReturnType<typeof spyOn>
   let providerModelsSpy: ReturnType<typeof spyOn>
 
@@ -283,7 +283,7 @@ describe("sisyphus-task", () => {
           id: "task-123",
           status: "pending",
           description: "Parse test",
-          agent: "sisyphus-junior",
+          agent: "executor",
           sessionID: "test-session",
         }),
       }
@@ -312,7 +312,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -346,7 +346,7 @@ describe("sisyphus-task", () => {
           id: "task-456",
           status: "pending",
           description: "Parse test",
-          agent: "sisyphus-junior",
+          agent: "executor",
           sessionID: "test-session",
         }),
       }
@@ -375,7 +375,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -402,7 +402,7 @@ describe("sisyphus-task", () => {
   })
 
   describe("category delegation config validation", () => {
-    test("fills subagent_type as sisyphus-junior when category is provided without subagent_type", async () => {
+    test("fills subagent_type as executor when category is provided without subagent_type", async () => {
       // given
       const { createDelegateTask } = require("./tools")
 
@@ -411,7 +411,7 @@ describe("sisyphus-task", () => {
           id: "task-123",
           status: "pending",
           description: "Test task",
-          agent: "sisyphus-junior",
+          agent: "executor",
           sessionID: "test-session",
         }),
       }
@@ -439,7 +439,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
 
@@ -465,7 +465,7 @@ describe("sisyphus-task", () => {
        expect(args.subagent_type).toBe("Executor")
     }, { timeout: 10000 })
 
-    test("category overrides subagent_type and still maps to sisyphus-junior", async () => {
+    test("category overrides subagent_type and still maps to executor", async () => {
       //#given
       const { createDelegateTask } = require("./tools")
 
@@ -474,7 +474,7 @@ describe("sisyphus-task", () => {
           id: "task-override",
           status: "pending",
           description: "Override test",
-          agent: "sisyphus-junior",
+          agent: "executor",
           sessionID: "test-session",
         }),
       }
@@ -503,7 +503,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -535,7 +535,7 @@ describe("sisyphus-task", () => {
       // given a mock client with no model in config
       const { createDelegateTask } = require("./tools")
       
-       const mockManager = { launch: async () => ({ id: "task-123", status: "pending", description: "Test task", agent: "sisyphus-junior", sessionID: "test-session" }) }
+       const mockManager = { launch: async () => ({ id: "task-123", status: "pending", description: "Test task", agent: "executor", sessionID: "test-session" }) }
        const mockClient = {
          app: { agents: async () => ({ data: [] }) },
          config: { get: async () => ({}) }, // No model configured
@@ -560,7 +560,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
        
@@ -609,7 +609,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -675,7 +675,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
         metadata: (input: { title?: string; metadata?: Record<string, unknown> }) => {
           metadataCalls.push(input)
@@ -937,7 +937,7 @@ describe("sisyphus-task", () => {
             id: "task-variant",
             sessionID: "session-variant",
             description: "Variant task",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -967,7 +967,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -1003,7 +1003,7 @@ describe("sisyphus-task", () => {
             id: "task-default-variant",
             sessionID: "session-default-variant",
             description: "Default variant task",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -1032,7 +1032,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -1093,7 +1093,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -1143,7 +1143,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -1184,7 +1184,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
        
@@ -1237,7 +1237,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1338,7 +1338,7 @@ describe("sisyphus-task", () => {
      const toolContext = {
        sessionID: "parent-session",
        messageID: "parent-message",
-       agent: "sisyphus",
+       agent: "orchestrator",
        abort: new AbortController().signal,
      }
      
@@ -1373,7 +1373,7 @@ describe("sisyphus-task", () => {
         info: {
           id: "msg_001",
           role: "user",
-          agent: "sisyphus-junior",
+          agent: "executor",
           model: { providerID: "anthropic", modelID: "claude-opus-4-6" },
           variant: "max",
           time: { created: baseTime },
@@ -1428,14 +1428,14 @@ describe("sisyphus-task", () => {
     }
 
     const tool = createDelegateTask({
-      manager: { resume: async () => ({ id: "task-var", sessionID: "ses_var_test", description: "Variant test", agent: "sisyphus-junior", status: "running" }) },
+      manager: { resume: async () => ({ id: "task-var", sessionID: "ses_var_test", description: "Variant test", agent: "executor", status: "running" }) },
       client: mockClient,
     })
 
     const toolContext = {
       sessionID: "parent-session",
       messageID: "parent-message",
-      agent: "sisyphus",
+      agent: "orchestrator",
       abort: new AbortController().signal,
     }
 
@@ -1455,7 +1455,7 @@ describe("sisyphus-task", () => {
     expect(promptMock).toHaveBeenCalled()
     const callArgs = promptMock.mock.calls[0][0]
     expect(callArgs.body.variant).toBe("max")
-    expect(callArgs.body.agent).toBe("sisyphus-junior")
+    expect(callArgs.body.agent).toBe("executor")
     expect(callArgs.body.model).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-6" })
   }, { timeout: 10000 })
 
@@ -1494,7 +1494,7 @@ describe("sisyphus-task", () => {
      const toolContext = {
        sessionID: "parent-session",
        messageID: "parent-message",
-       agent: "sisyphus",
+       agent: "orchestrator",
        abort: new AbortController().signal,
      }
      
@@ -1552,7 +1552,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1617,7 +1617,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1673,7 +1673,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1732,7 +1732,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent",
         messageID: "msg",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal
       }
 
@@ -1763,7 +1763,7 @@ describe("sisyphus-task", () => {
         id: "task-unstable",
         sessionID: "ses_unstable_gemini",
         description: "Unstable gemini task",
-        agent: "sisyphus-junior",
+        agent: "executor",
         status: "running",
       }
       const mockManager = {
@@ -1800,7 +1800,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1834,7 +1834,7 @@ describe("sisyphus-task", () => {
             id: "task-normal-bg",
             sessionID: "ses_normal_bg",
             description: "Normal background task",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -1859,7 +1859,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
        
@@ -1890,7 +1890,7 @@ describe("sisyphus-task", () => {
         id: "task-unstable-minimax",
         sessionID: "ses_unstable_minimax",
         description: "Unstable minimax task",
-        agent: "sisyphus-junior",
+        agent: "executor",
         status: "running",
       }
       const mockManager = {
@@ -1931,7 +1931,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -1995,7 +1995,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -2026,7 +2026,7 @@ describe("sisyphus-task", () => {
         id: "task-visual-engineering",
         sessionID: "ses_visual_engineering_gemini",
         description: "Visual gemini task",
-        agent: "sisyphus-junior",
+        agent: "executor",
         status: "running",
       }
       const mockManager = {
@@ -2063,7 +2063,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -2094,7 +2094,7 @@ describe("sisyphus-task", () => {
         id: "task-writing",
         sessionID: "ses_writing_gemini",
         description: "Writing gemini task",
-        agent: "sisyphus-junior",
+        agent: "executor",
         status: "running",
       }
       const mockManager = {
@@ -2131,7 +2131,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -2162,7 +2162,7 @@ describe("sisyphus-task", () => {
         id: "task-custom-unstable",
         sessionID: "ses_custom_unstable",
         description: "Custom unstable task",
-        agent: "sisyphus-junior",
+        agent: "executor",
         status: "running",
       }
       const mockManager = {
@@ -2204,7 +2204,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -2243,7 +2243,7 @@ describe("sisyphus-task", () => {
             id: "task-fallback",
             sessionID: "ses_fallback_test",
             description: "Fallback test task",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -2260,12 +2260,12 @@ describe("sisyphus-task", () => {
         },
       }
 
-      // NO userCategories override, NO sisyphusJuniorModel
+      // NO userCategories override, NO orchestratorJuniorModel
       const tool = createDelegateTask({
         manager: mockManager,
         client: mockClient,
         // userCategories: undefined - use DEFAULT_CATEGORIES only
-        // sisyphusJuniorModel: undefined
+        // orchestratorJuniorModel: undefined
         connectedProvidersOverride: null,
         availableModelsOverride: new Set(),
       })
@@ -2273,7 +2273,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2307,7 +2307,7 @@ describe("sisyphus-task", () => {
             id: "task-ui-model",
             sessionID: "ses_ui_model_test",
             description: "UI model inheritance test",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -2338,7 +2338,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2359,8 +2359,8 @@ describe("sisyphus-task", () => {
       expect(launchInput.model.modelID).toBe("claude-haiku-4-5")
     })
 
-    test("sisyphus-junior model override takes precedence over category model", async () => {
-      // given - sisyphus-junior override model differs from category default
+    test("executor model override takes precedence over category model", async () => {
+      // given - executor override model differs from category default
       const { createDelegateTask } = require("./tools")
       let launchInput: any
 
@@ -2371,7 +2371,7 @@ describe("sisyphus-task", () => {
             id: "task-override",
             sessionID: "ses_override_test",
             description: "Override precedence test",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -2391,7 +2391,7 @@ describe("sisyphus-task", () => {
       const tool = createDelegateTask({
         manager: mockManager,
         client: mockClient,
-        sisyphusJuniorModel: "anthropic/claude-sonnet-4-6",
+        executorModel: "anthropic/claude-sonnet-4-6",
         connectedProvidersOverride: TEST_CONNECTED_PROVIDERS,
         availableModelsOverride: createTestAvailableModels(),
       })
@@ -2399,7 +2399,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2420,8 +2420,8 @@ describe("sisyphus-task", () => {
       expect(launchInput.model.modelID).toBe("claude-sonnet-4-6")
     })
 
-    test("explicit category model takes precedence over sisyphus-junior model", async () => {
-      // given - explicit category model differs from sisyphus-junior override
+    test("explicit category model takes precedence over executor model", async () => {
+      // given - explicit category model differs from executor override
       const { createDelegateTask } = require("./tools")
       let launchInput: any
 
@@ -2432,7 +2432,7 @@ describe("sisyphus-task", () => {
             id: "task-category-precedence",
             sessionID: "ses_category_precedence_test",
             description: "Category precedence test",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -2453,7 +2453,7 @@ describe("sisyphus-task", () => {
        const tool = createDelegateTask({
          manager: mockManager,
          client: mockClient,
-         sisyphusJuniorModel: "anthropic/claude-sonnet-4-6",
+          executorModel: "anthropic/claude-sonnet-4-6",
          userCategories: {
             deep: { model: "openai/gpt-5.3-codex" },
          },
@@ -2464,7 +2464,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2485,8 +2485,8 @@ describe("sisyphus-task", () => {
       expect(launchInput.model.modelID).toBe("gpt-5.3-codex")
     })
 
-    test("sisyphus-junior model override works with quick category (#1295)", async () => {
-      // given - user configures agents.sisyphus-junior.model but uses quick category
+    test("executor model override works with quick category (#1295)", async () => {
+      // given - user configures agents.executor.model but uses quick category
       const { createDelegateTask } = require("./tools")
       let launchInput: any
 
@@ -2497,7 +2497,7 @@ describe("sisyphus-task", () => {
             id: "task-1295-quick",
             sessionID: "ses_1295_quick",
             description: "Issue 1295 regression",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -2517,7 +2517,7 @@ describe("sisyphus-task", () => {
       const tool = createDelegateTask({
         manager: mockManager,
         client: mockClient,
-        sisyphusJuniorModel: "anthropic/claude-sonnet-4-6",
+        executorModel: "anthropic/claude-sonnet-4-6",
         connectedProvidersOverride: TEST_CONNECTED_PROVIDERS,
         availableModelsOverride: createTestAvailableModels(),
       })
@@ -2525,7 +2525,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2541,12 +2541,12 @@ describe("sisyphus-task", () => {
         toolContext
       )
 
-      // then - sisyphus-junior override model should be used, not category default
+      // then - executor override model should be used, not category default
       expect(launchInput.model.providerID).toBe("anthropic")
       expect(launchInput.model.modelID).toBe("claude-sonnet-4-6")
     })
 
-    test("sisyphus-junior model override works with user-defined category (#1295)", async () => {
+    test("executor model override works with user-defined category (#1295)", async () => {
       // given - user has a custom category with no model requirement
       const { createDelegateTask } = require("./tools")
       let launchInput: any
@@ -2558,7 +2558,7 @@ describe("sisyphus-task", () => {
             id: "task-1295-custom",
             sessionID: "ses_1295_custom",
             description: "Issue 1295 custom category",
-            agent: "sisyphus-junior",
+            agent: "executor",
             status: "running",
           }
         },
@@ -2578,7 +2578,7 @@ describe("sisyphus-task", () => {
       const tool = createDelegateTask({
         manager: mockManager,
         client: mockClient,
-        sisyphusJuniorModel: "openai/gpt-5.4",
+        executorModel: "openai/gpt-5.4",
         userCategories: {
           "my-custom": { temperature: 0.5 },
         },
@@ -2587,7 +2587,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2603,7 +2603,7 @@ describe("sisyphus-task", () => {
         toolContext
       )
 
-      // then - sisyphus-junior override model should be used as fallback
+      // then - executor override model should be used as fallback
       expect(launchInput.model.providerID).toBe("openai")
       expect(launchInput.model.modelID).toBe("gpt-5.4")
     })
@@ -2647,7 +2647,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2702,7 +2702,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3179,7 +3179,7 @@ describe("sisyphus-task", () => {
       expect(result).toContain("plan-family")
     })
 
-    test("sisyphus CAN delegate to plan (not in plan family)", async () => {
+    test("orchestrator CAN delegate to plan (not in plan family)", async () => {
       //#given
       const { createDelegateTask } = require("./tools")
       const mockClient = {
@@ -3199,7 +3199,7 @@ describe("sisyphus-task", () => {
       //#when
       const result = await tool.execute(
         { description: "test", prompt: "Create a plan", subagent_type: "plan", run_in_background: false, load_skills: [] },
-        { sessionID: "p", messageID: "m", agent: "sisyphus", abort: new AbortController().signal }
+        { sessionID: "p", messageID: "m", agent: "orchestrator", abort: new AbortController().signal }
       )
       
       //#then
@@ -3252,7 +3252,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3316,7 +3316,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3380,7 +3380,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3444,7 +3444,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3511,7 +3511,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3575,7 +3575,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3602,7 +3602,7 @@ describe("sisyphus-task", () => {
 
   describe("subagent task permission", () => {
     test("plan subagent should have task permission enabled", async () => {
-      //#given - sisyphus delegates to plan agent
+      //#given - orchestrator delegates to plan agent
       const { createDelegateTask } = require("./tools")
       let promptBody: any
       
@@ -3636,11 +3636,11 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
-      //#when - sisyphus delegates to plan
+      //#when - orchestrator delegates to plan
       await tool.execute(
         {
           description: "Test plan task permission",
@@ -3678,7 +3678,7 @@ describe("sisyphus-task", () => {
       //#when
       await tool.execute(
         { description: "Test prometheus task permission", prompt: "Create a plan", subagent_type: "prometheus", run_in_background: false, load_skills: [] },
-        { sessionID: "p", messageID: "m", agent: "sisyphus", abort: new AbortController().signal }
+        { sessionID: "p", messageID: "m", agent: "orchestrator", abort: new AbortController().signal }
       )
       
       //#then
@@ -3686,7 +3686,7 @@ describe("sisyphus-task", () => {
     }, { timeout: 20000 })
 
     test("non-plan subagent should NOT have task permission", async () => {
-      //#given - sisyphus delegates to oracle (non-plan)
+      //#given - orchestrator delegates to oracle (non-plan)
       const { createDelegateTask } = require("./tools")
       let promptBody: any
       
@@ -3720,11 +3720,11 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
-      // when - sisyphus delegates to oracle
+      // when - orchestrator delegates to oracle
       await tool.execute(
         {
           description: "Test oracle no task permission",
@@ -3775,7 +3775,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3824,7 +3824,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3855,7 +3855,7 @@ describe("sisyphus-task", () => {
           id: "bg_meta_test",
           sessionID: "ses_bg_metadata",
           description: "Background metadata test",
-          agent: "sisyphus-junior",
+          agent: "executor",
           status: "running",
         }),
       }
@@ -3875,14 +3875,14 @@ describe("sisyphus-task", () => {
          manager: mockManager,
          client: mockClient,
          userCategories: {
-           "sisyphus-junior": { model: "anthropic/claude-sonnet-4-6" },
+           "executor": { model: "anthropic/claude-sonnet-4-6" },
          },
        })
 
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 

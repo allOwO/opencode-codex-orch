@@ -6,7 +6,7 @@ import type { z } from "zod"
 import type { OpenCodeCodexOrchConfig } from "../../config/schema"
 
 export function getTaskDir(config: Partial<OpenCodeCodexOrchConfig> = {}): string {
-  const tasksConfig = config.sisyphus?.tasks
+  const tasksConfig = config.orchestrator?.tasks
   const storagePath = tasksConfig?.storage_path
 
   if (storagePath) {
@@ -29,7 +29,7 @@ export function resolveTaskListId(config: Partial<OpenCodeCodexOrchConfig> = {})
   const claudeEnvId = process.env.CLAUDE_CODE_TASK_LIST_ID?.trim()
   if (claudeEnvId) return sanitizePathSegment(claudeEnvId)
 
-  const configId = config.sisyphus?.tasks?.task_list_id?.trim()
+  const configId = config.orchestrator?.tasks?.task_list_id?.trim()
   if (configId) return sanitizePathSegment(configId)
 
   return sanitizePathSegment(basename(process.cwd()))

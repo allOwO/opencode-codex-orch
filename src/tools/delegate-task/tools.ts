@@ -6,7 +6,7 @@ import type {
   DelegateTaskToolOptions,
 } from "./types"
 import { CATEGORY_DESCRIPTIONS } from "./constants"
-import { SISYPHUS_JUNIOR_AGENT } from "./sisyphus-junior-agent"
+import { EXECUTOR_AGENT } from "./executor-agent"
 import { mergeCategories } from "../../shared/merge-categories"
 import { log } from "../../shared/logger"
 import { buildSystemContent } from "./prompt-builder"
@@ -78,16 +78,16 @@ export function createDelegateTask(options: DelegateTaskToolOptions): ToolDefini
   \`\`\`
   
   REQUIRED: Provide ONE of:
-  - category: For task delegation (uses Sisyphus-Junior with category-optimized model)
+  - category: For task delegation (uses Executor with category-optimized model)
   - subagent_type: For direct agent invocation (explore, librarian, oracle, etc.)
   
   **DO NOT provide both.** If category is provided, subagent_type is ignored.
   
   - load_skills: ALWAYS REQUIRED. Pass [] if no skills needed, or ["skill-1", "skill-2"] for category tasks.
-  - category: Use predefined category → Spawns Sisyphus-Junior with category config
+  - category: Use predefined category → Spawns Executor with category config
     Available categories:
   ${categoryList}
-  - subagent_type: Use specific agent directly (explore, librarian, oracle, metis, momus)
+- subagent_type: Use specific agent directly (explore, librarian, oracle, metis, reviewer)
   - run_in_background: true=async (returns task_id), false=sync (waits). Default: false. Use background=true ONLY for parallel exploration with 5+ independent queries.
   - session_id: Existing Task session to continue (from previous task output). Continues agent with FULL CONTEXT PRESERVED - saves tokens, maintains continuity.
   - command: The command that triggered this task (optional, for slash command tracking).
@@ -115,13 +115,13 @@ export function createDelegateTask(options: DelegateTaskToolOptions): ToolDefini
       const ctx = toolContext as ToolContextWithMetadata
 
       if (args.category) {
-        if (args.subagent_type && args.subagent_type !== SISYPHUS_JUNIOR_AGENT) {
-          log("[task] category provided - overriding subagent_type to sisyphus-junior", {
+        if (args.subagent_type && args.subagent_type !== EXECUTOR_AGENT) {
+          log("[task] category provided - overriding subagent_type to executor", {
             category: args.category,
             subagent_type: args.subagent_type,
           })
         }
-        args.subagent_type = SISYPHUS_JUNIOR_AGENT
+        args.subagent_type = EXECUTOR_AGENT
       }
       await ctx.metadata?.({
         title: args.description,

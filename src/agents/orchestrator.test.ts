@@ -6,7 +6,7 @@ import type {
 	AvailableCategory,
 	AvailableSkill,
 } from "./dynamic-agent-prompt-builder";
-import { createSisyphusAgent } from "./sisyphus";
+import { createOrchestratorAgent } from "./orchestrator";
 
 function createAgent(name: string): AvailableAgent {
 	return {
@@ -40,9 +40,9 @@ function createCategory(name: string): AvailableCategory {
 	};
 }
 
-describe("createSisyphusAgent fallback prompt", () => {
+describe("createOrchestratorAgent fallback prompt", () => {
 	it("falls back cleanly to repo-native research guidance when research agents are unavailable", () => {
-		const result = createSisyphusAgent("anthropic/claude-sonnet-4-6");
+		const result = createOrchestratorAgent("anthropic/claude-sonnet-4-6");
 		const prompt = result.prompt ?? "";
 
 		expect(prompt).toContain("repo-native tools → synthesize → answer");
@@ -55,7 +55,7 @@ describe("createSisyphusAgent fallback prompt", () => {
 
 	it("keeps strong explore and librarian guidance when both agents are available", () => {
 		const agents = [createAgent("explore"), createAgent("librarian")];
-		const result = createSisyphusAgent("anthropic/claude-sonnet-4-6", agents);
+		const result = createOrchestratorAgent("anthropic/claude-sonnet-4-6", agents);
 		const prompt = result.prompt ?? "";
 
 		expect(prompt).toContain("explore/librarian → synthesize → answer");
@@ -66,26 +66,26 @@ describe("createSisyphusAgent fallback prompt", () => {
 	});
 
 	it("routes provider-based Kimi models to dedicated Kimi prompt branch", () => {
-		const result = createSisyphusAgent("kimi-for-coding/k2p5");
+		const result = createOrchestratorAgent("kimi-for-coding/k2p5");
 		const prompt = result.prompt ?? "";
 
 		expect(prompt).toContain("You are operating as a specialized subagent on a Kimi model.");
-		expect(prompt).not.toContain("Sisyphus Kimi orchestration profile");
+		expect(prompt).not.toContain("Orchestrator Kimi orchestration profile");
 		expect(prompt).toContain("<Role>");
 	});
 
 	it("routes model-based Kimi models to dedicated Kimi prompt branch", () => {
-		const result = createSisyphusAgent("opencode/kimi-k2.5-free");
+		const result = createOrchestratorAgent("opencode/kimi-k2.5-free");
 		const prompt = result.prompt ?? "";
 
 		expect(prompt).toContain("You are operating as a specialized subagent on a Kimi model.");
-		expect(prompt).not.toContain("Sisyphus Kimi orchestration profile");
+		expect(prompt).not.toContain("Orchestrator Kimi orchestration profile");
 		expect(prompt).toContain("<Role>");
 	});
 
 	it("preserves dynamic research-agent orchestration guidance in Kimi branch", () => {
 		const agents = [createAgent("explore"), createAgent("librarian")];
-		const result = createSisyphusAgent("kimi-for-coding/k2p5", agents);
+		const result = createOrchestratorAgent("kimi-for-coding/k2p5", agents);
 		const prompt = result.prompt ?? "";
 
 		expect(prompt).toContain("explore/librarian → synthesize → answer");
@@ -99,7 +99,7 @@ describe("createSisyphusAgent fallback prompt", () => {
 			createSkill("my-project-skill", "project"),
 		];
 		const categories: AvailableCategory[] = [createCategory("deep")];
-		const result = createSisyphusAgent(
+		const result = createOrchestratorAgent(
 			"kimi-for-coding/k2p5",
 			[],
 			[],

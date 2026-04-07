@@ -1,8 +1,8 @@
-import { describe, expect, test } from "bun:test"
 import type { AgentConfig } from "@opencode-ai/sdk"
+import { describe, expect, test } from "bun:test"
 
-import { collectPendingBuiltinAgents } from "./general-agents"
 import type { AgentFactory, AgentPromptMetadata, BuiltinAgentName } from "../types"
+import { collectPendingBuiltinAgents } from "./general-agents"
 
 function createSubagentFactory(description: string): AgentFactory {
   const factory = ((model: string) => ({
@@ -15,20 +15,19 @@ function createSubagentFactory(description: string): AgentFactory {
   return factory
 }
 
-function createAgentSources(): Record<BuiltinAgentName, AgentFactory | AgentConfig> {
+function createAgentSources(): Partial<Record<BuiltinAgentName, AgentFactory | AgentConfig>> {
   return {
-    sisyphus: createSubagentFactory("orchestrator"),
     oracle: createSubagentFactory("oracle"),
     librarian: createSubagentFactory("librarian"),
     explore: createSubagentFactory("explore"),
     deepsearch: createSubagentFactory("deepsearch"),
-    momus: createSubagentFactory("reviewer"),
+    reviewer: createSubagentFactory("reviewer"),
   }
 }
 
 function createAgentMetadata(): Partial<Record<BuiltinAgentName, AgentPromptMetadata>> {
   return {
-    momus: {
+    reviewer: {
       category: "advisor",
       cost: "CHEAP",
       triggers: [],
@@ -53,9 +52,7 @@ describe("collectPendingBuiltinAgents", () => {
     })
 
     expect(result.pendingAgentConfigs.has("reviewer")).toBe(false)
-    expect(result.pendingAgentConfigs.has("momus")).toBe(false)
     expect(result.availableAgents.some((agent) => agent.name === "reviewer")).toBe(false)
-    expect(result.availableAgents.some((agent) => agent.name === "momus")).toBe(false)
   })
 
   test("publishes reviewer under its canonical runtime name", () => {
@@ -74,9 +71,7 @@ describe("collectPendingBuiltinAgents", () => {
     })
 
     expect(result.pendingAgentConfigs.has("reviewer")).toBe(true)
-    expect(result.pendingAgentConfigs.has("momus")).toBe(false)
     expect(result.pendingAgentConfigs.get("reviewer")?.description).toBe("Configured reviewer")
     expect(result.availableAgents.some((agent) => agent.name === "reviewer")).toBe(true)
-    expect(result.availableAgents.some((agent) => agent.name === "momus")).toBe(false)
   })
 })

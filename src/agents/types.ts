@@ -2,7 +2,7 @@ import type { AgentConfig } from "@opencode-ai/sdk";
 
 /**
  * Agent mode determines UI model selection behavior:
- * - "primary": Respects user's UI-selected model (sisyphus/orchestrator)
+ * - "primary": Respects user's UI-selected model (orchestrator)
  * - "subagent": Uses own fallback chain, ignores UI selection (oracle, explore, etc.)
  * - "all": Available in both contexts (OpenCode compatibility)
  */
@@ -115,14 +115,6 @@ export function isKimiModel(model?: string): boolean {
 }
 
 export type BuiltinAgentName =
-  | "sisyphus"
-  | "oracle"
-  | "librarian"
-  | "explore"
-  | "deepsearch"
-  | "momus";
-
-export type CanonicalAgentName =
   | "orchestrator"
   | "oracle"
   | "librarian"
@@ -131,7 +123,9 @@ export type CanonicalAgentName =
   | "reviewer"
   | "executor";
 
-export type OverridableAgentName = "build" | BuiltinAgentName | CanonicalAgentName;
+export type CanonicalAgentName = BuiltinAgentName;
+
+export type OverridableAgentName = "build" | BuiltinAgentName;
 
 export type AgentName = CanonicalAgentName;
 

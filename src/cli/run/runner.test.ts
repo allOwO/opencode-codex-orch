@@ -48,7 +48,7 @@ describe("resolveRunAgent", () => {
     expect(agent).toBe("Reviewer")
   })
 
-  it("falls back to sisyphus when none set", () => {
+  it("falls back to orchestrator when none set", () => {
     // given
     const config = createConfig()
 
@@ -59,9 +59,9 @@ describe("resolveRunAgent", () => {
     expect(agent).toBe("Orchestrator")
   })
 
-  it("skips disabled sisyphus for next available core agent", () => {
+  it("skips disabled orchestrator for next available core agent", () => {
     // given
-    const config = createConfig({ disabled_agents: ["sisyphus"] })
+    const config = createConfig({ disabled_agents: ["orchestrator"] })
 
     // when
     const agent = resolveRunAgent({ message: "test" }, config, {})

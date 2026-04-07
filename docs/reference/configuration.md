@@ -117,7 +117,7 @@ Here's a practical starting configuration:
 
 ### Agents
 
-Override built-in agent settings. Available agents: `orchestrator`, `reviewer`, `executor`, `oracle`, `librarian`, `explore`, `deepsearch`, plus internal support agents such as `build` and `plan`. Legacy aliases like `sisyphus`, `momus`, and `sisyphus-junior` are accepted only for migration.
+Override built-in agent settings. Available agents: `orchestrator`, `reviewer`, `executor`, `oracle`, `librarian`, `explore`, `deepsearch`, plus internal support agents such as `build` and `plan`.
 
 ```json
 {
@@ -303,7 +303,7 @@ Configure the main orchestration system.
 | `planner_enabled`         | `false` | Legacy planner compatibility toggle                             |
 | `replace_plan`            | `false` | Legacy plan-agent demotion toggle                               |
 
-> **Note**: `orchestrator_agent` is the canonical config key. Legacy `sisyphus_agent` is migration-only.
+> **Note**: `orchestrator_agent` is the canonical config key.
 
 Orchestrator-related behavior can also be customized under `agents` using canonical names such as `orchestrator`, `reviewer`, `executor`, and `OpenCode-Builder`.
 
@@ -313,7 +313,7 @@ Enable the task system for cross-session task tracking.
 
 ```json
 {
-  "sisyphus": {
+  "orchestrator": {
     "tasks": {
       "enabled": false,
       "storage_path": ".opencode/tasks",
@@ -328,8 +328,6 @@ Enable the task system for cross-session task tracking.
 | `enabled`            | `false`           | Enable task system                         |
 | `storage_path`       | `.opencode/tasks` | Storage path (relative to project root)    |
 | `claude_code_compat` | `false`           | Enable Claude Code path compatibility mode |
-
-> **Migration note**: The legacy path `.sisyphus/tasks` is still readable for backward compatibility.
 
 ---
 

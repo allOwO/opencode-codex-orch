@@ -1,5 +1,5 @@
 /**
- * Sisyphus agent — multi-model orchestrator.
+ * Orchestrator agent — multi-model orchestrator.
  *
  * This directory contains model-specific prompt variants:
  * - default.ts: Shared task/todo management section
@@ -16,4 +16,5 @@ export {
   buildGeminiToolGuide,
   buildGeminiToolCallExamples,
 } from "./gemini";
-export { buildGpt54SisyphusPrompt } from "./gpt-5-4";
+export { buildGpt54OrchestratorPrompt } from "./gpt-5-4";
+export { buildKimiOrchestratorPrompt } from "./kimi";

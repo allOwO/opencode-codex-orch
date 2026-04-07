@@ -50,7 +50,7 @@ describe("writeOcoConfig", () => {
     // given
     const existingConfig = {
       agents: {
-        sisyphus: {
+        orchestrator: {
           model: "custom/provider-model",
         },
       },
@@ -68,7 +68,7 @@ describe("writeOcoConfig", () => {
 
     const savedConfig = JSON.parse(readFileSync(testConfigPath, "utf-8")) as Record<string, unknown>
     const savedAgents = getRecord(savedConfig.agents)
-    const savedSisyphus = getRecord(savedAgents.sisyphus)
+    const savedSisyphus = getRecord(savedAgents.orchestrator)
     expect(savedSisyphus.model).toBe("custom/provider-model")
     expect(savedConfig.disabled_hooks).toEqual(["comment-checker"])
 

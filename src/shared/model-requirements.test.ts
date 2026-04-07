@@ -106,17 +106,17 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(quaternary.model).toBe("gpt-5-nano")
   })
 
-  test("momus has valid fallbackChain with gpt-5.4 as primary", () => {
-    // given - momus agent requirement
-    const momus = AGENT_MODEL_REQUIREMENTS["momus"]
+  test("reviewer has valid fallbackChain with gpt-5.4 as primary", () => {
+    // given - reviewer agent requirement
+    const reviewer = AGENT_MODEL_REQUIREMENTS["reviewer"]
 
     // when - accessing Momus requirement
     // then - fallbackChain exists with gpt-5.4 as first entry, variant xhigh
-    expect(momus).toBeDefined()
-    expect(momus.fallbackChain).toBeArray()
-    expect(momus.fallbackChain.length).toBeGreaterThan(0)
+    expect(reviewer).toBeDefined()
+    expect(reviewer.fallbackChain).toBeArray()
+    expect(reviewer.fallbackChain.length).toBeGreaterThan(0)
 
-    const primary = momus.fallbackChain[0]
+    const primary = reviewer.fallbackChain[0]
     expect(primary.model).toBe("gpt-5.4")
     expect(primary.variant).toBe("xhigh")
     expect(primary.providers[0]).toBe("openai")
@@ -151,12 +151,10 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     // #given - list of builtin agent names
     const expectedAgents = [
       "orchestrator",
-      "sisyphus",
       "deepsearch",
       "oracle",
       "librarian",
       "explore",
-      "momus",
       "reviewer",
     ]
 
@@ -164,7 +162,7 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     const definedAgents = Object.keys(AGENT_MODEL_REQUIREMENTS)
 
     // #then - all agents present with valid fallbackChain
-    expect(definedAgents).toHaveLength(8)
+    expect(definedAgents).toHaveLength(6)
     for (const agent of expectedAgents) {
       const requirement = AGENT_MODEL_REQUIREMENTS[agent]
       expect(requirement).toBeDefined()

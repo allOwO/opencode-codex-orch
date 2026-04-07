@@ -46,9 +46,9 @@ describe("isCompactionAgent", () => {
       expect(result).toBe(false)
     })
 
-    test("returns false for non-compaction agent like 'sisyphus'", () => {
+    test("returns false for non-compaction agent like 'orchestrator'", () => {
       // when
-      const result = isCompactionAgent("sisyphus")
+      const result = isCompactionAgent("orchestrator")
 
       // then
       expect(result).toBe(false)
@@ -71,7 +71,7 @@ describe("findNearestMessageExcludingCompaction", () => {
     test("finds message with full agent and model", () => {
       // given
       const message = {
-        agent: "sisyphus",
+        agent: "orchestrator",
         model: { providerID: "anthropic", modelID: "claude-opus-4-6" },
       }
       writeFileSync(join(tempDir, "001.json"), JSON.stringify(message))
@@ -81,7 +81,7 @@ describe("findNearestMessageExcludingCompaction", () => {
 
       // then
       expect(result).not.toBeNull()
-      expect(result?.agent).toBe("sisyphus")
+      expect(result?.agent).toBe("orchestrator")
       expect(result?.model?.providerID).toBe("anthropic")
       expect(result?.model?.modelID).toBe("claude-opus-4-6")
     })
@@ -93,7 +93,7 @@ describe("findNearestMessageExcludingCompaction", () => {
         model: { providerID: "anthropic", modelID: "claude-opus-4-6" },
       }
       const validMessage = {
-        agent: "sisyphus",
+        agent: "orchestrator",
         model: { providerID: "anthropic", modelID: "claude-opus-4-6" },
       }
       writeFileSync(join(tempDir, "002.json"), JSON.stringify(compactionMessage))
@@ -104,13 +104,13 @@ describe("findNearestMessageExcludingCompaction", () => {
 
       // then
       expect(result).not.toBeNull()
-      expect(result?.agent).toBe("sisyphus")
+      expect(result?.agent).toBe("orchestrator")
     })
 
     test("falls back to partial agent/model match", () => {
       // given
       const messageWithAgentOnly = {
-        agent: "sisyphus",
+        agent: "orchestrator",
       }
       const messageWithModelOnly = {
         model: { providerID: "openai", modelID: "gpt-5.3" },
@@ -124,7 +124,7 @@ describe("findNearestMessageExcludingCompaction", () => {
       // then
       expect(result).not.toBeNull()
       // Should find the one with agent first (sorted reverse, so 002 is checked first)
-      expect(result?.agent).toBe("sisyphus")
+      expect(result?.agent).toBe("orchestrator")
     })
 
     test("returns null for empty directory", () => {

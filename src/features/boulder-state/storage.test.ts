@@ -16,15 +16,14 @@ import type { BoulderState } from "./types"
 
 describe("boulder-state", () => {
   const TEST_DIR = join(tmpdir(), "boulder-state-test-" + Date.now())
-  const SISYPHUS_DIR = join(TEST_DIR, ".sisyphus")
   const OPENCODE_DIR = join(TEST_DIR, ".opencode")
 
   beforeEach(() => {
     if (!existsSync(TEST_DIR)) {
       mkdirSync(TEST_DIR, { recursive: true })
     }
-    if (!existsSync(SISYPHUS_DIR)) {
-      mkdirSync(SISYPHUS_DIR, { recursive: true })
+    if (!existsSync(OPENCODE_DIR)) {
+      mkdirSync(OPENCODE_DIR, { recursive: true })
     }
     clearBoulderState(TEST_DIR)
   })
@@ -46,7 +45,7 @@ describe("boulder-state", () => {
 
     test("should return null for JSON null value", () => {
       //#given - boulder.json containing null
-      const boulderFile = join(SISYPHUS_DIR, "boulder.json")
+      const boulderFile = join(OPENCODE_DIR, "boulder.json")
       writeFileSync(boulderFile, "null")
 
       //#when
@@ -58,7 +57,7 @@ describe("boulder-state", () => {
 
     test("should return null for JSON primitive value", () => {
       //#given - boulder.json containing a string
-      const boulderFile = join(SISYPHUS_DIR, "boulder.json")
+      const boulderFile = join(OPENCODE_DIR, "boulder.json")
       writeFileSync(boulderFile, '"just a string"')
 
       //#when
@@ -70,7 +69,7 @@ describe("boulder-state", () => {
 
     test("should default session_ids to [] when missing from JSON", () => {
       //#given - boulder.json without session_ids field
-      const boulderFile = join(SISYPHUS_DIR, "boulder.json")
+      const boulderFile = join(OPENCODE_DIR, "boulder.json")
       writeFileSync(boulderFile, JSON.stringify({
         active_plan: "/path/to/plan.md",
         started_at: "2026-01-01T00:00:00Z",
@@ -87,7 +86,7 @@ describe("boulder-state", () => {
 
     test("should default session_ids to [] when not an array", () => {
       //#given - boulder.json with session_ids as a string
-      const boulderFile = join(SISYPHUS_DIR, "boulder.json")
+      const boulderFile = join(OPENCODE_DIR, "boulder.json")
       writeFileSync(boulderFile, JSON.stringify({
         active_plan: "/path/to/plan.md",
         started_at: "2026-01-01T00:00:00Z",
@@ -105,7 +104,7 @@ describe("boulder-state", () => {
 
     test("should default session_ids to [] for empty object", () => {
       //#given - boulder.json with empty object
-      const boulderFile = join(SISYPHUS_DIR, "boulder.json")
+      const boulderFile = join(OPENCODE_DIR, "boulder.json")
       writeFileSync(boulderFile, JSON.stringify({}))
 
       //#when
@@ -160,22 +159,22 @@ describe("boulder-state", () => {
   })
 
   describe("legacy path compatibility", () => {
-    test("reads legacy .sisyphus boulder state when canonical file is absent", () => {
-      const boulderFile = join(SISYPHUS_DIR, "boulder.json")
+    test("reads canonical .opencode boulder state when present", () => {
+      const boulderFile = join(OPENCODE_DIR, "boulder.json")
       writeFileSync(
         boulderFile,
         JSON.stringify({
-          active_plan: "/path/to/legacy-plan.md",
+          active_plan: "/path/to/canonical-plan.md",
           started_at: "2026-01-02T10:00:00Z",
-          session_ids: ["legacy-session"],
-          plan_name: "legacy-plan",
+          session_ids: ["canonical-session"],
+          plan_name: "canonical-plan",
         })
       )
 
       const result = readBoulderState(TEST_DIR)
 
-      expect(result?.active_plan).toBe("/path/to/legacy-plan.md")
-      expect(result?.session_ids).toEqual(["legacy-session"])
+      expect(result?.active_plan).toBe("/path/to/canonical-plan.md")
+      expect(result?.session_ids).toEqual(["canonical-session"])
     })
   })
 
@@ -226,7 +225,7 @@ describe("boulder-state", () => {
 
     test("should not crash when boulder.json has no session_ids field", () => {
       //#given - boulder.json without session_ids
-      const boulderFile = join(SISYPHUS_DIR, "boulder.json")
+      const boulderFile = join(OPENCODE_DIR, "boulder.json")
       writeFileSync(boulderFile, JSON.stringify({
         active_plan: "/plan.md",
         started_at: "2026-01-01T00:00:00Z",
@@ -399,7 +398,7 @@ describe("boulder-state", () => {
   describe("getPlanName", () => {
     test("should extract plan name from path", () => {
       // given
-      const path = "/home/user/.sisyphus/plans/project/my-feature.md"
+      const path = "/home/user/.opencode/plans/project/my-feature.md"
       // when
       const name = getPlanName(path)
       // then

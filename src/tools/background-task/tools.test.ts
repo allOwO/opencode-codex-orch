@@ -91,13 +91,13 @@ describe("background_output full_session", () => {
 		expect(restored?.title).toBe("explore - Find how task output is rendered");
 	});
 
-	test("shows category instead of agent for sisyphus-junior", async () => {
+	test("shows category instead of agent for executor", async () => {
 		// #given
 		clearPendingStore();
 
 		const task = createTask({
 			id: "task-1",
-			agent: "Sisyphus-Junior",
+			agent: "Executor",
 			category: "quick",
 			description: "Fix flaky test",
 			status: "running",

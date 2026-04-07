@@ -44,7 +44,7 @@ runner.ts
 1. --agent CLI flag
 2. OPENCODE_AGENT environment variable
 3. default_run_agent config
-4. "sisyphus" (default)
+4. "orchestrator" (default)
 ```
 
 ## COMPLETION DETECTION

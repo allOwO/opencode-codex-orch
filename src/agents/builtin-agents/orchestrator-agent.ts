@@ -6,9 +6,9 @@ import { AGENT_MODEL_REQUIREMENTS, isAnyFallbackModelAvailable } from "../../sha
 import { applyEnvironmentContext } from "./environment-context"
 import { applyOverrides } from "./agent-overrides"
 import { applyModelResolution, getFirstFallbackModel } from "./model-resolution"
-import { createSisyphusAgent } from "../sisyphus"
+import { createOrchestratorAgent } from "../orchestrator"
 
-export function maybeCreateSisyphusConfig(input: {
+export function maybeCreateOrchestratorConfig(input: {
   disabledAgents: string[]
   agentOverrides: AgentOverrides
   uiSelectedModel?: string
@@ -40,39 +40,39 @@ export function maybeCreateSisyphusConfig(input: {
     disableOcoEnv = false,
   } = input
 
-  const sisyphusOverride = agentOverrides["orchestrator"] ?? agentOverrides["sisyphus"]
-  const sisyphusRequirement = AGENT_MODEL_REQUIREMENTS["orchestrator"] ?? AGENT_MODEL_REQUIREMENTS["sisyphus"]
-  const hasSisyphusExplicitConfig = sisyphusOverride !== undefined
-  const meetsSisyphusAnyModelRequirement =
-    !sisyphusRequirement?.requiresAnyModel ||
-    hasSisyphusExplicitConfig ||
+  const orchestratorOverride = agentOverrides.orchestrator
+  const orchestratorRequirement = AGENT_MODEL_REQUIREMENTS.orchestrator
+  const hasOrchestratorExplicitConfig = orchestratorOverride !== undefined
+  const meetsOrchestratorAnyModelRequirement =
+    !orchestratorRequirement?.requiresAnyModel ||
+    hasOrchestratorExplicitConfig ||
     isFirstRunNoCache ||
-    isAnyFallbackModelAvailable(sisyphusRequirement.fallbackChain, availableModels)
+    isAnyFallbackModelAvailable(orchestratorRequirement.fallbackChain, availableModels)
 
   if (
     disabledAgents.some((name) => {
       const lowered = name.toLowerCase()
-      return lowered === "sisyphus" || lowered === "orchestrator"
-    }) || !meetsSisyphusAnyModelRequirement
+      return lowered === "orchestrator"
+    }) || !meetsOrchestratorAnyModelRequirement
   ) return undefined
 
-  let sisyphusResolution = applyModelResolution({
-    uiSelectedModel: sisyphusOverride?.model ? undefined : uiSelectedModel,
-    userModel: sisyphusOverride?.model,
-    requirement: sisyphusRequirement,
+  let orchestratorResolution = applyModelResolution({
+    uiSelectedModel: orchestratorOverride?.model ? undefined : uiSelectedModel,
+    userModel: orchestratorOverride?.model,
+    requirement: orchestratorRequirement,
     availableModels,
     systemDefaultModel,
   })
 
-  if (isFirstRunNoCache && !sisyphusOverride?.model && !uiSelectedModel) {
-    sisyphusResolution = getFirstFallbackModel(sisyphusRequirement)
+  if (isFirstRunNoCache && !orchestratorOverride?.model && !uiSelectedModel) {
+    orchestratorResolution = getFirstFallbackModel(orchestratorRequirement)
   }
 
-  if (!sisyphusResolution) return undefined
-  const { model: sisyphusModel, variant: sisyphusResolvedVariant } = sisyphusResolution
+  if (!orchestratorResolution) return undefined
+  const { model: orchestratorModel, variant: orchestratorResolvedVariant } = orchestratorResolution
 
-  let sisyphusConfig = createSisyphusAgent(
-    sisyphusModel,
+  let orchestratorConfig = createOrchestratorAgent(
+    orchestratorModel,
     availableAgents,
     undefined,
     availableSkills,
@@ -80,14 +80,14 @@ export function maybeCreateSisyphusConfig(input: {
     useTaskSystem
   )
 
-  if (sisyphusResolvedVariant) {
-    sisyphusConfig = { ...sisyphusConfig, variant: sisyphusResolvedVariant }
+  if (orchestratorResolvedVariant) {
+    orchestratorConfig = { ...orchestratorConfig, variant: orchestratorResolvedVariant }
   }
 
-  sisyphusConfig = applyOverrides(sisyphusConfig, sisyphusOverride, mergedCategories, directory)
-  sisyphusConfig = applyEnvironmentContext(sisyphusConfig, directory, {
+  orchestratorConfig = applyOverrides(orchestratorConfig, orchestratorOverride, mergedCategories, directory)
+  orchestratorConfig = applyEnvironmentContext(orchestratorConfig, directory, {
     disableOcoEnv,
   })
 
-  return sisyphusConfig
+  return orchestratorConfig
 }

@@ -1,5 +1,5 @@
 /**
- * Default Sisyphus-Junior system prompt optimized for Claude series models.
+ * Default Executor system prompt optimized for Claude series models.
  *
  * Key characteristics:
  * - Optimized for Claude's tendency to be "helpful" by forcing explicit constraints
@@ -9,7 +9,7 @@
 
 import { resolvePromptAppend } from "../builtin-agents/resolve-file-uri"
 
-export function buildDefaultSisyphusJuniorPrompt(
+export function buildDefaultExecutorPrompt(
   useTaskSystem: boolean,
   promptAppend?: string
 ): string {
@@ -19,7 +19,7 @@ export function buildDefaultSisyphusJuniorPrompt(
     : "All todos marked completed"
 
   const prompt = `<Role>
-Sisyphus-Junior - Focused executor from opencode-codex-orch.
+Executor - Focused executor from opencode-codex-orch.
 Execute tasks directly.
 </Role>
 

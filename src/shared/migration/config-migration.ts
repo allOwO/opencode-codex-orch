@@ -131,14 +131,6 @@ export function migrateConfigFile(
     needsWrite = true
   }
 
-  const legacyOrchestratorAgentConfig = copy.orchestrator_agent ?? copy.sisyphus_agent ?? copy.omo_agent
-  if (legacyOrchestratorAgentConfig) {
-    copy.orchestrator_agent = legacyOrchestratorAgentConfig
-    delete copy.sisyphus_agent
-    delete copy.omo_agent
-    needsWrite = true
-  }
-
   if (copy.experimental && typeof copy.experimental === "object") {
     const experimental = copy.experimental as Record<string, unknown>
     if ("hashline_edit" in experimental) {

@@ -27,7 +27,7 @@ export function createToolExecuteBeforeHandler(args: {
     await hooks.rulesInjector?.["tool.execute.before"]?.(input, output)
     await hooks.tasksTodowriteDisabler?.["tool.execute.before"]?.(input, output)
     await hooks.prometheusMdOnly?.["tool.execute.before"]?.(input, output)
-    await hooks.sisyphusJuniorNotepad?.["tool.execute.before"]?.(input, output)
+    await hooks.executorNotepad?.["tool.execute.before"]?.(input, output)
     await hooks.atlasHook?.["tool.execute.before"]?.(input, output)
 
     const normalizedToolName = input.tool.toLowerCase()
@@ -56,7 +56,7 @@ export function createToolExecuteBeforeHandler(args: {
       const sessionId = typeof argsObject.session_id === "string" ? argsObject.session_id : undefined
 
       if (category) {
-        argsObject.subagent_type = "sisyphus-junior"
+        argsObject.subagent_type = "executor"
       } else if (!subagentType && sessionId) {
         const resolvedAgent = await resolveSessionAgent(ctx.client, sessionId)
         argsObject.subagent_type = resolvedAgent ?? "continue"

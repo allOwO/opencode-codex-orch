@@ -29,7 +29,7 @@ describe("BackgroundManager model settings propagation", () => {
     await manager.launch({
       description: "settings launch",
       prompt: "test",
-      agent: "sisyphus-junior",
+      agent: "executor",
       parentSessionID: "ses_parent",
       parentMessageID: "msg_parent",
       model: {
@@ -88,11 +88,11 @@ describe("BackgroundManager model settings propagation", () => {
       parentMessageID: "msg_parent",
       description: "settings resume",
       prompt: "old",
-      agent: "sisyphus-junior",
+      agent: "executor",
       status: "completed",
       startedAt: new Date(),
       completedAt: new Date(),
-      concurrencyGroup: "sisyphus-junior",
+      concurrencyGroup: "executor",
       model: {
         providerID: "openai",
         modelID: "gpt-5.3-codex",

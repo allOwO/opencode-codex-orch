@@ -281,9 +281,9 @@ Approve by default. Max 3 issues. Be specific — "Task X needs Y" not "needs mo
 Response language: match the language of the plan content.
 </final_rules>`;
 
-export { MOMUS_DEFAULT_PROMPT as MOMUS_SYSTEM_PROMPT };
+export { MOMUS_DEFAULT_PROMPT as REVIEWER_SYSTEM_PROMPT };
 
-export function createMomusAgent(model: string): AgentConfig {
+export function createReviewerAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions([
     "write",
     "edit",
@@ -299,7 +299,7 @@ export function createMomusAgent(model: string): AgentConfig {
 
   const base = {
     description:
-      "Expert reviewer for evaluating work plans against rigorous clarity, verifiability, and completeness standards. (Momus - opencode-codex-orch)",
+      "Expert reviewer for evaluating work plans against rigorous clarity, verifiability, and completeness standards. (Reviewer - opencode-codex-orch)",
     mode: MODE,
     model,
     temperature: 0.1,
@@ -320,12 +320,12 @@ export function createMomusAgent(model: string): AgentConfig {
     thinking: { type: "enabled", budgetTokens: 32000 },
   } as AgentConfig;
 }
-createMomusAgent.mode = MODE;
+createReviewerAgent.mode = MODE;
 
-export const momusPromptMetadata: AgentPromptMetadata = {
+export const reviewerPromptMetadata: AgentPromptMetadata = {
   category: "advisor",
   cost: "EXPENSIVE",
-  promptAlias: "Momus",
+  promptAlias: "Reviewer",
   triggers: [
     {
       domain: "Plan review",
@@ -349,5 +349,5 @@ export const momusPromptMetadata: AgentPromptMetadata = {
     "When user explicitly wants to skip review",
     "For trivial plans that don't need formal review",
   ],
-  keyTrigger: "Work plan created → invoke Momus for review before execution",
+  keyTrigger: "Work plan created → invoke Reviewer for review before execution",
 };

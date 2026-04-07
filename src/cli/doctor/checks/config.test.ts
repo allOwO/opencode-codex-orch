@@ -123,7 +123,7 @@ describe("config check", () => {
         valid: true,
         config: {
           agents: {
-            sisyphus: { model: "volcengine-ark-api/kimi-k2.5" },
+            orchestrator: { model: "volcengine-ark-api/kimi-k2.5" },
           },
           categories: {
             writing: { model: "baishan-cloud/GLM-5" },
@@ -133,7 +133,7 @@ describe("config check", () => {
       })
 
       mockGetModelResolutionInfoWithOverrides.mockReturnValue({
-        agents: [{ name: "sisyphus", userOverride: "volcengine-ark-api/kimi-k2.5" }],
+        agents: [{ name: "orchestrator", userOverride: "volcengine-ark-api/kimi-k2.5" }],
         categories: [{ name: "writing", userOverride: "baishan-cloud/GLM-5" }],
       })
 

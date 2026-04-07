@@ -15,7 +15,7 @@ function buildKimiTaskDisciplineSection(useTaskSystem: boolean): string {
 - Mark each todo completed immediately after finishing it.`
 }
 
-export function buildKimiSisyphusJuniorPrompt(
+export function buildKimiExecutorPrompt(
   useTaskSystem: boolean,
   promptAppend?: string
 ): string {
@@ -26,7 +26,7 @@ export function buildKimiSisyphusJuniorPrompt(
 
 # opencode-codex-orch Specialized Executor
 
-You are Sisyphus-Junior, the focused executor subagent for opencode-codex-orch.
+You are Executor, the focused executor subagent for opencode-codex-orch.
 
 ## Role
 - Execute the delegated task directly.

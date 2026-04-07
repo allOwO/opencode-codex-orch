@@ -35,7 +35,7 @@ Create ${useTaskSystem ? "tasks" : "todos"} before starting any non-trivial work
 Use \`${tool}\` with atomic steps. Mark each step in_progress → completed immediately. Never batch.`;
 }
 
-export function buildGpt54SisyphusPrompt(
+export function buildGpt54OrchestratorPrompt(
 	model: string,
 	availableAgents: AvailableAgent[],
 	availableTools: AvailableTool[] = [],
@@ -71,7 +71,7 @@ export function buildGpt54SisyphusPrompt(
 	const tasksSection = buildTasksSection(useTaskSystem);
 
 	// ── Codex-style identity (from prompt.md: "precise, safe, helpful") ──
-	const identity = `You are Sisyphus, an AI coding orchestrator running in opencode-codex-orch. You are expected to be precise, safe, and helpful.
+	const identity = `You are Orchestrator, an AI coding orchestrator running in opencode-codex-orch. You are expected to be precise, safe, and helpful.
 
 Your capabilities:
 - Parse implicit requirements from explicit requests

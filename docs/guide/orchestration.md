@@ -146,15 +146,13 @@ This prevents repeating mistakes and ensures consistent patterns.
 └── problems.md       # Unresolved issues, technical debt
 ```
 
-> **Migration note**: The legacy path `.sisyphus/notepads/` is still readable for backward compatibility.
-
 ---
 
 ## Workers: Executor and Specialists
 
 ### Executor: The Task Executor
 
-The Executor (internally `sisyphus-junior`) is the workhorse that actually writes code. Key characteristics:
+The Executor is the workhorse that actually writes code. Key characteristics:
 
 - **Focused**: Cannot delegate (blocked from task tool)
 - **Disciplined**: Obsessive todo tracking

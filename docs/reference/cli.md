@@ -248,7 +248,7 @@ Plugin config files use strict JSON. Comments and trailing commas are rejected. 
 }
 ```
 
-> **Note**: The canonical config key is `orchestrator_agent`. Legacy `sisyphus_agent` is still migrated for compatibility.
+> **Note**: The canonical config key is `orchestrator_agent`.
 
 ---
 

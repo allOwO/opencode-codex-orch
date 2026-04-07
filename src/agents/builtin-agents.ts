@@ -1,55 +1,44 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
-import type { BuiltinAgentName, AgentOverrides, AgentFactory, AgentPromptMetadata } from "./types"
 import type { CategoriesConfig } from "../config/schema"
-import type { LoadedSkill } from "../features/opencode-skill-loader/types"
 import type { BrowserAutomationProvider } from "../config/schema"
-import { createSisyphusAgent } from "./sisyphus"
-import { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
-import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
-import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
-import { createDeepSearchAgent, DEEPSEARCH_PROMPT_METADATA } from "./deepsearch"
-import { createMomusAgent, momusPromptMetadata } from "./momus"
-
-import type { AvailableCategory } from "./dynamic-agent-prompt-builder"
+import type { LoadedSkill } from "../features/opencode-skill-loader/types"
 import {
   fetchAvailableModels,
   readConnectedProvidersCache,
   readProviderModelsCache,
 } from "../shared"
-import { CATEGORY_DESCRIPTIONS } from "../tools/delegate-task/constants"
 import { mergeCategories } from "../shared/merge-categories"
+import { CATEGORY_DESCRIPTIONS } from "../tools/delegate-task/constants"
+import { createDeepSearchAgent, DEEPSEARCH_PROMPT_METADATA } from "./deepsearch"
+import type { AvailableCategory } from "./dynamic-agent-prompt-builder"
+import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
+import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
+import { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
+import { createOrchestratorAgent } from "./orchestrator"
+import { createReviewerAgent, reviewerPromptMetadata } from "./reviewer"
+import type { AgentFactory, AgentOverrides, AgentPromptMetadata, BuiltinAgentName } from "./types"
+import { maybeCreateOrchestratorConfig } from "./builtin-agents/orchestrator-agent"
 import { buildAvailableSkills } from "./builtin-agents/available-skills"
 import { collectPendingBuiltinAgents } from "./builtin-agents/general-agents"
-import { maybeCreateSisyphusConfig } from "./builtin-agents/sisyphus-agent"
 import { buildCustomAgentMetadata, parseRegisteredAgentSummaries } from "./custom-agent-summaries"
 
 type AgentSource = AgentFactory | AgentConfig
 
-function getRuntimeBuiltinAgentName(agentName: BuiltinAgentName): string {
-  if (agentName === "sisyphus") return "orchestrator"
-  if (agentName === "momus") return "reviewer"
-  return agentName
-}
-
-const agentSources: Record<BuiltinAgentName, AgentSource> = {
-  sisyphus: createSisyphusAgent,
+const agentSources: Partial<Record<BuiltinAgentName, AgentSource>> = {
+  orchestrator: createOrchestratorAgent,
   oracle: createOracleAgent,
   librarian: createLibrarianAgent,
   explore: createExploreAgent,
   deepsearch: createDeepSearchAgent,
-  momus: createMomusAgent,
+  reviewer: createReviewerAgent,
 }
 
-/**
- * Metadata for each agent, used to build Sisyphus's dynamic prompt sections
- * (Delegation Table, Tool Selection, Key Triggers, etc.)
- */
 const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
   oracle: ORACLE_PROMPT_METADATA,
   librarian: LIBRARIAN_PROMPT_METADATA,
   explore: EXPLORE_PROMPT_METADATA,
   deepsearch: DEEPSEARCH_PROMPT_METADATA,
-  momus: momusPromptMetadata,
+  reviewer: reviewerPromptMetadata,
 }
 
 export async function createBuiltinAgents(
@@ -64,19 +53,15 @@ export async function createBuiltinAgents(
   uiSelectedModel?: string,
   disabledSkills?: Set<string>,
   useTaskSystem = false,
-  disableOcoEnv = false
+  disableOcoEnv = false,
 ): Promise<Record<string, AgentConfig>> {
-
   const connectedProviders = readConnectedProvidersCache()
   const providerModelsConnected = connectedProviders
     ? (readProviderModelsCache()?.connected ?? [])
     : []
   const mergedConnectedProviders = Array.from(
-    new Set([...(connectedProviders ?? []), ...providerModelsConnected])
+    new Set([...(connectedProviders ?? []), ...providerModelsConnected]),
   )
-  // IMPORTANT: Do NOT call OpenCode client APIs during plugin initialization.
-  // This function is called from config handler, and calling client API causes deadlock.
-  // See: https://github.com/code-yeongyu/oh-my-openagent/issues/1301
   const availableModels = await fetchAvailableModels(undefined, {
     connectedProviders: mergedConnectedProviders.length > 0 ? mergedConnectedProviders : undefined,
   })
@@ -84,17 +69,13 @@ export async function createBuiltinAgents(
     availableModels.size === 0 && mergedConnectedProviders.length === 0
 
   const result: Record<string, AgentConfig> = {}
-
   const mergedCategories = mergeCategories(categories)
-
   const availableCategories: AvailableCategory[] = Object.entries(mergedCategories).map(([name]) => ({
     name,
     description: categories?.[name]?.description ?? CATEGORY_DESCRIPTIONS[name] ?? "General tasks",
   }))
-
   const availableSkills = buildAvailableSkills(discoveredSkills, browserProvider, disabledSkills)
 
-  // Collect general agents first (for availableAgents), but don't add to result yet
   const { pendingAgentConfigs, availableAgents } = collectPendingBuiltinAgents({
     agentSources,
     agentMetadata,
@@ -111,13 +92,7 @@ export async function createBuiltinAgents(
   })
 
   const registeredAgents = parseRegisteredAgentSummaries(customAgentSummaries)
-  const builtinAgentNames = new Set(
-    Object.keys(agentSources).flatMap((name) => {
-      const lowered = name.toLowerCase()
-      const runtimeName = getRuntimeBuiltinAgentName(name as BuiltinAgentName).toLowerCase()
-      return lowered === runtimeName ? [lowered] : [lowered, runtimeName]
-    })
-  )
+  const builtinAgentNames = new Set(Object.keys(agentSources).map((name) => name.toLowerCase()))
   const disabledAgentNames = new Set(disabledAgents.map((name) => name.toLowerCase()))
 
   for (const agent of registeredAgents) {
@@ -133,7 +108,7 @@ export async function createBuiltinAgents(
     })
   }
 
-  const sisyphusConfig = maybeCreateSisyphusConfig({
+  const orchestratorConfig = maybeCreateOrchestratorConfig({
     disabledAgents,
     agentOverrides,
     uiSelectedModel,
@@ -149,13 +124,10 @@ export async function createBuiltinAgents(
     useTaskSystem,
     disableOcoEnv,
   })
-  if (sisyphusConfig) {
-    result["orchestrator"] = sisyphusConfig
+  if (orchestratorConfig) {
+    result.orchestrator = orchestratorConfig
   }
 
-
-
-  // Add pending agents after sisyphus to maintain order
   for (const [name, config] of pendingAgentConfigs) {
     result[name] = config
   }

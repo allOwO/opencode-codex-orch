@@ -72,7 +72,7 @@ export interface DelegateTaskToolOptions {
    */
   availableModelsOverride?: Set<string>
   userCategories?: CategoriesConfig
-  sisyphusJuniorModel?: string
+  executorModel?: string
   browserProvider?: BrowserAutomationProvider
   disabledSkills?: Set<string>
   availableCategories?: AvailableCategory[]

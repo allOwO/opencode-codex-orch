@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 
-const AGENTS = ["sisyphus", "prometheus", "oracle", "librarian", "explore", "multimodal-looker", "metis", "momus", "atlas"]
+const AGENTS = ["orchestrator", "prometheus", "oracle", "librarian", "explore", "multimodal-looker", "metis", "reviewer", "atlas"]
 const CATEGORIES = ["visual-engineering", "deep", "quick", "writing", "unspecified-high", "unspecified-low"]
 
 function buildConfig(model: string): Record<string, unknown> {

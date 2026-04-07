@@ -38,31 +38,6 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
     ],
     requiresAnyModel: true,
   },
-  sisyphus: {
-    fallbackChain: [
-      {
-        providers: ["anthropic", "github-copilot", "opencode"],
-        model: "claude-opus-4-6",
-        variant: "max",
-      },
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      {
-        providers: [
-          "opencode",
-          "moonshotai",
-          "moonshotai-cn",
-          "firmware",
-          "ollama-cloud",
-          "aihubmix",
-        ],
-        model: "kimi-k2.5",
-      },
-      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.4", variant: "medium" },
-      { providers: ["zai-coding-plan", "opencode"], model: "glm-5" },
-      { providers: ["opencode"], model: "big-pickle" },
-    ],
-    requiresAnyModel: true,
-  },
   oracle: {
     fallbackChain: [
       {
@@ -118,25 +93,6 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         providers: ["anthropic", "github-copilot", "opencode"],
         model: "claude-opus-4-6",
         variant: "max",
-      },
-    ],
-  },
-  momus: {
-    fallbackChain: [
-      {
-        providers: ["openai", "github-copilot", "opencode"],
-        model: "gpt-5.4",
-        variant: "xhigh",
-      },
-      {
-        providers: ["anthropic", "github-copilot", "opencode"],
-        model: "claude-opus-4-6",
-        variant: "max",
-      },
-      {
-        providers: ["google", "github-copilot", "opencode"],
-        model: "gemini-3.1-pro",
-        variant: "high",
       },
     ],
   },

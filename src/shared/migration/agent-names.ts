@@ -1,43 +1,22 @@
 export const AGENT_NAME_MAP: Record<string, string> = {
-  // Sisyphus variants → orchestrator
   omo: "orchestrator",
-  sisyphus: "orchestrator",
   orchestrator: "orchestrator",
-
-  // Planner / reviewer variants
   "omo-plan": "prometheus",
   "oco-plan": "prometheus",
-  "planner-sisyphus": "prometheus",
   "prometheus (planner)": "prometheus",
   prometheus: "prometheus",
-
-  // Removed executor variants
-  "orchestrator-sisyphus": "atlas",
   "atlas (plan executor)": "atlas",
   atlas: "atlas",
-
-  // Removed consultant variants
   "plan-consultant": "metis",
   "metis (plan consultant)": "metis",
   metis: "metis",
-
-  // Momus variants → reviewer
-  "momus (plan reviewer)": "reviewer",
-  "momus (plan critic)": "reviewer",
-  momus: "reviewer",
   reviewer: "reviewer",
-
-  // Executor variants
-  "sisyphus-junior": "executor",
   executor: "executor",
-
-  // Other kept agents
   build: "build",
   oracle: "oracle",
   librarian: "librarian",
   explore: "explore",
   deepsearch: "deepsearch",
-  "multimodal-looker": "librarian",
 }
 
 for (const [key, value] of Object.entries({ ...AGENT_NAME_MAP })) {

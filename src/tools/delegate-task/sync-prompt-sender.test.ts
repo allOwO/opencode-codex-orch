@@ -24,7 +24,7 @@ bunDescribe("sendSyncPrompt", () => {
 
     const input = {
       sessionID: "test-session",
-      agentToUse: "sisyphus-junior",
+      agentToUse: "executor",
       args: {
         description: "test task",
         prompt: "test prompt",
@@ -125,7 +125,7 @@ bunDescribe("sendSyncPrompt", () => {
     bunExpect(promptArgs.body.tools.call_oco_agent).toBe(false)
   })
 
-  bunTest("does not restrict call_oco_agent for sisyphus agent", async () => {
+  bunTest("does not restrict call_oco_agent for orchestrator agent", async () => {
     //#given
     const { sendSyncPrompt } = require("./sync-prompt-sender")
 
@@ -143,7 +143,7 @@ bunDescribe("sendSyncPrompt", () => {
 
     const input = {
       sessionID: "test-session",
-      agentToUse: "sisyphus",
+      agentToUse: "orchestrator",
       args: {
         description: "test task",
         prompt: "test prompt",

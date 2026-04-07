@@ -1,5 +1,5 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
-import type { BuiltinAgentName, AgentOverrides, AgentPromptMetadata, OverridableAgentName } from "../types"
+import type { BuiltinAgentName, AgentOverrides, AgentPromptMetadata } from "../types"
 import type { CategoryConfig } from "../../config/schema"
 import type { BrowserAutomationProvider } from "../../config/schema"
 import type { AvailableAgent } from "../dynamic-agent-prompt-builder"
@@ -9,14 +9,8 @@ import { applyOverrides } from "./agent-overrides"
 import { applyEnvironmentContext } from "./environment-context"
 import { applyModelResolution } from "./model-resolution"
 
-function getRuntimeBuiltinAgentName(agentName: BuiltinAgentName): OverridableAgentName {
-  if (agentName === "sisyphus") return "orchestrator"
-  if (agentName === "momus") return "reviewer"
-  return agentName
-}
-
 export function collectPendingBuiltinAgents(input: {
-  agentSources: Record<BuiltinAgentName, import("../agent-builder").AgentSource>
+  agentSources: Partial<Record<BuiltinAgentName, import("../agent-builder").AgentSource>>
   agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>>
   disabledAgents: string[]
   agentOverrides: AgentOverrides
@@ -50,23 +44,19 @@ export function collectPendingBuiltinAgents(input: {
 
   for (const [name, source] of Object.entries(agentSources)) {
     const agentName = name as BuiltinAgentName
-    const runtimeAgentName = getRuntimeBuiltinAgentName(agentName)
+    if (!source) continue
+    if (agentName === "orchestrator") continue
 
-    if (agentName === "sisyphus") continue
     if (
       disabledAgents.some((name) => {
         const lowered = name.toLowerCase()
-        return lowered === agentName.toLowerCase() || lowered === runtimeAgentName.toLowerCase()
+        return lowered === agentName.toLowerCase()
       })
     ) continue
 
-    const override = agentOverrides[runtimeAgentName]
-      ?? agentOverrides[agentName]
-      ?? Object.entries(agentOverrides).find(([key]) => {
-        const lowered = key.toLowerCase()
-        return lowered === agentName.toLowerCase() || lowered === runtimeAgentName.toLowerCase()
-      })?.[1]
-    const requirement = AGENT_MODEL_REQUIREMENTS[runtimeAgentName] ?? AGENT_MODEL_REQUIREMENTS[agentName]
+    const override = agentOverrides[agentName]
+      ?? Object.entries(agentOverrides).find(([key]) => key.toLowerCase() === agentName.toLowerCase())?.[1]
+    const requirement = AGENT_MODEL_REQUIREMENTS[agentName]
 
     // Check if agent requires a specific model
     if (requirement?.requiresModel && availableModels) {
@@ -100,13 +90,12 @@ export function collectPendingBuiltinAgents(input: {
 
     config = applyOverrides(config, override, mergedCategories, directory)
 
-    // Store for later - will be added after sisyphus
-    pendingAgentConfigs.set(runtimeAgentName, config)
+    pendingAgentConfigs.set(agentName, config)
 
     const metadata = agentMetadata[agentName]
     if (metadata) {
       availableAgents.push({
-        name: runtimeAgentName,
+        name: agentName,
         description: config.description ?? "",
         metadata,
       })

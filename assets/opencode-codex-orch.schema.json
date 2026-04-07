@@ -2966,7 +2966,7 @@
       ],
       "additionalProperties": false
     },
-    "sisyphus": {
+    "orchestrator": {
       "type": "object",
       "properties": {
         "tasks": {

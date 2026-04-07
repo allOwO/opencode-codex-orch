@@ -22,7 +22,7 @@ import {
 	buildToolSelectionTable,
 	categorizeTools,
 } from "./dynamic-agent-prompt-builder";
-import { buildTaskManagementSection } from "./sisyphus/default";
+import { buildTaskManagementSection } from "./orchestrator/default";
 import {
 	buildGeminiDelegationOverride,
 	buildGeminiIntentGateEnforcement,
@@ -30,8 +30,8 @@ import {
 	buildGeminiToolGuide,
 	buildGeminiToolMandate,
 	buildGeminiVerificationOverride,
-} from "./sisyphus/gemini";
-import { buildGpt54SisyphusPrompt } from "./sisyphus/gpt-5-4";
+} from "./orchestrator/gemini";
+import { buildGpt54OrchestratorPrompt } from "./orchestrator/gpt-5-4";
 import {
 	type AgentMode,
 	type AgentPromptMetadata,
@@ -40,17 +40,17 @@ import {
 	isGptModel,
 	isKimiModel,
 } from "./types";
-import { buildKimiSisyphusPrompt } from "./sisyphus/kimi";
+import { buildKimiOrchestratorPrompt } from "./orchestrator/kimi";
 
 const MODE: AgentMode = "all";
-export const SISYPHUS_PROMPT_METADATA: AgentPromptMetadata = {
+export const ORCHESTRATOR_PROMPT_METADATA: AgentPromptMetadata = {
 	category: "utility",
 	cost: "EXPENSIVE",
-	promptAlias: "Sisyphus",
+	promptAlias: "Orchestrator",
 	triggers: [],
 };
 
-function buildDynamicSisyphusPrompt(
+function buildDynamicOrchestratorPrompt(
 	model: string,
 	availableAgents: AvailableAgent[],
 	availableTools: AvailableTool[] = [],
@@ -97,9 +97,9 @@ function buildDynamicSisyphusPrompt(
 		: "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
 
 	return `<Role>
-You are "Sisyphus" - Powerful AI Agent with orchestration capabilities from opencode-codex-orch.
+You are "Orchestrator" - Powerful AI Agent with orchestration capabilities from opencode-codex-orch.
 
-**Why Sisyphus?**: Humans roll their boulder every day. So do you. We're not so different—your code should be indistinguishable from a senior engineer's.
+**Why Orchestrator?**: You coordinate the whole team. Your code should be indistinguishable from a senior engineer's.
 
 **Identity**: SF Bay Area engineer. Work, delegate, verify, ship. No AI slop.
 
@@ -466,7 +466,7 @@ ${antiPatterns}
 `;
 }
 
-export function createSisyphusAgent(
+export function createOrchestratorAgent(
 	model: string,
 	availableAgents?: AvailableAgent[],
 	availableToolNames?: string[],
@@ -480,7 +480,7 @@ export function createSisyphusAgent(
 	const agents = availableAgents ?? [];
 
 	if (isGpt5_4Model(model)) {
-		const prompt = buildGpt54SisyphusPrompt(
+		const prompt = buildGpt54OrchestratorPrompt(
 			model,
 			agents,
 			tools,
@@ -490,7 +490,7 @@ export function createSisyphusAgent(
 		);
 		return {
 			description:
-				"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Sisyphus - opencode-codex-orch)",
+				"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - opencode-codex-orch)",
 			mode: MODE,
 			model,
 			maxTokens: 64000,
@@ -505,7 +505,7 @@ export function createSisyphusAgent(
 	}
 
 	if (isKimiModel(model)) {
-		const dynamicPrompt = buildDynamicSisyphusPrompt(
+		const dynamicPrompt = buildDynamicOrchestratorPrompt(
 			model,
 			agents,
 			tools,
@@ -513,10 +513,10 @@ export function createSisyphusAgent(
 			categories,
 			useTaskSystem,
 		);
-		const prompt = buildKimiSisyphusPrompt(dynamicPrompt);
+		const prompt = buildKimiOrchestratorPrompt(dynamicPrompt);
 		return {
 			description:
-				"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Sisyphus - opencode-codex-orch)",
+				"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - opencode-codex-orch)",
 			mode: MODE,
 			model,
 			maxTokens: 64000,
@@ -530,7 +530,7 @@ export function createSisyphusAgent(
 		};
 	}
 
-	let prompt = buildDynamicSisyphusPrompt(
+	let prompt = buildDynamicOrchestratorPrompt(
 		model,
 		agents,
 		tools,
@@ -567,7 +567,7 @@ export function createSisyphusAgent(
 	} as AgentConfig["permission"];
 	const base = {
 		description:
-			"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Sisyphus - opencode-codex-orch)",
+			"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - opencode-codex-orch)",
 		mode: MODE,
 		model,
 		maxTokens: 64000,
@@ -582,4 +582,4 @@ export function createSisyphusAgent(
 
 	return { ...base, thinking: { type: "enabled", budgetTokens: 32000 } };
 }
-createSisyphusAgent.mode = MODE;
+createOrchestratorAgent.mode = MODE;
