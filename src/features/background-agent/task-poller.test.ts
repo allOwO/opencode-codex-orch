@@ -275,7 +275,7 @@ describe("checkAndInterruptStaleTasks", () => {
     expect(task.status).toBe("running")
   })
 
-  it("should use default stale timeout when session status is unknown/missing", async () => {
+  it("should NOT interrupt task on a missing session status snapshot", async () => {
     //#given — lastUpdate exceeds stale timeout, session not in status map
     const task = createRunningTask({
       startedAt: new Date(Date.now() - 300_000),
@@ -295,9 +295,63 @@ describe("checkAndInterruptStaleTasks", () => {
       sessionStatuses: {},
     })
 
-    //#then — unknown session treated as potentially stale, apply default timeout
+    //#then — missing status should not stale-kill the task
+    expect(task.status).toBe("running")
+  })
+
+  it("should complete task instead of cancelling when stale check finds valid output", async () => {
+    //#given
+    const task = createRunningTask({
+      startedAt: new Date(Date.now() - 300_000),
+      progress: {
+        toolCalls: 1,
+        lastUpdate: new Date(Date.now() - 200_000),
+      },
+    })
+    const completeTask = mock(async () => {
+      task.status = "completed"
+      task.completedAt = new Date()
+      return true
+    })
+
+    //#when
+    await checkAndInterruptStaleTasks({
+      tasks: [task],
+      client: mockClient as never,
+      config: { staleTimeoutMs: 180_000 },
+      concurrencyManager: mockConcurrencyManager as never,
+      notifyParentSession: mockNotify,
+      sessionStatuses: {},
+      hasValidOutput: async () => true,
+      completeTask,
+    })
+
+    //#then
+    expect(completeTask).toHaveBeenCalledWith(task, "stale-check output confirmation")
+    expect(task.status).toBe("completed")
+  })
+
+  it("should cancel task when session status map is not provided", async () => {
+    //#given
+    const task = createRunningTask({
+      startedAt: new Date(Date.now() - 300_000),
+      progress: {
+        toolCalls: 1,
+        lastUpdate: new Date(Date.now() - 200_000),
+      },
+    })
+
+    //#when
+    await checkAndInterruptStaleTasks({
+      tasks: [task],
+      client: mockClient as never,
+      config: { staleTimeoutMs: 180_000 },
+      concurrencyManager: mockConcurrencyManager as never,
+      notifyParentSession: mockNotify,
+    })
+
+    //#then
     expect(task.status).toBe("cancelled")
-    expect(task.error).toContain("Stale timeout")
   })
 
   it("should NOT interrupt task when session is busy (OpenCode status), even if lastUpdate exceeds stale timeout", async () => {
