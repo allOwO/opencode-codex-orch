@@ -248,6 +248,36 @@ export async function applyAgentConfig(params: {
     params.config.agent = reorderAgentsByPriority(
       params.config.agent as Record<string, unknown>,
     );
+
+    // Mark builtin subagents as hidden so they don't appear in the picker but remain
+    // available for internal delegation, runtime use, and tool permission assignment
+    const primaryAgentDisplayNames = new Set([
+      getAgentDisplayName("orchestrator"),
+      getAgentDisplayName("deepsearch"),
+    ]);
+    const builtinSubagentDisplayNames = new Set([
+      getAgentDisplayName("executor"),
+      getAgentDisplayName("reviewer"),
+      getAgentDisplayName("oracle"),
+      getAgentDisplayName("librarian"),
+      getAgentDisplayName("explore"),
+      getAgentDisplayName("build"),
+    ]);
+
+    // Mark builtin subagents with hidden: true so they don't appear in picker
+    // but are still available for downstream consumers (e.g., applyToolConfig)
+    params.config.agent = Object.fromEntries(
+      Object.entries(params.config.agent as Record<string, unknown>).map(([key, value]) => {
+        // Keep primary agents as-is (not hidden)
+        if (primaryAgentDisplayNames.has(key)) return [key, value];
+        // Mark builtin subagents as hidden
+        if (builtinSubagentDisplayNames.has(key)) {
+          return [key, { ...(value as Record<string, unknown>), hidden: true }];
+        }
+        // User-defined custom agents are kept as-is
+        return [key, value];
+      }),
+    );
   }
 
   const agentResult = params.config.agent as Record<string, unknown>;
