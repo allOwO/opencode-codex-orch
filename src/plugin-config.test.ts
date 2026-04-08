@@ -140,6 +140,38 @@ describe("parseConfigPartially", () => {
       expect(result!.agents?.reviewer?.model).toBe("openai/gpt-5.4");
       expect(result!.disabled_hooks).toEqual(["comment-checker"]);
     });
+
+    it("should preserve valid lsp config", () => {
+      const rawConfig = {
+        agents: {
+          oracle: { model: "openai/gpt-5.4" },
+        },
+        lsp: {
+          "typescript-language-server": {
+            command: ["typescript-language-server", "--stdio"],
+            extensions: [".ts", ".tsx"],
+          },
+          "rust-analyzer": {
+            command: ["rust-analyzer"],
+            extensions: [".rs"],
+          },
+        },
+      };
+
+      const result = parseConfigPartially(rawConfig);
+
+      expect(result).not.toBeNull();
+      expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.4");
+      expect(result!.lsp).toBeDefined();
+      expect(result!.lsp?.["typescript-language-server"]).toEqual({
+        command: ["typescript-language-server", "--stdio"],
+        extensions: [".ts", ".tsx"],
+      });
+      expect(result!.lsp?.["rust-analyzer"]).toEqual({
+        command: ["rust-analyzer"],
+        extensions: [".rs"],
+      });
+    });
   });
 
   describe("partially invalid config", () => {
@@ -182,6 +214,29 @@ describe("parseConfigPartially", () => {
 
       expect(result).not.toBeNull();
       expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.4");
+      expect(result!.disabled_hooks).toEqual(["not-a-real-hook"]);
+    });
+
+    it("should preserve valid lsp when another section is invalid", () => {
+      const rawConfig = {
+        agents: {
+          oracle: { model: "openai/gpt-5.4" },
+        },
+        lsp: {
+          "typescript-language-server": {
+            command: ["typescript-language-server", "--stdio"],
+          },
+        },
+        disabled_hooks: ["not-a-real-hook"],
+      };
+
+      const result = parseConfigPartially(rawConfig);
+
+      expect(result).not.toBeNull();
+      expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.4");
+      expect(result!.lsp?.["typescript-language-server"]).toEqual({
+        command: ["typescript-language-server", "--stdio"],
+      });
       expect(result!.disabled_hooks).toEqual(["not-a-real-hook"]);
     });
   });

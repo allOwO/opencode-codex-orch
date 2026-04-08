@@ -10,6 +10,7 @@ import { ClaudeCodeConfigSchema } from "./claude-code"
 import { CommentCheckerConfigSchema } from "./comment-checker"
 import { BuiltinCommandNameSchema } from "./commands"
 import { ExperimentalConfigSchema } from "./experimental"
+import { LspConfigSchema } from "./lsp"
 import { NotificationConfigSchema } from "./notification"
 import { OrchestratorConfigSchema } from "./orchestrator"
 import { OrchestratorAgentConfigSchema } from "./orchestrator-agent"
@@ -63,6 +64,8 @@ const OpenCodeCodexOrchConfigObjectSchema = z.object({
   tmux: TmuxConfigSchema.optional(),
   orchestrator: OrchestratorConfigSchema.optional(),
   start_work: StartWorkConfigSchema.optional(),
+  /** LSP server configuration */
+  lsp: LspConfigSchema.optional(),
   /** Migration history to prevent re-applying migrations (e.g., model version upgrades) */
   _migrations: z.array(z.string()).optional(),
 })

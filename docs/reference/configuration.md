@@ -472,7 +472,7 @@ Built-in MCPs (enabled by default): `websearch` (Exa AI), `context7` (library do
 
 ### LSP
 
-Configure Language Server Protocol integration:
+Configure Language Server Protocol (LSP) servers. This is a supported top-level field in `opencode-codex-orch.json`:
 
 ```json
 {

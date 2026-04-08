@@ -3004,6 +3004,52 @@
       ],
       "additionalProperties": false
     },
+    "lsp": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          },
+          "command": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "extensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priority": {
+            "type": "number"
+          },
+          "env": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "initialization": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "_migrations": {
       "type": "array",
       "items": {

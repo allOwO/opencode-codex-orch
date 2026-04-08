@@ -898,3 +898,135 @@ describe("skills schema", () => {
     expect(result.success).toBe(true)
   })
 })
+
+describe("OpenCodeCodexOrchConfigSchema - lsp", () => {
+  test("accepts lsp config with valid server entry", () => {
+    //#given
+    const input = {
+      lsp: {
+        typescript: {
+          command: ["typescript-language-server", "--stdio"],
+          extensions: [".ts", ".tsx"],
+          priority: 10,
+        },
+      },
+    }
+
+    //#when
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(input)
+
+    //#then
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.lsp?.typescript?.command).toEqual(["typescript-language-server", "--stdio"])
+      expect(result.data.lsp?.typescript?.extensions).toEqual([".ts", ".tsx"])
+      expect(result.data.lsp?.typescript?.priority).toBe(10)
+    }
+  })
+
+  test("accepts lsp config with disabled flag", () => {
+    //#given
+    const input = {
+      lsp: {
+        python: {
+          disabled: true,
+          command: ["pyls"],
+          extensions: [".py"],
+        },
+      },
+    }
+
+    //#when
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(input)
+
+    //#then
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.lsp?.python?.disabled).toBe(true)
+    }
+  })
+
+  test("accepts lsp config with env", () => {
+    //#given
+    const input = {
+      lsp: {
+        rust: {
+          command: ["rust-analyzer"],
+          extensions: [".rs"],
+          env: { RUST_BACKTRACE: "1" },
+        },
+      },
+    }
+
+    //#when
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(input)
+
+    //#then
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.lsp?.rust?.env).toEqual({ RUST_BACKTRACE: "1" })
+    }
+  })
+
+  test("accepts lsp config with initialization options", () => {
+    //#given
+    const input = {
+      lsp: {
+        json: {
+          command: ["vscode-json-languageserver", "--stdio"],
+          extensions: [".json"],
+          initialization: { validate: true, schemaValidation: "error" },
+        },
+      },
+    }
+
+    //#when
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(input)
+
+    //#then
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.lsp?.json?.initialization).toEqual({ validate: true, schemaValidation: "error" })
+    }
+  })
+
+  test("accepts config without lsp", () => {
+    //#given
+    const input = {}
+
+    //#when
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(input)
+
+    //#then
+    expect(result.success).toBe(true)
+    expect(result.data?.lsp).toBeUndefined()
+  })
+
+  test("accepts empty lsp object", () => {
+    //#given
+    const input = { lsp: {} }
+
+    //#when
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(input)
+
+    //#then
+    expect(result.success).toBe(true)
+  })
+
+  test("rejects lsp with invalid field type", () => {
+    //#given
+    const input = {
+      lsp: {
+        typescript: {
+          command: "not-an-array",
+        },
+      },
+    }
+
+    //#when
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(input)
+
+    //#then
+    expect(result.success).toBe(false)
+  })
+})
