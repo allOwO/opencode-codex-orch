@@ -27,6 +27,8 @@ export type SkillContext = {
   disabledSkills: Set<string>
 }
 
+const DEFAULT_HARD_DISABLED_SKILLS = new Set(["writing-skills"])
+
 function mapScopeToLocation(scope: SkillScope): AvailableSkill["location"] {
   if (scope === "user" || scope === "opencode") return "user"
   if (scope === "project" || scope === "opencode-project") return "project"
@@ -43,7 +45,10 @@ export async function createSkillContext(args: {
   const browserProvider: BrowserAutomationProvider =
     pluginConfig.browser_automation_engine?.provider ?? "playwright"
 
-  const disabledSkills = new Set<string>(pluginConfig.disabled_skills ?? [])
+  const disabledSkills = new Set<string>([
+    ...DEFAULT_HARD_DISABLED_SKILLS,
+    ...(pluginConfig.disabled_skills ?? []),
+  ])
   const systemMcpNames = getSystemMcpServerNames()
 
   const builtinSkills = createBuiltinSkills({
@@ -85,14 +90,16 @@ export async function createSkillContext(args: {
     { configDir: directory },
   )
 
-  const availableSkills: AvailableSkill[] = mergedSkills.map((skill) => ({
+  const filteredMergedSkills = mergedSkills.filter((skill) => !disabledSkills.has(skill.name))
+
+  const availableSkills: AvailableSkill[] = filteredMergedSkills.map((skill) => ({
     name: skill.name,
     description: skill.definition.description ?? "",
     location: mapScopeToLocation(skill.scope),
   }))
 
   return {
-    mergedSkills,
+    mergedSkills: filteredMergedSkills,
     availableSkills,
     browserProvider,
     disabledSkills,

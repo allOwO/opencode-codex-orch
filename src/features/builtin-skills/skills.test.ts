@@ -222,10 +222,13 @@ describe("createBuiltinSkills", () => {
 
 		// then
 		expect(skill.template).toContain("skill(name=")
+		expect(skill.template).toContain("NO SKILL WITHOUT A FAILING TEST FIRST")
+		expect(skill.template).toContain("Description = When to Use, NOT What the Skill Does")
+		expect(skill.template).toContain("Red Flags - STOP and Start Over")
 		expect(skill.template).toContain("SKILL.md")
 		expect(skill.template).toContain(".agents/skills/<name>/SKILL.md")
 		expect(skill.template).toContain("Prefer the narrowest scope that matches intended reuse")
-		expect(skill.template).toContain("For general skill-writing doctrine, use writing-skills")
+		expect(skill.template).not.toContain("For general skill-writing doctrine, use writing-skills")
 	})
 
 	test("includes skill-creator skill with OpenCode-specific scope guidance", () => {
@@ -239,7 +242,8 @@ describe("createBuiltinSkills", () => {
 		// then
 		expect(skill.description).toContain("local SKILL.md skill")
 		expect(skill.description).toContain("built-in TypeScript skill")
-		expect(skill.template).toContain("For general skill-writing doctrine, use writing-skills")
+		expect(skill.template).toContain("Built-In Skill Pattern")
+		expect(skill.template).toContain("validate-skill")
 	})
 
 	test("includes fast-implementation skill by default", () => {

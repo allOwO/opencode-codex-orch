@@ -76,4 +76,59 @@ runtime-context body
     expect(context.mergedSkills.some((skill) => skill.name === "runtime-context-skill")).toBe(true)
     expect(context.availableSkills.some((skill) => skill.name === "runtime-context-skill")).toBe(true)
   })
+
+  it("filters disabled skills from merged and available skill lists even when discovered from external paths", async () => {
+    const opencodeSkillsDir = join(testDir, "opencode-config", "skills", "writing-skills")
+    mkdirSync(opencodeSkillsDir, { recursive: true })
+    writeFileSync(
+      join(opencodeSkillsDir, "SKILL.md"),
+      `---
+name: writing-skills
+description: External doctrine skill
+---
+writing-skills body
+`
+    )
+
+    process.env.OPENCODE_CONFIG_DIR = join(testDir, "opencode-config")
+    process.env.CLAUDE_CONFIG_DIR = join(testDir, "claude-config")
+
+    const { createSkillContext } = await import("./skill-context")
+    const context = await createSkillContext({
+      directory: testDir,
+      pluginConfig: {
+        disabled_skills: ["writing-skills"],
+      },
+    })
+
+    expect(context.mergedSkills.some((skill) => skill.name === "writing-skills")).toBe(false)
+    expect(context.availableSkills.some((skill) => skill.name === "writing-skills")).toBe(false)
+  })
+
+  it("hard-disables writing-skills by default even without user config", async () => {
+    const opencodeSkillsDir = join(testDir, "opencode-config", "skills", "writing-skills")
+    mkdirSync(opencodeSkillsDir, { recursive: true })
+    writeFileSync(
+      join(opencodeSkillsDir, "SKILL.md"),
+      `---
+name: writing-skills
+description: External doctrine skill
+---
+writing-skills body
+`
+    )
+
+    process.env.OPENCODE_CONFIG_DIR = join(testDir, "opencode-config")
+    process.env.CLAUDE_CONFIG_DIR = join(testDir, "claude-config")
+
+    const { createSkillContext } = await import("./skill-context")
+    const context = await createSkillContext({
+      directory: testDir,
+      pluginConfig: {},
+    })
+
+    expect(context.disabledSkills.has("writing-skills")).toBe(true)
+    expect(context.mergedSkills.some((skill) => skill.name === "writing-skills")).toBe(false)
+    expect(context.availableSkills.some((skill) => skill.name === "writing-skills")).toBe(false)
+  })
 })

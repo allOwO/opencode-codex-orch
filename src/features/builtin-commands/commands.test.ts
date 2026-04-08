@@ -108,8 +108,8 @@ describe("loadBuiltinCommands", () => {
 	//#given - the template string
 
 	//#when / #then
-	expect(SKILL_CREATOR_TEMPLATE).toContain("OpenCode-specific scope, packaging, discovery, and validation")
-	expect(SKILL_CREATOR_TEMPLATE).toContain("Do not duplicate general authoring doctrine from writing-skills")
+	expect(SKILL_CREATOR_TEMPLATE).toContain("skill-writing doctrine plus OpenCode-specific scope, packaging, discovery, and validation")
+	expect(SKILL_CREATOR_TEMPLATE).toContain("failing baseline before writing the skill")
   })
 
   test("should have correct description for skill-creator", () => {

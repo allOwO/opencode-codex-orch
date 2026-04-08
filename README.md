@@ -33,7 +33,7 @@ The plugin ships with these built-in skills:
 - **frontend-ui-ux** — broad UI/UX design skill for visually strong frontend work, including restrained, brand-forward landing pages and consumer UI *(GPT-optimized prompt)*
 - **fast-implementation** — spec-disciplined workflow for low-risk small and medium implementation tasks with minimal diffs, requirement locks, and explicit escalation boundaries
 - **git-commit / git-rebase / git-search** — git workflow skills covering atomic commits, history rewriting, and code archaeology *(GPT-optimized; split from the old monolithic git-master to save ~85% tokens per invocation)*
-- **skill-creator** — create and refine reusable `SKILL.md`-based skills for this plugin
+- **skill-creator** — the canonical skill-authoring workflow for this plugin, combining doctrine, scope selection, and skill validation tooling
 
 ### Fork-specific skills
 
