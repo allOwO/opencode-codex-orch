@@ -6,11 +6,19 @@
 
 Agent factories following `createXXXAgent(model) → AgentConfig` pattern. Each has static `mode` property. Built via `buildAgent()` compositing factory + categories + skills.
 
+## CURRENT USER-FACING SURFACE
+
+- The OpenCode picker is intended to expose only **Orchestrator** and **DeepSearch** as primary selectable agents.
+- **DeepSearch** is treated as a primary picker-visible agent and should use `mode: "primary"` so OpenCode surfaces it alongside Orchestrator.
+- Other builtin agents such as **Executor**, **Reviewer**, **oracle**, **librarian**, and **explore** remain available for internal orchestration and delegation, but are not meant to appear as top-level picker choices.
+- Picker hiding is enforced downstream in `src/plugin-handlers/agent-config-handler.ts`, where non-primary builtin agents are marked `hidden: true` while staying available for runtime permissions and delegation.
+
 ## AGENT INVENTORY
 
 | Agent         | Model            | Temp | Mode     | Fallback Chain                     | Purpose                          |
 | ------------- | ---------------- | ---- | -------- | ---------------------------------- | -------------------------------- |
 | **Orchestrator** | gpt-5.4 xhigh | 0.1  | all      | k2p5 → glm-5                       | Main orchestrator, plans + delegates |
+| **DeepSearch** | gpt-5.4 high | 0.2  | primary  | gpt-5.4 → gemini-3.1-pro → claude-opus-4-6 | Deep research orchestrator, picker-visible |
 | **Oracle**    | glm-5            | 0.1  | subagent | k2p5                               | Read-only consultation           |
 | **Librarian** | k2p5             | 0.1  | subagent | doubao-seed-2.0-code → gemini-3-flash | External docs/code search    |
 | **Explore**   | doubao-seed-2.0-code | 0.1 | subagent | doubao-seed-2.0-code → gemini-3-flash | Contextual grep              |
