@@ -117,8 +117,8 @@ afterEach(() => {
 });
 
 describe("Executor model inheritance", () => {
-	// Executor is marked as hidden (not in picker) but still present for internal use
-	test("executor is hidden from picker but internal config is assembled", async () => {
+	// Executor remains available in config so it can be selected or mentioned directly
+	test("executor remains available in assembled config", async () => {
 		// #given
 		const pluginConfig: OpenCodeCodexOrchConfig = {};
 		const config: Record<string, unknown> = {
@@ -137,11 +137,11 @@ describe("Executor model inheritance", () => {
 		// #when
 		await handler(config);
 
-		// #then - Executor is present but hidden (for internal use like tool permissions)
+		// #then - Executor is present and not force-hidden
 		const agentConfig = config.agent as Record<string, { hidden?: boolean }>;
 		const executor = agentConfig[getAgentDisplayName("executor")];
 		expect(executor).toBeDefined();
-		expect(executor.hidden).toBe(true);
+		expect(executor.hidden).toBeUndefined();
 	});
 });
 
@@ -172,13 +172,12 @@ describe("canonical builtin runtime names", () => {
 
 		await handler(config);
 
-		// Primary agents are visible in picker, subagents are hidden but present for internal use
+		// Builtin agents remain present for runtime use and @mention availability
 		const agentConfig = config.agent as Record<string, unknown>;
 		expect(agentConfig.Orchestrator).toBeDefined();
 		expect(agentConfig.DeepSearch).toBeDefined();
-		// Subagents are present but hidden from picker (for internal use like tool permissions)
-		expect((agentConfig.Reviewer as { hidden?: boolean })?.hidden).toBe(true);
-		expect((agentConfig.Executor as { hidden?: boolean })?.hidden).toBe(true);
+		expect((agentConfig.Reviewer as { hidden?: boolean })?.hidden).toBeUndefined();
+		expect((agentConfig.Executor as { hidden?: boolean })?.hidden).toBeUndefined();
 		expect(config.default_agent).toBe(getAgentDisplayName("orchestrator"));
 	});
 });
@@ -214,19 +213,19 @@ describe("retired planning agents", () => {
 		// #when
 		await handler(config);
 
-		// #then - Orchestrator is first, subagents are present but hidden from picker
+		// #then - Orchestrator is first and builtin team agents remain mentionable
 		const keys = Object.keys(config.agent as Record<string, unknown>);
 		expect(keys[0]).toBe(getAgentDisplayName("orchestrator"));
-		// Subagents are present but hidden (for internal use)
+		// Builtin team agents remain present and not force-hidden
 		const agentConfig = config.agent as Record<string, { hidden?: boolean }>;
 		expect(
 			(agentConfig[getAgentDisplayName("executor")] as { hidden?: boolean })
 				?.hidden,
-		).toBe(true);
+		).toBeUndefined();
 		expect(
 			(agentConfig[getAgentDisplayName("oracle")] as { hidden?: boolean })
 				?.hidden,
-		).toBe(true);
+		).toBeUndefined();
 	});
 
 	test("planner flags no longer demote the plan agent", async () => {
@@ -268,10 +267,10 @@ describe("retired planning agents", () => {
 		expect(agents.plan.mode).toBe("primary");
 		expect(agents.plan.prompt).toBe("original plan prompt");
 		expect(agents[getAgentDisplayName("prometheus")]).toBeUndefined();
-		// Builtin subagents are present but hidden from picker (for internal use)
+		// Builtin team agents remain present and not force-hidden
 		expect(
 			(agents[getAgentDisplayName("executor")] as { hidden?: boolean })?.hidden,
-		).toBe(true);
+		).toBeUndefined();
 	});
 
 	test("plan agent remains unchanged when planner is disabled", async () => {
@@ -312,6 +311,45 @@ describe("retired planning agents", () => {
 		expect(agents.plan).toBeDefined();
 		expect(agents.plan.mode).toBe("primary");
 		expect(agents.plan.prompt).toBe("original plan prompt");
+	});
+
+	test("picker hides plan and exposes build instead", async () => {
+		const pluginConfig: OpenCodeCodexOrchConfig = {
+			orchestrator_agent: {
+				planner_enabled: true,
+				replace_plan: true,
+			},
+		};
+		const config: Record<string, unknown> = {
+			model: "anthropic/claude-opus-4-6",
+			agent: {
+				plan: {
+					name: "plan",
+					mode: "primary",
+					prompt: "original plan prompt",
+				},
+			},
+		};
+		const handler = createConfigHandler({
+			ctx: { directory: "/tmp" },
+			pluginConfig,
+			modelCacheState: {
+				anthropicContext1MEnabled: false,
+				modelContextLimitsCache: new Map(),
+			},
+		});
+
+		await handler(config);
+
+		const agents = config.agent as Record<
+			string,
+			{ mode?: string; hidden?: boolean; prompt?: string }
+		>;
+		expect(agents.plan).toBeDefined();
+		expect(agents.plan.hidden).toBe(true);
+		expect(agents.build).toBeDefined();
+		expect(agents.build.hidden).toBeUndefined();
+		expect(agents.build.mode).toBe("all");
 	});
 
 	test("planner flags do not create a prometheus agent", async () => {
@@ -839,8 +877,7 @@ describe("config-handler plugin loading error boundary (#1559)", () => {
 });
 
 describe("per-agent todowrite/todoread deny when task_system enabled", () => {
-	// Only Orchestrator is in picker-facing config per 2026-04-08 spec
-	// Executor is filtered from picker surface but remains available for runtime use
+	// Orchestrator keeps todo denial while builtin agents remain directly addressable
 	const AGENTS_WITH_TODO_DENY = new Set([getAgentDisplayName("orchestrator")]);
 
 	test("denies todowrite and todoread for primary agents when task_system is enabled", async () => {
@@ -873,7 +910,7 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
 		//#when
 		await handler(config);
 
-		//#then - Orchestrator has todo deny, executor is hidden but present with permissions
+		//#then - Orchestrator has todo deny, executor remains present with permissions
 		const agentResult = config.agent as Record<
 			string,
 			{ permission?: Record<string, unknown>; hidden?: boolean }
@@ -882,10 +919,10 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
 			expect(agentResult[agentName]?.permission?.todowrite).toBe("deny");
 			expect(agentResult[agentName]?.permission?.todoread).toBe("deny");
 		}
-		// Executor is present but hidden from picker (for internal use like tool permissions)
+		// Executor is present and remains directly addressable
 		const executor = agentResult[getAgentDisplayName("executor")];
 		expect(executor).toBeDefined();
-		expect(executor.hidden).toBe(true);
+		expect(executor.hidden).toBeUndefined();
 		expect(executor.permission?.task).toBe("allow");
 	});
 
@@ -971,6 +1008,57 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
 });
 
 describe("agent picker primary surface", () => {
+	test("picker surface exposes only orchestrator and deepsearch from builtin team agents", async () => {
+		// #given - only orchestrator and deepsearch should remain picker-visible
+		const createBuiltinAgentsMock = agents.createBuiltinAgents as unknown as {
+			mockResolvedValue: (value: Record<string, unknown>) => void;
+		};
+		createBuiltinAgentsMock.mockResolvedValue({
+			orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
+			deepsearch: { name: "deepsearch", prompt: "research", mode: "primary" },
+			executor: { name: "executor", prompt: "execute", mode: "subagent" },
+			reviewer: { name: "reviewer", prompt: "review", mode: "subagent" },
+			oracle: { name: "oracle", prompt: "oracle", mode: "subagent" },
+			librarian: { name: "librarian", prompt: "librarian", mode: "subagent" },
+			explore: { name: "explore", prompt: "explore", mode: "subagent" },
+		});
+
+		const pluginConfig: OpenCodeCodexOrchConfig = {};
+		const config: Record<string, unknown> = {
+			model: "anthropic/claude-opus-4-6",
+			agent: {},
+		};
+		const handler = createConfigHandler({
+			ctx: { directory: "/tmp" },
+			pluginConfig,
+			modelCacheState: {
+				anthropicContext1MEnabled: false,
+				modelContextLimitsCache: new Map(),
+			},
+		});
+
+		// #when
+		await handler(config);
+
+		// #then - only orchestrator/deepsearch stay picker-visible; other builtin agents stay internal
+		const agentConfig = config.agent as Record<
+			string,
+			{ hidden?: boolean; mode?: string }
+		>;
+		expect(agentConfig[getAgentDisplayName("orchestrator")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("deepsearch")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("executor")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("reviewer")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("oracle")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("librarian")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("explore")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("executor")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("reviewer")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("oracle")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("librarian")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("explore")]?.mode).toBe("subagent");
+	});
+
 	test("DeepSearch has mode: primary in final config (like Orchestrator) for picker visibility", async () => {
 		// #given - standard agent setup with full builtin agents
 		const createBuiltinAgentsMock = agents.createBuiltinAgents as unknown as {
@@ -1019,12 +1107,15 @@ describe("agent picker primary surface", () => {
 		const deepsearchMode = agentConfig[getAgentDisplayName("deepsearch")]?.mode;
 		expect(deepsearchMode).toBe("primary");
 
-		// Other builtin subagents remain with mode: "subagent" and hidden: true
+		// Other builtin agents remain subagents so the picker hides them
 		expect(agentConfig[getAgentDisplayName("executor")]?.mode).toBe("subagent");
 		expect(agentConfig[getAgentDisplayName("reviewer")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("oracle")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("librarian")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("explore")]?.mode).toBe("subagent");
 	});
 
-	test("picker-facing config contains only Orchestrator and DeepSearch", async () => {
+	test("picker-facing config promotes deepsearch but keeps other builtin agents internal", async () => {
 		// #given - standard agent setup with full builtin agents
 		const createBuiltinAgentsMock = agents.createBuiltinAgents as unknown as {
 			mockResolvedValue: (value: Record<string, unknown>) => void;
@@ -1056,11 +1147,13 @@ describe("agent picker primary surface", () => {
 		// #when
 		await handler(config);
 
-		// #then - verify picker-facing surface shows only primary agents (non-hidden)
-		const agentConfig = config.agent as Record<string, { hidden?: boolean }>;
-		const allKeys = Object.keys(agentConfig);
+		// #then - deepsearch becomes visible while the rest stay hidden by mode
+		const agentConfig = config.agent as Record<
+			string,
+			{ hidden?: boolean; mode?: string }
+		>;
 
-		// Primary picker agents should be present and NOT hidden (visible in picker)
+		// Primary agents should be present and not hidden
 		expect(
 			agentConfig[getAgentDisplayName("orchestrator")]?.hidden,
 		).toBeUndefined();
@@ -1068,36 +1161,32 @@ describe("agent picker primary surface", () => {
 			agentConfig[getAgentDisplayName("deepsearch")]?.hidden,
 		).toBeUndefined();
 
-		// Subagents are present but marked as hidden (not visible in picker but available for internal use)
+		// Builtin team agents stay internal-only
 		expect(
 			(agentConfig[getAgentDisplayName("executor")] as { hidden?: boolean })
 				?.hidden,
-		).toBe(true);
+		).toBeUndefined();
 		expect(
 			(agentConfig[getAgentDisplayName("reviewer")] as { hidden?: boolean })
 				?.hidden,
-		).toBe(true);
+		).toBeUndefined();
 		expect(
 			(agentConfig[getAgentDisplayName("oracle")] as { hidden?: boolean })
 				?.hidden,
-		).toBe(true);
+		).toBeUndefined();
 		expect(
 			(agentConfig[getAgentDisplayName("librarian")] as { hidden?: boolean })
 				?.hidden,
-		).toBe(true);
+		).toBeUndefined();
 		expect(
 			(agentConfig[getAgentDisplayName("explore")] as { hidden?: boolean })
 				?.hidden,
-		).toBe(true);
-
-		// Only Orchestrator and DeepSearch are visible in picker (not hidden)
-		const visiblePickerKeys = allKeys.filter(
-			(key) => !agentConfig[key]?.hidden,
-		);
-		expect(visiblePickerKeys).toEqual([
-			getAgentDisplayName("orchestrator"),
-			getAgentDisplayName("deepsearch"),
-		]);
+		).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("executor")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("reviewer")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("oracle")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("librarian")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("explore")]?.mode).toBe("subagent");
 	});
 
 	test("picker-facing config does not include retired agent names", async () => {

@@ -2,8 +2,8 @@ import { createBuiltinAgents } from "../agents";
 import { createExecutorAgentWithOverrides } from "../agents/executor";
 import type { OpenCodeCodexOrchConfig } from "../config";
 import { log, migrateAgentConfig } from "../shared";
-import { AGENT_NAME_MAP } from "../shared/migration";
 import { getAgentDisplayName } from "../shared/agent-display-names";
+import { AGENT_NAME_MAP } from "../shared/migration";
 import {
   discoverConfigSourceSkills,
   discoverOpencodeGlobalSkills,
@@ -21,6 +21,34 @@ type AgentConfigRecord = Record<string, Record<string, unknown> | undefined> & {
   build?: Record<string, unknown>;
   plan?: Record<string, unknown>;
 };
+
+function alignAgentPickerVisibility(
+  agents: Record<string, unknown>
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(agents).map(([name, value]) => {
+      if (!value || typeof value !== "object") {
+        return [name, value]
+      }
+
+      const config = value as Record<string, unknown>
+
+      if (name === "deepsearch") {
+        return [name, { ...config, mode: "primary", hidden: undefined }]
+      }
+
+      if (name === "build") {
+        return [name, { ...config, mode: "all", hidden: undefined }]
+      }
+
+      if (name === "plan") {
+        return [name, { ...config, hidden: true }]
+      }
+
+      return [name, value]
+    }),
+  )
+}
 
 function getConfiguredDefaultAgent(config: Record<string, unknown>): string | undefined {
   const defaultAgent = config.default_agent;
@@ -241,44 +269,17 @@ export async function applyAgentConfig(params: {
     };
   }
 
-  if (params.config.agent) {
-    params.config.agent = remapAgentKeysToDisplayNames(
-      params.config.agent as Record<string, unknown>,
-    );
-    params.config.agent = reorderAgentsByPriority(
-      params.config.agent as Record<string, unknown>,
-    );
-
-    // Mark builtin subagents as hidden so they don't appear in the picker but remain
-    // available for internal delegation, runtime use, and tool permission assignment
-    const primaryAgentDisplayNames = new Set([
-      getAgentDisplayName("orchestrator"),
-      getAgentDisplayName("deepsearch"),
-    ]);
-    const builtinSubagentDisplayNames = new Set([
-      getAgentDisplayName("executor"),
-      getAgentDisplayName("reviewer"),
-      getAgentDisplayName("oracle"),
-      getAgentDisplayName("librarian"),
-      getAgentDisplayName("explore"),
-      getAgentDisplayName("build"),
-    ]);
-
-    // Mark builtin subagents with hidden: true so they don't appear in picker
-    // but are still available for downstream consumers (e.g., applyToolConfig)
-    params.config.agent = Object.fromEntries(
-      Object.entries(params.config.agent as Record<string, unknown>).map(([key, value]) => {
-        // Keep primary agents as-is (not hidden)
-        if (primaryAgentDisplayNames.has(key)) return [key, value];
-        // Mark builtin subagents as hidden
-        if (builtinSubagentDisplayNames.has(key)) {
-          return [key, { ...(value as Record<string, unknown>), hidden: true }];
-        }
-        // User-defined custom agents are kept as-is
-        return [key, value];
-      }),
-    );
-  }
+	if (params.config.agent) {
+		params.config.agent = alignAgentPickerVisibility(
+			params.config.agent as Record<string, unknown>,
+		)
+		params.config.agent = remapAgentKeysToDisplayNames(
+			params.config.agent as Record<string, unknown>,
+		);
+		params.config.agent = reorderAgentsByPriority(
+			params.config.agent as Record<string, unknown>,
+		);
+	}
 
   const agentResult = params.config.agent as Record<string, unknown>;
   log("[config-handler] agents loaded", { agentKeys: Object.keys(agentResult) });
