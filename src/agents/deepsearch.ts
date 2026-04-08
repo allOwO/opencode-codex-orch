@@ -1,43 +1,46 @@
-import type { AgentConfig } from "@opencode-ai/sdk"
-import type { AgentMode, AgentPromptMetadata } from "./types"
-import { createAgentToolAllowlist } from "../shared/permission-compat"
-import { maybePrependKimiPrompt } from "./kimi"
+import type { AgentConfig } from "@opencode-ai/sdk";
+import { createAgentToolAllowlist } from "../shared/permission-compat";
+import { maybePrependKimiPrompt } from "./kimi";
+import type { AgentMode, AgentPromptMetadata } from "./types";
 
-const MODE: AgentMode = "subagent"
+const MODE: AgentMode = "primary";
 
 export const DEEPSEARCH_PROMPT_METADATA: AgentPromptMetadata = {
-  category: "exploration",
-  cost: "EXPENSIVE",
-  promptAlias: "DeepSearch",
-  keyTrigger: "Deep research / comparison request → route to `deepsearch`",
-  triggers: [
-    {
-      domain: "Deep research",
-      trigger: "Comparative analysis, technical selection, or a research report that needs parallel librarian/explore work",
-    },
-  ],
-  useWhen: [
-    "Deep research requests that need multiple independent questions investigated in parallel",
-    "Comparative analysis or technology selection work that should end in a structured report",
-  ],
-}
+	category: "exploration",
+	cost: "EXPENSIVE",
+	promptAlias: "DeepSearch",
+	keyTrigger: "Deep research / comparison request → route to `deepsearch`",
+	triggers: [
+		{
+			domain: "Deep research",
+			trigger:
+				"Comparative analysis, technical selection, or a research report that needs parallel librarian/explore work",
+		},
+	],
+	useWhen: [
+		"Deep research requests that need multiple independent questions investigated in parallel",
+		"Comparative analysis or technology selection work that should end in a structured report",
+	],
+};
 
 export function createDeepSearchAgent(model: string): AgentConfig {
-  const permissions = createAgentToolAllowlist([
-    "question",
-    "read",
-    "write",
-    "call_oco_agent",
-  ])
+	const permissions = createAgentToolAllowlist([
+		"question",
+		"read",
+		"write",
+		"call_oco_agent",
+	]);
 
-  return {
-    description:
-      "Deep research orchestrator. Clarifies scope, dispatches parallel librarian/explore subagents, and synthesizes findings into a structured report under docs/deepsearch/. (DeepSearch - opencode-codex-orch)",
-    mode: MODE,
-    model,
-    temperature: 0.2,
-    ...permissions,
-    prompt: maybePrependKimiPrompt(model, `# DeepSearch
+	return {
+		description:
+			"Deep research orchestrator. Clarifies scope, dispatches parallel librarian/explore subagents, and synthesizes findings into a structured report under docs/deepsearch/. (DeepSearch - opencode-codex-orch)",
+		mode: MODE,
+		model,
+		temperature: 0.2,
+		...permissions,
+		prompt: maybePrependKimiPrompt(
+			model,
+			`# DeepSearch
 
 You are DeepSearch, a research orchestration agent.
 
@@ -53,8 +56,9 @@ Rules:
 - Prefer librarian for external evidence and explore for repo-local patterns.
 - Use at most 3 rounds of follow-up research.
 - Every important claim in the report should cite the source used to support it.
-`),
-  }
+`,
+		),
+	};
 }
 
-createDeepSearchAgent.mode = MODE
+createDeepSearchAgent.mode = MODE;
