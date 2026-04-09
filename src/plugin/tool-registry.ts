@@ -23,6 +23,7 @@ import {
   createHashlineEditTool,
 } from "../tools"
 import { getMainSessionID } from "../features/claude-code-session-state"
+import { createSessionCreatedEvent } from "../features/tmux-subagent"
 import { filterDisabledTools } from "../shared/disabled-tools"
 import { log } from "../shared"
 import type { RuntimeConfigState } from "../plugin-state"
@@ -67,16 +68,7 @@ export function createToolRegistry(args: {
         parentID: event.parentID,
         title: event.title,
       })
-      await managers.tmuxSessionManager.onSessionCreated({
-        type: "session.created",
-        properties: {
-          info: {
-            id: event.sessionID,
-            parentID: event.parentID,
-            title: event.title,
-          },
-        },
-      })
+      await managers.tmuxSessionManager.onSessionCreated(createSessionCreatedEvent(event))
     },
   })
 

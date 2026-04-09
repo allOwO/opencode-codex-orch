@@ -43,12 +43,33 @@ import {
 import { buildKimiOrchestratorPrompt } from "./orchestrator/kimi";
 
 const MODE: AgentMode = "all";
+const ORCHESTRATOR_DESCRIPTION =
+	"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - opencode-codex-orch)";
+const ORCHESTRATOR_PERMISSION = {
+	question: "allow",
+	call_oco_agent: "deny",
+} as AgentConfig["permission"];
 export const ORCHESTRATOR_PROMPT_METADATA: AgentPromptMetadata = {
 	category: "utility",
 	cost: "EXPENSIVE",
 	promptAlias: "Orchestrator",
 	triggers: [],
 };
+
+function createOrchestratorBaseConfig(
+	model: string,
+	prompt: string,
+): AgentConfig {
+	return {
+		description: ORCHESTRATOR_DESCRIPTION,
+		mode: MODE,
+		model,
+		maxTokens: 64000,
+		prompt,
+		color: "#00CED1",
+		permission: ORCHESTRATOR_PERMISSION,
+	};
+}
 
 function buildDynamicOrchestratorPrompt(
 	model: string,
@@ -489,17 +510,7 @@ export function createOrchestratorAgent(
 			useTaskSystem,
 		);
 		return {
-			description:
-				"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - opencode-codex-orch)",
-			mode: MODE,
-			model,
-			maxTokens: 64000,
-			prompt,
-			color: "#00CED1",
-			permission: {
-				question: "allow",
-				call_oco_agent: "deny",
-			} as AgentConfig["permission"],
+			...createOrchestratorBaseConfig(model, prompt),
 			reasoningEffort: "high",
 		};
 	}
@@ -515,17 +526,7 @@ export function createOrchestratorAgent(
 		);
 		const prompt = buildKimiOrchestratorPrompt(dynamicPrompt);
 		return {
-			description:
-				"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - opencode-codex-orch)",
-			mode: MODE,
-			model,
-			maxTokens: 64000,
-			prompt,
-			color: "#00CED1",
-			permission: {
-				question: "allow",
-				call_oco_agent: "deny",
-			} as AgentConfig["permission"],
+			...createOrchestratorBaseConfig(model, prompt),
 			thinking: { type: "enabled", budgetTokens: 32000 },
 		};
 	}
@@ -561,20 +562,7 @@ export function createOrchestratorAgent(
 		);
 	}
 
-	const permission = {
-		question: "allow",
-		call_oco_agent: "deny",
-	} as AgentConfig["permission"];
-	const base = {
-		description:
-			"Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - opencode-codex-orch)",
-		mode: MODE,
-		model,
-		maxTokens: 64000,
-		prompt,
-		color: "#00CED1",
-		permission,
-	};
+	const base = createOrchestratorBaseConfig(model, prompt);
 
 	if (isGptModel(model)) {
 		return { ...base, reasoningEffort: "high" };

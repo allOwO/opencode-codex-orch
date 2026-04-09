@@ -67,6 +67,41 @@ function hasAgent(agents: AvailableAgent[], name: string): boolean {
   return agents.some((agent) => agent.name === name)
 }
 
+function getResearchAgentFlags(agents: AvailableAgent[]): {
+  hasExplore: boolean
+  hasLibrarian: boolean
+} {
+  return {
+    hasExplore: hasAgent(agents, "explore"),
+    hasLibrarian: hasAgent(agents, "librarian"),
+  }
+}
+
+type ResearchAgentMode = "both" | "explore" | "librarian" | "none"
+
+function getResearchAgentMode(agents: AvailableAgent[]): ResearchAgentMode {
+  const { hasExplore, hasLibrarian } = getResearchAgentFlags(agents)
+
+  if (hasExplore && hasLibrarian) return "both"
+  if (hasExplore) return "explore"
+  if (hasLibrarian) return "librarian"
+  return "none"
+}
+
+const EXPLORE_AUTH_PATTERNS_EXAMPLE =
+  'task(subagent_type="explore", run_in_background=true, load_skills=[], description="Find auth patterns", prompt="[CONTEXT] Adding JWT auth in src/api/routes/. [GOAL] Match existing middleware and token-flow conventions. [DOWNSTREAM] Use findings to choose middleware structure and validation flow. [REQUEST] Find auth middleware, login/signup handlers, token generation, and credential validation. Focus on src/, skip tests, return file paths with pattern summaries.")'
+
+const LIBRARIAN_JWT_GUIDANCE_EXAMPLE =
+  'task(subagent_type="librarian", run_in_background=true, load_skills=[], description="Find JWT security guidance", prompt="[CONTEXT] Implementing JWT auth and choosing token storage plus expiration policy. [GOAL] Get current production security guidance. [DOWNSTREAM] Use findings to choose storage, lifetime, and refresh strategy. [REQUEST] Find OWASP guidance, token lifetime recommendations, refresh rotation strategies, and common JWT vulnerabilities. Skip tutorials, return concise production-focused recommendations.")'
+
+const REPO_NATIVE_FLOW = "**Default flow**: repo-native tools → oracle (if required)"
+const REPO_NATIVE_SYNTHESIZE_ANSWER = "repo-native tools → synthesize → answer"
+const REPO_NATIVE_REPORT_FINDINGS = "repo-native tools → report findings"
+const NO_RESEARCH_AGENT_RULE =
+  "- No research agents available. Use repo-native tools in parallel for discovery and avoid guessing from memory"
+const NO_RESEARCH_AGENT_EXAMPLE =
+  "**No research agents are available. Use repo-native tools directly and parallelize reads/searches aggressively.**"
+
 export function buildSearchGuidance(tools: AvailableTool[] = []): string {
   const searchTools = tools
     .filter((tool) => tool.category === "search")
@@ -82,153 +117,120 @@ export function buildSearchGuidance(tools: AvailableTool[] = []): string {
 }
 
 export function buildDefaultResearchFlow(agents: AvailableAgent[]): string {
-  const hasExplore = hasAgent(agents, "explore")
-  const hasLibrarian = hasAgent(agents, "librarian")
-
-  if (hasExplore && hasLibrarian) {
-    return "**Default flow**: explore/librarian (background) + tools → oracle (if required)"
+  switch (getResearchAgentMode(agents)) {
+    case "both":
+      return "**Default flow**: explore/librarian (background) + tools → oracle (if required)"
+    case "explore":
+      return "**Default flow**: explore (background) + repo-native tools → oracle (if required)"
+    case "librarian":
+      return "**Default flow**: librarian (background) + repo-native tools → oracle (if required)"
+    case "none":
+      return REPO_NATIVE_FLOW
   }
-
-  if (hasExplore) {
-    return "**Default flow**: explore (background) + repo-native tools → oracle (if required)"
-  }
-
-  if (hasLibrarian) {
-    return "**Default flow**: librarian (background) + repo-native tools → oracle (if required)"
-  }
-
-  return "**Default flow**: repo-native tools → oracle (if required)"
 }
 
 export function buildExplorationParallelGuidance(agents: AvailableAgent[]): string {
-  const hasExplore = hasAgent(agents, "explore")
-  const hasLibrarian = hasAgent(agents, "librarian")
-
-  if (hasExplore && hasLibrarian) {
-    return "Parallelize EVERYTHING independent. Fire 2-5 explore/librarian agents (always `run_in_background=true`) for any non-trivial codebase question."
+  switch (getResearchAgentMode(agents)) {
+    case "both":
+      return "Parallelize EVERYTHING independent. Fire 2-5 explore/librarian agents (always `run_in_background=true`) for any non-trivial codebase question."
+    case "explore":
+      return "Parallelize EVERYTHING independent. Fire 2-5 explore agents (always `run_in_background=true`) for non-trivial repo discovery."
+    case "librarian":
+      return "Parallelize EVERYTHING independent. Use librarian (always `run_in_background=true`) for external docs/code questions, and use repo-native tools for repo discovery."
+    case "none":
+      return "Parallelize EVERYTHING independent. Use repo-native tools aggressively for discovery when no research agents are available."
   }
-
-  if (hasExplore) {
-    return "Parallelize EVERYTHING independent. Fire 2-5 explore agents (always `run_in_background=true`) for non-trivial repo discovery."
-  }
-
-  if (hasLibrarian) {
-    return "Parallelize EVERYTHING independent. Use librarian (always `run_in_background=true`) for external docs/code questions, and use repo-native tools for repo discovery."
-  }
-
-  return "Parallelize EVERYTHING independent. Use repo-native tools aggressively for discovery when no research agents are available."
 }
 
 export function buildResearchDelegationThresholds(agents: AvailableAgent[]): string {
-  const hasExplore = hasAgent(agents, "explore")
-  const hasLibrarian = hasAgent(agents, "librarian")
-
-  if (hasExplore && hasLibrarian) {
-    return "- need to discover files, symbols, or patterns first → `explore`\n- unfamiliar or version-sensitive library/API behavior → `librarian`"
+  switch (getResearchAgentMode(agents)) {
+    case "both":
+      return "- need to discover files, symbols, or patterns first → `explore`\n- unfamiliar or version-sensitive library/API behavior → `librarian`"
+    case "explore":
+      return "- need to discover files, symbols, or patterns first → `explore`\n- library/API uncertainty without external research support → use repo-native tools first and avoid guessing"
+    case "librarian":
+      return "- need repo discovery first → use repo-native tools\n- unfamiliar or version-sensitive library/API behavior → `librarian`"
+    case "none":
+      return "- need to discover files, symbols, or patterns first → use repo-native tools\n- library/API uncertainty without research agents → rely on available repo context and avoid guessing"
   }
-
-  if (hasExplore) {
-    return "- need to discover files, symbols, or patterns first → `explore`\n- library/API uncertainty without external research support → use repo-native tools first and avoid guessing"
-  }
-
-  if (hasLibrarian) {
-    return "- need repo discovery first → use repo-native tools\n- unfamiliar or version-sensitive library/API behavior → `librarian`"
-  }
-
-  return "- need to discover files, symbols, or patterns first → use repo-native tools\n- library/API uncertainty without research agents → rely on available repo context and avoid guessing"
 }
 
 export function buildResearchAnswerRouting(agents: AvailableAgent[]): string {
-  const hasExplore = hasAgent(agents, "explore")
-  const hasLibrarian = hasAgent(agents, "librarian")
-
-  if (hasExplore && hasLibrarian) {
-    return "explore/librarian → synthesize → answer"
+  switch (getResearchAgentMode(agents)) {
+    case "both":
+      return "explore/librarian → synthesize → answer"
+    case "explore":
+      return "explore + repo-native tools → synthesize → answer"
+    case "librarian":
+      return "librarian + repo-native tools → synthesize → answer"
+    case "none":
+      return REPO_NATIVE_SYNTHESIZE_ANSWER
   }
-
-  if (hasExplore) {
-    return "explore + repo-native tools → synthesize → answer"
-  }
-
-  if (hasLibrarian) {
-    return "librarian + repo-native tools → synthesize → answer"
-  }
-
-  return "repo-native tools → synthesize → answer"
 }
 
 export function buildInvestigationRouting(agents: AvailableAgent[]): string {
-  return hasAgent(agents, "explore")
+  return getResearchAgentFlags(agents).hasExplore
     ? "explore → report findings"
-    : "repo-native tools → report findings"
+    : REPO_NATIVE_REPORT_FINDINGS
 }
 
 export function buildResearchToolUsageRules(agents: AvailableAgent[]): string {
-  const hasExplore = hasAgent(agents, "explore")
-  const hasLibrarian = hasAgent(agents, "librarian")
-
-  if (hasExplore && hasLibrarian) {
-    return "- Explore/Librarian = background research. ALWAYS `run_in_background=true`, ALWAYS parallel\n- Fire 2-5 explore/librarian agents in parallel for any non-trivial codebase question"
+  switch (getResearchAgentMode(agents)) {
+    case "both":
+      return "- Explore/Librarian = background research. ALWAYS `run_in_background=true`, ALWAYS parallel\n- Fire 2-5 explore/librarian agents in parallel for any non-trivial codebase question"
+    case "explore":
+      return "- Explore = background repo research. ALWAYS `run_in_background=true`, ALWAYS parallel\n- Fire 2-5 explore agents in parallel for non-trivial repo discovery; use repo-native tools for the rest"
+    case "librarian":
+      return "- Librarian = background external research. ALWAYS `run_in_background=true`; use repo-native tools for repo discovery\n- Fire librarian proactively for library/docs questions, but keep direct repo inspection in tools"
+    case "none":
+      return "- No research agents available. Use repo-native tools in parallel for discovery and avoid guessing from memory"
   }
-
-  if (hasExplore) {
-    return "- Explore = background repo research. ALWAYS `run_in_background=true`, ALWAYS parallel\n- Fire 2-5 explore agents in parallel for non-trivial repo discovery; use repo-native tools for the rest"
-  }
-
-  if (hasLibrarian) {
-    return "- Librarian = background external research. ALWAYS `run_in_background=true`; use repo-native tools for repo discovery\n- Fire librarian proactively for library/docs questions, but keep direct repo inspection in tools"
-  }
-
-  return "- No research agents available. Use repo-native tools in parallel for discovery and avoid guessing from memory"
 }
 
 export function buildBackgroundResearchExamples(agents: AvailableAgent[]): string {
-  const hasExplore = hasAgent(agents, "explore")
-  const hasLibrarian = hasAgent(agents, "librarian")
-
-  if (hasExplore && hasLibrarian) {
-    return `**Research agents = background grep, not consultants.**
+  switch (getResearchAgentMode(agents)) {
+    case "both":
+      return `**Research agents = background grep, not consultants.**
 
 
 ~~~typescript
 // CORRECT: Always background, always parallel.
-task(subagent_type="explore", run_in_background=true, load_skills=[], description="Find auth patterns", prompt="[CONTEXT] Adding JWT auth in src/api/routes/. [GOAL] Match existing middleware and token-flow conventions. [DOWNSTREAM] Use findings to choose middleware structure and validation flow. [REQUEST] Find auth middleware, login/signup handlers, token generation, and credential validation. Focus on src/, skip tests, return file paths with pattern summaries.")
-task(subagent_type="librarian", run_in_background=true, load_skills=[], description="Find JWT security guidance", prompt="[CONTEXT] Implementing JWT auth and choosing token storage plus expiration policy. [GOAL] Get current production security guidance. [DOWNSTREAM] Use findings to choose storage, lifetime, and refresh strategy. [REQUEST] Find OWASP guidance, token lifetime recommendations, refresh rotation strategies, and common JWT vulnerabilities. Skip tutorials, return concise production-focused recommendations.")
+${EXPLORE_AUTH_PATTERNS_EXAMPLE}
+${LIBRARIAN_JWT_GUIDANCE_EXAMPLE}
 
 // WRONG: Never block on explore/librarian.
 result = task(..., run_in_background=false)
 ~~~
 `
-  }
 
-  if (hasExplore) {
-    return `**Explore = background repo grep. Use repo-native tools for anything outside the repo.**
+    case "explore":
+      return `**Explore = background repo grep. Use repo-native tools for anything outside the repo.**
 
 
 ~~~typescript
 // CORRECT: Use explore in background for repo discovery.
-task(subagent_type="explore", run_in_background=true, load_skills=[], description="Find auth patterns", prompt="[CONTEXT] Adding JWT auth in src/api/routes/. [GOAL] Match existing middleware and token-flow conventions. [DOWNSTREAM] Use findings to choose middleware structure and validation flow. [REQUEST] Find auth middleware, login/signup handlers, token generation, and credential validation. Focus on src/, skip tests, return file paths with pattern summaries.")
+${EXPLORE_AUTH_PATTERNS_EXAMPLE}
 
 // WRONG: Never block on explore.
 result = task(..., run_in_background=false)
 ~~~
 `
-  }
 
-  if (hasLibrarian) {
-    return `**Librarian = background external research. Use repo-native tools for repo discovery.**
+    case "librarian":
+      return `**Librarian = background external research. Use repo-native tools for repo discovery.**
 
 
 ~~~typescript
 // CORRECT: Use librarian in background for external docs/code guidance.
-task(subagent_type="librarian", run_in_background=true, load_skills=[], description="Find JWT security guidance", prompt="[CONTEXT] Implementing JWT auth and choosing token storage plus expiration policy. [GOAL] Get current production security guidance. [DOWNSTREAM] Use findings to choose storage, lifetime, and refresh strategy. [REQUEST] Find OWASP guidance, token lifetime recommendations, refresh rotation strategies, and common JWT vulnerabilities. Skip tutorials, return concise production-focused recommendations.")
+${LIBRARIAN_JWT_GUIDANCE_EXAMPLE}
 
 // WRONG: Use repo-native tools, not librarian, for files you can inspect directly.
 ~~~
 `
-  }
 
-  return "**No research agents are available. Use repo-native tools directly and parallelize reads/searches aggressively.**"
+    case "none":
+      return "**No research agents are available. Use repo-native tools directly and parallelize reads/searches aggressively.**"
+  }
 }
 
 export function buildKeyTriggersSection(agents: AvailableAgent[], _skills: AvailableSkill[] = []): string {
@@ -343,31 +345,32 @@ export function buildCategorySkillsDelegationGuide(categories: AvailableCategory
     return `${s.name} (${source})`
   }).join(", ")
 
-  let skillsSection: string
+  let skillsSection = ""
 
-  if (customSkills.length > 0 && builtinSkills.length > 0) {
-    skillsSection = `#### Available Skills (via \`skill\` tool)
+  if (builtinSkills.length > 0 || customSkills.length > 0) {
+    const skillLines = ["#### Available Skills (via `skill` tool)", ""]
 
-**Built-in**: ${builtinNames}
-**⚡ YOUR SKILLS (PRIORITY)**: ${customNames}
+    if (builtinSkills.length > 0) {
+      skillLines.push(`**Built-in**: ${builtinNames}`)
+    }
 
-> User-installed skills OVERRIDE built-in defaults. ALWAYS prefer YOUR SKILLS when domain matches.
-> Full skill descriptions → use the \`skill\` tool to check before EVERY delegation.`
-  } else if (customSkills.length > 0) {
-    skillsSection = `#### Available Skills (via \`skill\` tool)
+    if (customSkills.length > 0) {
+      skillLines.push(`**⚡ YOUR SKILLS (PRIORITY)**: ${customNames}`)
+    }
 
-**⚡ YOUR SKILLS (PRIORITY)**: ${customNames}
+    skillLines.push("")
 
-> User-installed skills OVERRIDE built-in defaults. ALWAYS prefer YOUR SKILLS when domain matches.
-> Full skill descriptions → use the \`skill\` tool to check before EVERY delegation.`
-  } else if (builtinSkills.length > 0) {
-    skillsSection = `#### Available Skills (via \`skill\` tool)
+    if (customSkills.length > 0) {
+      skillLines.push(
+        "> User-installed skills OVERRIDE built-in defaults. ALWAYS prefer YOUR SKILLS when domain matches.",
+      )
+    }
 
-**Built-in**: ${builtinNames}
+    skillLines.push(
+      "> Full skill descriptions → use the `skill` tool to check before EVERY delegation.",
+    )
 
-> Full skill descriptions → use the \`skill\` tool to check before EVERY delegation.`
-  } else {
-    skillsSection = ""
+    skillsSection = skillLines.join("\n")
   }
 
   return `### Category + Skills Delegation

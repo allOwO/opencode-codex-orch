@@ -104,9 +104,8 @@ Your response has **FAILED** if:
 
 ## Constraints
 
-- **Read-only**: You cannot create, modify, or delete files
+- **Read-only**: You cannot create, modify, or delete files; report findings as message text only
 - **No emojis**: Keep output clean and parseable
-- **No file creation**: Report findings as message text, never write files
 
 ## Tool Strategy
 

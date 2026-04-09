@@ -6,7 +6,7 @@ import type { SubagentSessionCreatedEvent } from "./features/background-agent"
 import { BackgroundManager } from "./features/background-agent"
 import { SkillMcpManager } from "./features/skill-mcp-manager"
 import { initTaskToastManager } from "./features/task-toast-manager"
-import { TmuxSessionManager } from "./features/tmux-subagent"
+import { createSessionCreatedEvent, TmuxSessionManager } from "./features/tmux-subagent"
 import { createConfigHandler } from "./plugin-handlers"
 import { log } from "./shared"
 
@@ -41,16 +41,7 @@ export function createManagers(args: {
           title: event.title,
         })
 
-        await tmuxSessionManager.onSessionCreated({
-          type: "session.created",
-          properties: {
-            info: {
-              id: event.sessionID,
-              parentID: event.parentID,
-              title: event.title,
-            },
-          },
-        })
+        await tmuxSessionManager.onSessionCreated(createSessionCreatedEvent(event))
 
         log("[index] onSubagentSessionCreated callback completed")
       },

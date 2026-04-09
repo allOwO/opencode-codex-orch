@@ -13,12 +13,8 @@ import { queryWindowState } from "./pane-state-querier"
 import { decideSpawnActions, decideCloseAction, type SessionMapping } from "./decision-engine"
 import { executeActions, executeAction } from "./action-executor"
 import { TmuxPollingManager } from "./polling-manager"
+import type { SessionCreatedEvent } from "./session-created-event"
 type OpencodeClient = PluginInput["client"]
-
-interface SessionCreatedEvent {
-  type: string
-  properties?: { info?: { id?: string; parentID?: string; title?: string } }
-}
 
 interface DeferredSession {
   sessionId: string

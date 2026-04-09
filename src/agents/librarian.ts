@@ -4,6 +4,14 @@ import { createAgentToolRestrictions } from "../shared/permission-compat"
 import { maybePrependKimiPrompt } from "./kimi"
 
 const MODE: AgentMode = "subagent"
+const CURRENT_YEAR = new Date().getFullYear()
+const PREVIOUS_YEAR = CURRENT_YEAR - 1
+const TEMP_REPO_NAME_DIR = String.raw`\${TMPDIR:-/tmp}/repo-name`
+const TEMP_REPO_DIR = String.raw`\${TMPDIR:-/tmp}/repo`
+const CLONE_REPO_NAME_DEPTH_1 = `gh repo clone owner/repo ${TEMP_REPO_NAME_DIR} -- --depth 1`
+const CLONE_REPO_DEPTH_1 = `gh repo clone owner/repo ${TEMP_REPO_DIR} -- --depth 1`
+const CLONE_REPO_DEPTH_50 = `gh repo clone owner/repo ${TEMP_REPO_DIR} -- --depth 50`
+const GET_HEAD_SHA_FROM_TEMP_REPO = `cd ${TEMP_REPO_NAME_DIR} && git rev-parse HEAD`
 
 export const LIBRARIAN_PROMPT_METADATA: AgentPromptMetadata = {
   category: "exploration",
@@ -47,10 +55,10 @@ Your job: Answer questions about open-source libraries by finding **EVIDENCE** w
 ## CRITICAL: DATE AWARENESS
 
 **CURRENT YEAR CHECK**: Before ANY search, verify the current date from environment context.
-- **NEVER search for ${new Date().getFullYear() - 1}** - It is NOT ${new Date().getFullYear() - 1} anymore
-- **ALWAYS use current year** (${new Date().getFullYear()}+) in search queries
-- When searching: use "library-name topic ${new Date().getFullYear()}" NOT "${new Date().getFullYear() - 1}"
-- Filter out outdated ${new Date().getFullYear() - 1} results when they conflict with ${new Date().getFullYear()} information
+- **NEVER search for ${PREVIOUS_YEAR}** - It is NOT ${PREVIOUS_YEAR} anymore
+- **ALWAYS use current year** (${CURRENT_YEAR}+) in search queries
+- When searching: use "library-name topic ${CURRENT_YEAR}" NOT "${PREVIOUS_YEAR}"
+- Filter out outdated ${PREVIOUS_YEAR} results when they conflict with ${CURRENT_YEAR} information
 
 ---
 
@@ -136,10 +144,10 @@ Tool 3: grep_app_searchGitHub(query: "usage pattern", language: ["TypeScript"])
 **Execute in sequence**:
 \`\`\`
 Step 1: Clone to temp directory
-        gh repo clone owner/repo \${TMPDIR:-/tmp}/repo-name -- --depth 1
+        ${CLONE_REPO_NAME_DEPTH_1}
 
 Step 2: Get commit SHA for permalinks
-        cd \${TMPDIR:-/tmp}/repo-name && git rev-parse HEAD
+        ${GET_HEAD_SHA_FROM_TEMP_REPO}
 
 Step 3: Find the implementation
         - grep/ast_grep_search for function/class
@@ -152,7 +160,7 @@ Step 4: Construct permalink
 
 **Parallel acceleration (4+ calls)**:
 \`\`\`
-Tool 1: gh repo clone owner/repo \${TMPDIR:-/tmp}/repo -- --depth 1
+Tool 1: ${CLONE_REPO_DEPTH_1}
 Tool 2: grep_app_searchGitHub(query: "function_name", repo: "owner/repo")
 Tool 3: gh api repos/owner/repo/commits/HEAD --jq '.sha'
 Tool 4: context7_get-library-docs(id, topic: "relevant-api")
@@ -167,7 +175,7 @@ Tool 4: context7_get-library-docs(id, topic: "relevant-api")
 \`\`\`
 Tool 1: gh search issues "keyword" --repo owner/repo --state all --limit 10
 Tool 2: gh search prs "keyword" --repo owner/repo --state merged --limit 10
-Tool 3: gh repo clone owner/repo \${TMPDIR:-/tmp}/repo -- --depth 50
+Tool 3: ${CLONE_REPO_DEPTH_50}
         → then: git log --oneline -n 20 -- path/to/file
         → then: git blame -L 10,30 path/to/file
 Tool 4: gh api repos/owner/repo/releases --jq '.[0:5]'
@@ -196,7 +204,7 @@ Tool 3: grep_app_searchGitHub(query: "pattern1", language: [...])
 Tool 4: grep_app_searchGitHub(query: "pattern2", useRegexp: true)
 
 // Source Analysis
-Tool 5: gh repo clone owner/repo \${TMPDIR:-/tmp}/repo -- --depth 1
+Tool 5: ${CLONE_REPO_DEPTH_1}
 
 // Context
 Tool 6: gh search issues "topic" --repo owner/repo
@@ -246,7 +254,7 @@ https://github.com/tanstack/query/blob/abc123def/packages/react-query/src/useQue
 - **Find Docs URL**: Use websearch_exa — \`websearch_web_search_exa("library official documentation")\`
 - **Sitemap Discovery**: Use webfetch — \`webfetch(docs_url + "/sitemap.xml")\` to understand doc structure
 - **Read Doc Page**: Use webfetch — \`webfetch(specific_doc_page)\` for targeted documentation
-- **Latest Info**: Use websearch_exa — \`websearch_web_search_exa("query ${new Date().getFullYear()}")\`
+- **Latest Info**: Use websearch_exa — \`websearch_web_search_exa("query ${CURRENT_YEAR}")\`
 - **Fast Code Search**: Use grep_app — \`grep_app_searchGitHub(query, language, useRegexp)\`
 - **Deep Code Search**: Use gh CLI — \`gh search code "query" --repo owner/repo\`
 - **Clone Repo**: Use gh CLI — \`gh repo clone owner/repo \${TMPDIR:-/tmp}/name -- --depth 1\`
@@ -260,7 +268,7 @@ https://github.com/tanstack/query/blob/abc123def/packages/react-query/src/useQue
 Use OS-appropriate temp directory:
 \`\`\`bash
 # Cross-platform
-\${TMPDIR:-/tmp}/repo-name
+${TEMP_REPO_NAME_DIR}
 
 # Examples:
 # macOS: /var/folders/.../repo-name or /tmp/repo-name

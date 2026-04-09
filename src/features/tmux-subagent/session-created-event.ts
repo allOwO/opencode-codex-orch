@@ -21,6 +21,25 @@ export interface SessionCreatedEvent {
   properties?: { info?: { id?: string; parentID?: string; title?: string } }
 }
 
+export interface SessionCreatedInfo {
+  sessionID: string
+  parentID?: string
+  title?: string
+}
+
+export function createSessionCreatedEvent(info: SessionCreatedInfo): SessionCreatedEvent {
+  return {
+    type: "session.created",
+    properties: {
+      info: {
+        id: info.sessionID,
+        parentID: info.parentID,
+        title: info.title,
+      },
+    },
+  }
+}
+
 export function coerceSessionCreatedEvent(input: {
   type: string
   properties?: unknown
