@@ -23,7 +23,8 @@ type AgentConfigRecord = Record<string, Record<string, unknown> | undefined> & {
 };
 
 function alignAgentPickerVisibility(
-  agents: Record<string, unknown>
+  agents: Record<string, unknown>,
+  options: { hasSourceBuildAgent: boolean }
 ): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(agents).map(([name, value]) => {
@@ -37,7 +38,7 @@ function alignAgentPickerVisibility(
         return [name, { ...config, mode: "primary", hidden: undefined }]
       }
 
-      if (name === "build") {
+      if (name === "build" && options.hasSourceBuildAgent) {
         return [name, { ...config, mode: "all", hidden: undefined }]
       }
 
@@ -168,6 +169,11 @@ export async function applyAgentConfig(params: {
   const configuredDefaultAgent = getConfiguredDefaultAgent(params.config);
 
   const configAgent = params.config.agent as AgentConfigRecord | undefined;
+  const hasSourceBuildAgent = Boolean(
+    configAgent?.build
+    && typeof configAgent.build === "object"
+    && Object.keys(configAgent.build).length > 0,
+  )
 
   const builtinPrimaryAgent = getBuiltinPrimaryAgent(builtinAgents)
 
@@ -272,6 +278,7 @@ export async function applyAgentConfig(params: {
 	if (params.config.agent) {
 		params.config.agent = alignAgentPickerVisibility(
 			params.config.agent as Record<string, unknown>,
+			{ hasSourceBuildAgent },
 		)
 		params.config.agent = remapAgentKeysToDisplayNames(
 			params.config.agent as Record<string, unknown>,

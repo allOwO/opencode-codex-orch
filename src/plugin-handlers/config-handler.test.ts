@@ -313,7 +313,7 @@ describe("retired planning agents", () => {
 		expect(agents.plan.prompt).toBe("original plan prompt");
 	});
 
-	test("picker hides plan and exposes build instead", async () => {
+	test("picker keeps placeholder build hidden when no source build agent exists", async () => {
 		const pluginConfig: OpenCodeCodexOrchConfig = {
 			orchestrator_agent: {
 				planner_enabled: true,
@@ -327,6 +327,50 @@ describe("retired planning agents", () => {
 					name: "plan",
 					mode: "primary",
 					prompt: "original plan prompt",
+				},
+			},
+		};
+		const handler = createConfigHandler({
+			ctx: { directory: "/tmp" },
+			pluginConfig,
+			modelCacheState: {
+				anthropicContext1MEnabled: false,
+				modelContextLimitsCache: new Map(),
+			},
+		});
+
+		await handler(config);
+
+		const agents = config.agent as Record<
+			string,
+			{ mode?: string; hidden?: boolean; prompt?: string }
+		>;
+		expect(agents.plan).toBeDefined();
+		expect(agents.plan.hidden).toBe(true);
+		expect(agents.build).toBeDefined();
+		expect(agents.build.hidden).toBe(true);
+		expect(agents.build.mode).toBe("subagent");
+	});
+
+	test("picker exposes source build agent when replacing plan", async () => {
+		const pluginConfig: OpenCodeCodexOrchConfig = {
+			orchestrator_agent: {
+				planner_enabled: true,
+				replace_plan: true,
+			},
+		};
+		const config: Record<string, unknown> = {
+			model: "anthropic/claude-opus-4-6",
+			agent: {
+				plan: {
+					name: "plan",
+					mode: "primary",
+					prompt: "original plan prompt",
+				},
+				build: {
+					name: "build",
+					mode: "subagent",
+					prompt: "build prompt",
 				},
 			},
 		};
