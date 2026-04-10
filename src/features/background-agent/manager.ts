@@ -899,10 +899,20 @@ export class BackgroundManager {
     if (event.type === "session.status") {
       const sessionID = props?.sessionID as string | undefined
       const status = props?.status as { type?: string; message?: string } | undefined
-      if (!sessionID || status?.type !== "retry") return
+      if (!sessionID) return
 
       const task = this.findBySession(sessionID)
-      if (!task || task.status !== "running") return
+      if (task?.status === "running" && (status?.type === "busy" || status?.type === "retry")) {
+        if (!task.progress) {
+          task.progress = {
+            toolCalls: 0,
+            lastUpdate: new Date(),
+          }
+        }
+        task.progress.lastUpdate = new Date()
+      }
+
+      if (status?.type !== "retry" || !task || task.status !== "running") return
 
       const errorMessage = typeof status.message === "string" ? status.message : undefined
       const errorInfo = { name: "SessionRetry", message: errorMessage }
@@ -1027,8 +1037,8 @@ export class BackgroundManager {
       return true
     } catch (error) {
       log("[background-agent] Error validating session output:", error)
-      // On error, allow completion to proceed (don't block indefinitely)
-      return true
+      // On error, block completion so stale/idle logic remains conservative under uncertain state
+      return false
     }
   }
 
@@ -1494,7 +1504,7 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
   }
 
   private async checkAndInterruptStaleTasks(
-    allStatuses: Record<string, { type: string }> = {},
+    allStatuses?: Record<string, { type: string }>,
   ): Promise<void> {
     await checkAndInterruptStaleTasks({
       tasks: this.tasks.values(),
@@ -1503,6 +1513,8 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
       concurrencyManager: this.concurrencyManager,
       notifyParentSession: (task) => this.enqueueNotificationForParent(task.parentSessionID, () => this.notifyParentSession(task)),
       sessionStatuses: allStatuses,
+      hasValidOutput: async (task) => task.sessionID ? this.validateSessionHasOutput(task.sessionID) : false,
+      completeTask: (task, source) => this.tryCompleteTask(task, source),
     })
   }
 

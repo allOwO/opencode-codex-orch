@@ -60,6 +60,16 @@ export function pruneStaleTasksAndNotifications(args: {
 
 export type SessionStatusMap = Record<string, { type: string }>
 
+type ObservedSessionState = "active" | "idle" | "unknown"
+
+function classifyObservedSessionState(sessionStatus: string | undefined): ObservedSessionState {
+  if (sessionStatus === "idle") return "idle"
+  if (sessionStatus === "busy" || sessionStatus === "retry" || sessionStatus === "running") {
+    return "active"
+  }
+  return "unknown"
+}
+
 export async function checkAndInterruptStaleTasks(args: {
   tasks: Iterable<BackgroundTask>
   client: OpencodeClient
@@ -67,6 +77,8 @@ export async function checkAndInterruptStaleTasks(args: {
   concurrencyManager: ConcurrencyManager
   notifyParentSession: (task: BackgroundTask) => Promise<void>
   sessionStatuses?: SessionStatusMap
+  hasValidOutput?: (task: BackgroundTask) => Promise<boolean>
+  completeTask?: (task: BackgroundTask, source: string) => Promise<boolean>
   onTaskInterrupted?: (task: BackgroundTask) => void
 }): Promise<void> {
   const {
@@ -76,12 +88,21 @@ export async function checkAndInterruptStaleTasks(args: {
     concurrencyManager,
     notifyParentSession,
     sessionStatuses,
+    hasValidOutput,
+    completeTask,
     onTaskInterrupted = (task) => removeTaskToastTracking(task.id),
   } = args
   const staleTimeoutMs = config?.staleTimeoutMs ?? DEFAULT_STALE_TIMEOUT_MS
   const now = Date.now()
 
   const messageStalenessMs = config?.messageStalenessTimeoutMs ?? DEFAULT_MESSAGE_STALENESS_TIMEOUT_MS
+
+  async function tryCompleteInsteadOfCancel(task: BackgroundTask): Promise<boolean> {
+    if (!hasValidOutput || !completeTask) return false
+    const hasOutput = await hasValidOutput(task)
+    if (!hasOutput || task.status !== "running") return false
+    return completeTask(task, "stale-check output confirmation")
+  }
 
   for (const task of tasks) {
     if (task.status !== "running") continue
@@ -90,13 +111,18 @@ export async function checkAndInterruptStaleTasks(args: {
     const sessionID = task.sessionID
     if (!startedAt || !sessionID) continue
 
+    const sessionStatusesExplicitlyProvided = sessionStatuses !== undefined
     const sessionStatus = sessionStatuses?.[sessionID]?.type
-    const sessionIsRunning = sessionStatus !== undefined && sessionStatus !== "idle"
+    const observedSessionState = classifyObservedSessionState(sessionStatus)
     const runtime = now - startedAt.getTime()
 
     if (!task.progress?.lastUpdate) {
-      if (sessionIsRunning) continue
+      if (observedSessionState === "active") continue
       if (runtime <= messageStalenessMs) continue
+      if (sessionStatusesExplicitlyProvided && observedSessionState === "unknown") {
+        if (await tryCompleteInsteadOfCancel(task)) continue
+        continue
+      }
 
       const staleMinutes = Math.round(runtime / 60000)
       task.status = "cancelled"
@@ -121,13 +147,17 @@ export async function checkAndInterruptStaleTasks(args: {
       continue
     }
 
-    if (sessionIsRunning) continue
+    if (observedSessionState === "active") continue
 
     if (runtime < MIN_RUNTIME_BEFORE_STALE_MS) continue
 
     const timeSinceLastUpdate = now - task.progress.lastUpdate.getTime()
     if (timeSinceLastUpdate <= staleTimeoutMs) continue
     if (task.status !== "running") continue
+    if (sessionStatusesExplicitlyProvided && observedSessionState === "unknown") {
+      if (await tryCompleteInsteadOfCancel(task)) continue
+      continue
+    }
 
     const staleMinutes = Math.round(timeSinceLastUpdate / 60000)
     task.status = "cancelled"

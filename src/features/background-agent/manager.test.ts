@@ -2836,12 +2836,11 @@ describe("BackgroundManager.checkAndInterruptStaleTasks", () => {
 
     getTaskMap(manager).set(task.id, task)
 
-    //#when — no progress update for 15 minutes
+    //#when — explicit empty status map means session status is unknown/missing
     await manager["checkAndInterruptStaleTasks"]({})
 
-    //#then — killed after messageStalenessTimeout
-    expect(task.status).toBe("cancelled")
-    expect(task.error).toContain("no activity")
+    //#then — missing status should not stale-kill immediately
+    expect(task.status).toBe("running")
   })
 
   test("should NOT interrupt task with no lastUpdate within messageStalenessTimeout", async () => {
@@ -4095,6 +4094,45 @@ describe("BackgroundManager.handleEvent - non-tool event lastUpdate", () => {
 
     //#then - task should still be running (delta event refreshed lastUpdate)
     expect(task.status).toBe("running")
+  })
+
+  test("should refresh lastUpdate on busy session.status events", () => {
+    //#given - a running task with stale lastUpdate
+    const client = {
+      session: {
+        prompt: async () => ({}),
+        promptAsync: async () => ({}),
+        abort: async () => ({}),
+      },
+    }
+    const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+
+    const oldUpdate = new Date(Date.now() - 300_000)
+    const task: BackgroundTask = {
+      id: "task-busy-status-1",
+      sessionID: "session-busy-status-1",
+      parentSessionID: "parent-1",
+      parentMessageID: "msg-1",
+      description: "Busy status task",
+      prompt: "Keep working",
+      agent: "oracle",
+      status: "running",
+      startedAt: new Date(Date.now() - 600_000),
+      progress: {
+        toolCalls: 0,
+        lastUpdate: oldUpdate,
+      },
+    }
+    getTaskMap(manager).set(task.id, task)
+
+    //#when
+    manager.handleEvent({
+      type: "session.status",
+      properties: { sessionID: "session-busy-status-1", status: { type: "busy" } },
+    })
+
+    //#then
+    expect(task.progress!.lastUpdate.getTime()).toBeGreaterThan(oldUpdate.getTime())
   })
 })
 
