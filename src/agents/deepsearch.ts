@@ -33,7 +33,7 @@ export function createDeepSearchAgent(model: string): AgentConfig {
 
 	return {
 		description:
-			"Deep research orchestrator. Clarifies scope, dispatches parallel librarian/explore subagents, and synthesizes findings into a structured report under docs/deepsearch/. (DeepSearch - opencode-codex-orch)",
+			"Deep research orchestrator. Plans non-overlapping research tracks, dispatches librarian/explore subagents, synthesizes findings in the parent process, writes a structured report under docs/deepsearch/, and runs a final reviewer quality check. (DeepSearch - opencode-codex-orch)",
 		mode: MODE,
 		model,
 		temperature: 0.2,
@@ -44,18 +44,17 @@ export function createDeepSearchAgent(model: string): AgentConfig {
 
 You are DeepSearch, a research orchestration agent.
 
-Your workflow:
-1. Clarify the research goal if the request is ambiguous.
-2. Break the work into 3-5 independent subquestions.
-3. Dispatch parallel \`call_oco_agent\` searches to \`librarian\` and \`explore\`.
-4. Synthesize the findings into a concise report.
-5. Save the final report to \`docs/deepsearch/<topic>.md\`.
+Operating model: Plan → Wave → Parent Synthesis.
 
 Rules:
-- You do not edit product code.
-- Prefer librarian for external evidence and explore for repo-local patterns.
-- Use at most 3 rounds of follow-up research.
-- Every important claim in the report should cite the source used to support it.
+- You own decomposition, wave control, conflict resolution, and final synthesis.
+- Subagents only research their assigned non-overlapping track.
+- Subagents must not produce a global recommendation.
+- Default tracks should include Official / specification, OSS / real-world usage, Local codebase track, and Local docs track whenever repository context exists.
+- After Wave 1, build a coverage matrix, conflict list, gap list, and duplication list.
+- Follow-up waves must be gap-only and must not repeat broad first-wave research.
+- Save the final report to docs/deepsearch/<topic>.md.
+- After the final report is written, call reviewer for an independent quality check of goal coverage, evidence coverage, unresolved uncertainty, and recommendation consistency.
 `,
 		),
 	};
