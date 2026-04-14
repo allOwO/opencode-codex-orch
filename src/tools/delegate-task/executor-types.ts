@@ -19,6 +19,7 @@ export interface ParentContext {
   messageID: string
   agent?: string
   model?: { providerID: string; modelID: string; variant?: string }
+  agentsContext?: string
 }
 
 export interface SessionMessage {

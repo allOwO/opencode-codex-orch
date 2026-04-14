@@ -175,4 +175,21 @@ describe("token-limiter", () => {
     expect(result).not.toContain("CATEGORY_APPEND:")
     expect(estimateTokenCount(result as string)).toBeLessThanOrEqual(10 + TRUNCATION_MARKER_TOKEN_OVERHEAD)
   })
+
+  test("buildSystemContentWithTokenLimit preserves planAgentPrepend alongside inherited agentsContext", () => {
+    // given
+    const input = {
+      skillContents: [],
+      categoryPromptAppend: undefined,
+      agentsContext: "INHERITED_CONTEXT: use fff first",
+      planAgentPrepend: "PLAN_PREPEND: available categories",
+    }
+
+    // when
+    const result = buildSystemContentWithTokenLimit(input, undefined)
+
+    // then
+    expect(result).toContain("PLAN_PREPEND: available categories")
+    expect(result).toContain("INHERITED_CONTEXT: use fff first")
+  })
 })

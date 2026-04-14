@@ -274,6 +274,68 @@ function createTestAvailableModels(): Set<string> {
   })
 
   describe("load_skills parsing", () => {
+    test("passes parent agentsContext into delegated subagent system content", async () => {
+      //#given
+      const { createDelegateTask } = require("./tools")
+
+      spyOn(executor, "resolveParentContext").mockResolvedValue({
+        sessionID: "parent-session",
+        messageID: "parent-message",
+        agent: "orchestrator",
+        model: undefined,
+        agentsContext: "Instructions from: /repo/AGENTS.md\nUse fff first",
+      })
+      spyOn(executor, "resolveSubagentExecution").mockResolvedValue({
+        agentToUse: "explore",
+        categoryModel: undefined,
+        fallbackChain: undefined,
+      })
+
+      let capturedSystemContent: string | undefined
+      spyOn(executor, "executeSyncTask").mockImplementation(async (
+        _args,
+        _ctx,
+        _options,
+        _parentContext,
+        _agentToUse,
+        _categoryModel,
+        systemContent,
+      ) => {
+        capturedSystemContent = systemContent
+        return "done"
+      })
+
+      const tool = createDelegateTask({
+        manager: {} as any,
+        client: {
+          config: { get: async () => ({ data: {} }) },
+        } as any,
+        directory: "/tmp",
+      })
+
+      // when
+      const result = await tool.execute(
+        {
+          description: "Find patterns",
+          prompt: "Find auth patterns",
+          subagent_type: "explore",
+          run_in_background: false,
+          load_skills: [],
+        },
+        {
+          sessionID: "parent-session",
+          messageID: "parent-message",
+          agent: "orchestrator",
+          abort: new AbortController().signal,
+        }
+      )
+
+      // then
+      expect(result).toBe("done")
+      expect(capturedSystemContent).toContain("Instructions from: /repo/AGENTS.md")
+      expect(capturedSystemContent).toContain("Use fff first")
+    })
+
     test("parses valid JSON string into array before validation", async () => {
       //#given
       const { createDelegateTask } = require("./tools")
@@ -2808,7 +2870,7 @@ function createTestAvailableModels(): Set<string> {
       expect(result).toContain("### AVAILABLE CATEGORIES")
       expect(result).toContain("`deep`")
       expect(result).not.toContain("prompt-engineer")
-      expect(result).toBe(buildPlanAgentSystemPrepend(availableCategories, availableSkills))
+      expect(result).toContain(buildPlanAgentSystemPrepend(availableCategories, availableSkills))
     })
 
     test("does not prepend plan agent prompt for prometheus agent", () => {
@@ -2877,6 +2939,41 @@ function createTestAvailableModels(): Set<string> {
       expect(result).toContain(planPrepend)
       expect(result).toContain(skillContent)
       expect(result!.indexOf(planPrepend)).toBeLessThan(result!.indexOf(skillContent))
+    })
+
+    test("combines plan agent prepend with inherited agentsContext", () => {
+      // given
+      const { buildSystemContent } = require("./tools")
+      const { buildPlanAgentSystemPrepend } = require("./constants")
+      const agentsContext = "Instructions from: /repo/AGENTS.md\nUse fff first"
+
+      const availableCategories = [
+        {
+          name: "deep",
+          description: "Goal-oriented autonomous problem-solving",
+          model: "openai/gpt-5.3-codex",
+        },
+      ]
+      const availableSkills = [
+        {
+          name: "typescript-programmer",
+          description: "Production TypeScript code.",
+          location: "plugin",
+        },
+      ]
+      const planPrepend = buildPlanAgentSystemPrepend(availableCategories, availableSkills)
+
+      // when
+      const result = buildSystemContent({
+        agentsContext,
+        agentName: "plan",
+        availableCategories,
+        availableSkills,
+      })
+
+      // then
+      expect(result).toContain(planPrepend)
+      expect(result).toContain(agentsContext)
     })
 
     test("does not prepend plan agent prompt for non-plan agents", () => {

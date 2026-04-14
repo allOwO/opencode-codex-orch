@@ -38,6 +38,13 @@ function joinSystemParts(parts: string[]): string | undefined {
   return filtered.join("\n\n")
 }
 
+function combineAgentsContext(
+  agentsContext: string | undefined,
+  planAgentPrepend: string | undefined,
+): string {
+  return joinSystemParts([planAgentPrepend ?? "", agentsContext ?? ""]) ?? ""
+}
+
 function reduceSegmentToFitBudget(content: string, overflowTokens: number): string {
   if (overflowTokens <= 0 || !content) {
     return content
@@ -58,7 +65,7 @@ export function buildSystemContentWithTokenLimit(
       ? [input.skillContent]
       : []
   const categoryPromptAppend = input.categoryPromptAppend ?? ""
-  const agentsContext = input.agentsContext ?? input.planAgentPrepend ?? ""
+  const agentsContext = combineAgentsContext(input.agentsContext, input.planAgentPrepend)
 
   if (maxTokens === undefined) {
     return joinSystemParts([agentsContext, ...skillParts, categoryPromptAppend])
