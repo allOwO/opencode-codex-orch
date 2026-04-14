@@ -1,9 +1,5 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { REVIEWER_SYSTEM_PROMPT } from "./reviewer"
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}
 
 describe("REVIEWER_SYSTEM_PROMPT policy requirements", () => {
   test("should treat SYSTEM DIRECTIVE as ignorable/stripped", () => {
@@ -60,5 +56,19 @@ describe("REVIEWER_SYSTEM_PROMPT policy requirements", () => {
     // when / #then
     expect(prompt).toContain("docs/superpowers/specs/payment-design.md")
     expect(prompt.toLowerCase()).toMatch(/reviewable markdown plan path|markdown plan path/)
+  })
+
+  test("should accept a deepsearch report path under docs/deepsearch", () => {
+    const prompt = REVIEWER_SYSTEM_PROMPT
+
+    expect(prompt).toContain("docs/deepsearch/")
+    expect(prompt.toLowerCase()).toMatch(/report|deepsearch/)
+  })
+
+  test("should describe a final report quality-check mode", () => {
+    const prompt = REVIEWER_SYSTEM_PROMPT
+
+    expect(prompt.toLowerCase()).toMatch(/report quality|evidence coverage|conclusion quality/)
+    expect(prompt.toLowerCase()).toMatch(/plan or report|plan path or report path|review mode/)
   })
 })
