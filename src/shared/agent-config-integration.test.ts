@@ -38,7 +38,7 @@ describe("Agent Config Integration", () => {
     })
 
     test("returns correct display names for all active builtin agents", () => {
-      const agents = ["orchestrator", "reviewer", "oracle", "librarian", "explore", "deepsearch"]
+      const agents = ["orchestrator", "reviewer", "oracle", "librarian", "explore", "deepsearch", "quicktask"]
       const displayNames = agents.map((agent) => getAgentDisplayName(agent))
 
       expect(displayNames).toContain("Orchestrator")
@@ -47,6 +47,7 @@ describe("Agent Config Integration", () => {
       expect(displayNames).toContain("librarian")
       expect(displayNames).toContain("explore")
       expect(displayNames).toContain("DeepSearch")
+      expect(displayNames).toContain("quickTask")
     })
 
     test("handles active canonical names case-insensitively", () => {
@@ -73,7 +74,7 @@ describe("Agent Config Integration", () => {
     })
 
     test("model requirements include all active builtin agents", () => {
-      const expectedAgents = ["orchestrator", "deepsearch", "reviewer", "oracle", "librarian", "explore"]
+      const expectedAgents = ["orchestrator", "deepsearch", "quicktask", "reviewer", "oracle", "librarian", "explore"]
       const agentKeys = Object.keys(AGENT_MODEL_REQUIREMENTS)
 
       for (const agent of expectedAgents) {

@@ -562,7 +562,7 @@ describe("canonical agent override surface", () => {
     }
   })
 
-  test("schema accepts kept agent names including deepsearch", () => {
+  test("schema accepts kept agent names including deepsearch and quicktask", () => {
     // given
     const config = {
       agents: {
@@ -571,6 +571,9 @@ describe("canonical agent override surface", () => {
         },
         deepsearch: {
           temperature: 0.2,
+        },
+        quicktask: {
+          temperature: 0.25,
         },
         reviewer: {
           temperature: 0.3,
@@ -586,6 +589,7 @@ describe("canonical agent override surface", () => {
       if (result.success) {
         expect(result.data.agents?.orchestrator?.temperature).toBe(0.1)
         expect(result.data.agents?.deepsearch?.temperature).toBe(0.2)
+        expect(result.data.agents?.quicktask?.temperature).toBe(0.25)
         expect(result.data.agents?.reviewer?.temperature).toBe(0.3)
       }
   })

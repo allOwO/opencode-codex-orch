@@ -96,6 +96,19 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       },
     ],
   },
+  quicktask: {
+    fallbackChain: [
+      {
+        providers: ["anthropic", "github-copilot", "opencode"],
+        model: "claude-haiku-4-5",
+      },
+      {
+        providers: ["google", "github-copilot", "opencode"],
+        model: "gemini-3-flash",
+      },
+      { providers: ["opencode"], model: "gpt-5-nano" },
+    ],
+  },
   reviewer: {
     fallbackChain: [
       {

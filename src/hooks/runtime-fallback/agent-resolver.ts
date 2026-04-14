@@ -8,6 +8,7 @@ export const CANONICAL_AGENT_NAMES = [
   "librarian",
   "explore",
   "deepsearch",
+  "quicktask",
   "executor",
 ] as const
 

@@ -21,6 +21,7 @@ describe("getAgentDisplayName", () => {
     expect(getAgentDisplayName("orchestrator")).toBe("Orchestrator")
     expect(getAgentDisplayName("reviewer")).toBe("Reviewer")
     expect(getAgentDisplayName("executor")).toBe("Executor")
+    expect(getAgentDisplayName("quicktask")).toBe("quickTask")
   })
 
   it("returns original key for unknown agents (fallback)", () => {
@@ -137,6 +138,7 @@ describe("AGENT_DISPLAY_NAMES", () => {
       oracle: "oracle",
       librarian: "librarian",
       explore: "explore",
+      quicktask: "quickTask",
       build: "build",
     }
 

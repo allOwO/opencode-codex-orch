@@ -5,6 +5,7 @@ export const AGENT_DISPLAY_NAMES: Record<string, string> = {
   librarian: "librarian",
   explore: "explore",
   deepsearch: "DeepSearch",
+  quicktask: "quickTask",
   executor: "Executor",
   build: "build",
 }

@@ -10,6 +10,7 @@ import {
 } from "./matcher";
 import { parseRuleFrontmatter } from "./parser";
 import { saveInjectedRules } from "./storage";
+import { shouldSkipRuleForQuickTask } from "./quick-task-filter";
 import type { SessionInjectedRulesCache } from "./cache";
 import type { RuleMetadata } from "./types";
 
@@ -109,6 +110,7 @@ export function createRuleInjectionProcessor(deps: {
 
     for (const candidate of ruleFileCandidates) {
       if (isDuplicateByRealPath(candidate.realPath, cache.realPaths)) continue;
+      if (shouldSkipRuleForQuickTask({ sessionID, rulePath: candidate.path })) continue;
 
       try {
         const { metadata, body } = getCachedParsedRule(

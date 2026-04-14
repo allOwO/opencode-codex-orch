@@ -120,6 +120,7 @@ export type BuiltinAgentName =
   | "librarian"
   | "explore"
   | "deepsearch"
+  | "quicktask"
   | "reviewer"
   | "executor";
 

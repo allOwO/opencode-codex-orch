@@ -68,6 +68,7 @@ const AgentOverridesObjectSchema = z.object({
   reviewer: AgentOverrideConfigSchema.optional(),
   executor: AgentOverrideConfigSchema.optional(),
   deepsearch: AgentOverrideConfigSchema.optional(),
+  quicktask: AgentOverrideConfigSchema.optional(),
   "OpenCode-Builder": AgentOverrideConfigSchema.optional(),
   oracle: AgentOverrideConfigSchema.optional(),
   librarian: AgentOverrideConfigSchema.optional(),

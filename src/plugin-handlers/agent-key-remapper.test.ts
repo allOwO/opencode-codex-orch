@@ -36,6 +36,7 @@ describe("remapAgentKeysToDisplayNames", () => {
       orchestrator: {},
       reviewer: {},
       deepsearch: {},
+      quicktask: {},
       prometheus: {},
       atlas: {},
       metis: {},
@@ -49,6 +50,7 @@ describe("remapAgentKeysToDisplayNames", () => {
     expect(result["orchestrator"]).toBeUndefined()
     expect(result.Reviewer).toBeDefined()
     expect(result.DeepSearch).toBeDefined()
+    expect(result.quickTask).toBeDefined()
     expect(result["prometheus"]).toBeDefined()
     expect(result["atlas"]).toBeDefined()
     expect(result["metis"]).toBeDefined()

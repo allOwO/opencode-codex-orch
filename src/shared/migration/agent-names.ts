@@ -17,6 +17,7 @@ export const AGENT_NAME_MAP: Record<string, string> = {
   librarian: "librarian",
   explore: "explore",
   deepsearch: "deepsearch",
+  quicktask: "quicktask",
 }
 
 for (const [key, value] of Object.entries({ ...AGENT_NAME_MAP })) {
@@ -30,6 +31,7 @@ export const BUILTIN_AGENT_NAMES = new Set([
   "librarian",
   "explore",
   "deepsearch",
+  "quicktask",
   "build",
   "executor",
 ])

@@ -34,7 +34,7 @@ function alignAgentPickerVisibility(
 
       const config = value as Record<string, unknown>
 
-      if (name === "deepsearch") {
+      if (name === "deepsearch" || name === "quicktask") {
         return [name, { ...config, mode: "primary", hidden: undefined }]
       }
 

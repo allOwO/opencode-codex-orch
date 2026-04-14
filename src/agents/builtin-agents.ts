@@ -15,6 +15,7 @@ import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
 import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
 import { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
 import { createOrchestratorAgent } from "./orchestrator"
+import { createQuickTaskAgent, QUICK_TASK_PROMPT_METADATA } from "./quick-task"
 import { createReviewerAgent, reviewerPromptMetadata } from "./reviewer"
 import type { AgentFactory, AgentOverrides, AgentPromptMetadata, BuiltinAgentName } from "./types"
 import { maybeCreateOrchestratorConfig } from "./builtin-agents/orchestrator-agent"
@@ -30,6 +31,7 @@ const agentSources: Partial<Record<BuiltinAgentName, AgentSource>> = {
   librarian: createLibrarianAgent,
   explore: createExploreAgent,
   deepsearch: createDeepSearchAgent,
+  quicktask: createQuickTaskAgent,
   reviewer: createReviewerAgent,
 }
 
@@ -38,6 +40,7 @@ const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
   librarian: LIBRARIAN_PROMPT_METADATA,
   explore: EXPLORE_PROMPT_METADATA,
   deepsearch: DEEPSEARCH_PROMPT_METADATA,
+  quicktask: QUICK_TASK_PROMPT_METADATA,
   reviewer: reviewerPromptMetadata,
 }
 

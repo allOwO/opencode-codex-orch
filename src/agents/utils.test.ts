@@ -128,17 +128,19 @@ describe("createBuiltinAgents with model overrides", () => {
     }
   })
 
-  test("registers deepsearch and exposes it to the orchestrator prompt", async () => {
+  test("registers deepsearch and quicktask and exposes them to the orchestrator prompt", async () => {
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
       new Set(["anthropic/claude-opus-4-6", "openai/gpt-5.4", "google/gemini-3.1-pro"])
     )
 
     try {
-      const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL)
+	      const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL)
 
-      expect(agents.deepsearch).toBeDefined()
-      expect(agents.orchestrator.prompt).toContain("deepsearch")
-    } finally {
+	      expect(agents.deepsearch).toBeDefined()
+	      expect(agents.quicktask).toBeDefined()
+	      expect(agents.orchestrator.prompt).toContain("deepsearch")
+	      expect(agents.orchestrator.prompt).toContain("quickTask")
+	    } finally {
       fetchSpy.mockRestore()
     }
   })

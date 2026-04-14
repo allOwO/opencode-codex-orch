@@ -5,6 +5,7 @@ import * as os from "node:os";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { RULES_INJECTOR_STORAGE } from "./constants";
+import { _resetForTesting, setSessionAgent } from "../../features/claude-code-session-state";
 
 type StatSnapshot = { mtimeMs: number; size: number };
 
@@ -114,6 +115,7 @@ describe("createRuleInjectionProcessor", () => {
   let ruleRealPath: string;
 
   beforeEach(() => {
+    _resetForTesting();
     testRoot = join(tmpdir(), `rules-injector-injector-${Date.now()}`);
     projectRoot = join(testRoot, "project");
     homeRoot = join(testRoot, "home");
@@ -141,6 +143,7 @@ describe("createRuleInjectionProcessor", () => {
   });
 
   afterEach(() => {
+    _resetForTesting();
     if (fs.existsSync(testRoot)) {
       rmSync(testRoot, { recursive: true, force: true });
     }
@@ -255,5 +258,28 @@ describe("createRuleInjectionProcessor", () => {
 
     // then
     expect(trackedReadFileCount).toBe(2);
+  });
+
+  it("skips superpowers workflow rules for quickTask sessions", async () => {
+    // given
+    const quickRuleFile = join(
+      projectRoot,
+      ".claude",
+      "rules",
+      "superpowers",
+      "workflow.md"
+    );
+    mkdirSync(join(projectRoot, ".claude", "rules", "superpowers"), { recursive: true });
+    writeFileSync(quickRuleFile, "heavy-workflow-rule\n");
+    setSessionAgent("session-quicktask", "quickTask");
+    const processor = await createProcessor(projectRoot);
+    const output = createOutput();
+
+    // when
+    await processor.processFilePathForInjection(targetFile, "session-quicktask", output);
+
+    // then
+    expect(output.output).not.toContain("heavy-workflow-rule");
+    expect(output.output).toContain("rule-content");
   });
 });

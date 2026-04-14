@@ -134,6 +134,16 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     })
   })
 
+  test("quicktask has fast-model fallbackChain for small tasks", () => {
+    const quicktask = AGENT_MODEL_REQUIREMENTS["quicktask"]
+
+    expect(quicktask).toBeDefined()
+    expect(quicktask.fallbackChain[0]).toEqual({
+      providers: ["anthropic", "github-copilot", "opencode"],
+      model: "claude-haiku-4-5",
+    })
+  })
+
   test("librarian includes OpenCode MiniMax after official GLM entries", () => {
     // given - librarian agent requirement
     const librarian = AGENT_MODEL_REQUIREMENTS["librarian"]
@@ -152,6 +162,7 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     const expectedAgents = [
       "orchestrator",
       "deepsearch",
+      "quicktask",
       "oracle",
       "librarian",
       "explore",
@@ -162,7 +173,7 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     const definedAgents = Object.keys(AGENT_MODEL_REQUIREMENTS)
 
     // #then - all agents present with valid fallbackChain
-    expect(definedAgents).toHaveLength(6)
+    expect(definedAgents).toHaveLength(7)
     for (const agent of expectedAgents) {
       const requirement = AGENT_MODEL_REQUIREMENTS[agent]
       expect(requirement).toBeDefined()

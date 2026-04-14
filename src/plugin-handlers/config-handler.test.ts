@@ -1052,14 +1052,15 @@ describe("per-agent todowrite/todoread deny when task_system enabled", () => {
 });
 
 describe("agent picker primary surface", () => {
-	test("picker surface exposes only orchestrator and deepsearch from builtin team agents", async () => {
-		// #given - only orchestrator and deepsearch should remain picker-visible
+	test("picker surface exposes orchestrator, deepsearch, and quickTask from builtin team agents", async () => {
+		// #given - orchestrator, deepsearch, and quickTask should remain picker-visible
 		const createBuiltinAgentsMock = agents.createBuiltinAgents as unknown as {
 			mockResolvedValue: (value: Record<string, unknown>) => void;
 		};
 		createBuiltinAgentsMock.mockResolvedValue({
 			orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
 			deepsearch: { name: "deepsearch", prompt: "research", mode: "primary" },
+			quicktask: { name: "quicktask", prompt: "quick", mode: "primary" },
 			executor: { name: "executor", prompt: "execute", mode: "subagent" },
 			reviewer: { name: "reviewer", prompt: "review", mode: "subagent" },
 			oracle: { name: "oracle", prompt: "oracle", mode: "subagent" },
@@ -1084,18 +1085,20 @@ describe("agent picker primary surface", () => {
 		// #when
 		await handler(config);
 
-		// #then - only orchestrator/deepsearch stay picker-visible; other builtin agents stay internal
+		// #then - orchestrator/deepsearch/quickTask stay picker-visible; other builtin agents stay internal
 		const agentConfig = config.agent as Record<
 			string,
 			{ hidden?: boolean; mode?: string }
 		>;
 		expect(agentConfig[getAgentDisplayName("orchestrator")]?.hidden).toBeUndefined();
 		expect(agentConfig[getAgentDisplayName("deepsearch")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("quicktask")]?.hidden).toBeUndefined();
 		expect(agentConfig[getAgentDisplayName("executor")]?.hidden).toBeUndefined();
 		expect(agentConfig[getAgentDisplayName("reviewer")]?.hidden).toBeUndefined();
 		expect(agentConfig[getAgentDisplayName("oracle")]?.hidden).toBeUndefined();
 		expect(agentConfig[getAgentDisplayName("librarian")]?.hidden).toBeUndefined();
 		expect(agentConfig[getAgentDisplayName("explore")]?.hidden).toBeUndefined();
+		expect(agentConfig[getAgentDisplayName("quicktask")]?.mode).toBe("primary");
 		expect(agentConfig[getAgentDisplayName("executor")]?.mode).toBe("subagent");
 		expect(agentConfig[getAgentDisplayName("reviewer")]?.mode).toBe("subagent");
 		expect(agentConfig[getAgentDisplayName("oracle")]?.mode).toBe("subagent");
@@ -1111,6 +1114,7 @@ describe("agent picker primary surface", () => {
 		createBuiltinAgentsMock.mockResolvedValue({
 			orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
 			deepsearch: { name: "deepsearch", prompt: "research", mode: "primary" },
+			quicktask: { name: "quicktask", prompt: "quick", mode: "primary" },
 			executor: { name: "executor", prompt: "execute", mode: "subagent" },
 			reviewer: { name: "reviewer", prompt: "review", mode: "subagent" },
 			oracle: { name: "oracle", prompt: "oracle", mode: "subagent" },
@@ -1151,6 +1155,9 @@ describe("agent picker primary surface", () => {
 		const deepsearchMode = agentConfig[getAgentDisplayName("deepsearch")]?.mode;
 		expect(deepsearchMode).toBe("primary");
 
+		const quickTaskMode = agentConfig[getAgentDisplayName("quicktask")]?.mode;
+		expect(quickTaskMode).toBe("primary");
+
 		// Other builtin agents remain subagents so the picker hides them
 		expect(agentConfig[getAgentDisplayName("executor")]?.mode).toBe("subagent");
 		expect(agentConfig[getAgentDisplayName("reviewer")]?.mode).toBe("subagent");
@@ -1167,6 +1174,7 @@ describe("agent picker primary surface", () => {
 		createBuiltinAgentsMock.mockResolvedValue({
 			orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
 			deepsearch: { name: "deepsearch", prompt: "research", mode: "subagent" },
+			quicktask: { name: "quicktask", prompt: "quick", mode: "subagent" },
 			executor: { name: "executor", prompt: "execute", mode: "subagent" },
 			reviewer: { name: "reviewer", prompt: "review", mode: "subagent" },
 			oracle: { name: "oracle", prompt: "oracle", mode: "subagent" },
@@ -1204,6 +1212,9 @@ describe("agent picker primary surface", () => {
 		expect(
 			agentConfig[getAgentDisplayName("deepsearch")]?.hidden,
 		).toBeUndefined();
+		expect(
+			agentConfig[getAgentDisplayName("quicktask")]?.hidden,
+		).toBeUndefined();
 
 		// Builtin team agents stay internal-only
 		expect(
@@ -1231,6 +1242,7 @@ describe("agent picker primary surface", () => {
 		expect(agentConfig[getAgentDisplayName("oracle")]?.mode).toBe("subagent");
 		expect(agentConfig[getAgentDisplayName("librarian")]?.mode).toBe("subagent");
 		expect(agentConfig[getAgentDisplayName("explore")]?.mode).toBe("subagent");
+		expect(agentConfig[getAgentDisplayName("quicktask")]?.mode).toBe("primary");
 	});
 
 	test("picker-facing config does not include retired agent names", async () => {
