@@ -13,6 +13,7 @@ const ISOLATED_TEST_SPECS = [
   "src/cli/mcp-oauth/login.test.ts",
   "src/features/mcp-oauth/provider.test.ts",
   "src/features/skill-mcp-manager/manager.test.ts",
+  "src/plugin/event.model-fallback.test.ts",
   "src/tools/call-oco-agent/sync-executor.test.ts",
   "src/tools/call-oco-agent/session-creator.test.ts",
   "src/tools/session-manager",
