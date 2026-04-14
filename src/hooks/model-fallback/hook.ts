@@ -58,6 +58,13 @@ export function clearSessionFallbackChain(sessionID: string): void {
   sessionFallbackChains.delete(sessionID)
 }
 
+/** @internal For testing only */
+export function _resetModelFallbackForTesting(): void {
+  pendingModelFallbacks.clear()
+  lastToastKey.clear()
+  sessionFallbackChains.clear()
+}
+
 /**
  * Sets a pending model fallback for a session.
  * Called when a model error is detected in session.error handler.

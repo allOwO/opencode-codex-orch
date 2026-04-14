@@ -32,6 +32,7 @@ mock.module("../../shared/provider-model-id-transform", () => ({
 }))
 
 import {
+  _resetModelFallbackForTesting,
   clearPendingModelFallback,
   createModelFallbackHook,
   setSessionFallbackChain,
@@ -44,6 +45,8 @@ describe("model fallback hook", () => {
     readProviderModelsCacheMock.mockReturnValue(null)
     readConnectedProvidersCacheMock.mockClear()
     readProviderModelsCacheMock.mockClear()
+
+    _resetModelFallbackForTesting()
 
     clearPendingModelFallback("ses_model_fallback_main")
     clearPendingModelFallback("ses_model_fallback_ghcp")

@@ -1,5 +1,5 @@
 declare const require: (name: string) => any
-const { afterEach, describe, expect, mock, test } = require("bun:test")
+const { afterEach, beforeEach, describe, expect, mock, test } = require("bun:test")
 
 mock.module("../shared/connected-providers-cache", () => ({
   readConnectedProvidersCache: () => null,
@@ -9,7 +9,11 @@ mock.module("../shared/connected-providers-cache", () => ({
 import { createEventHandler } from "./event"
 import { createChatMessageHandler } from "./chat-message"
 import { _resetForTesting, setMainSession } from "../features/claude-code-session-state"
-import { createModelFallbackHook, clearPendingModelFallback } from "../hooks/model-fallback/hook"
+import {
+  _resetModelFallbackForTesting,
+  createModelFallbackHook,
+  clearPendingModelFallback,
+} from "../hooks/model-fallback/hook"
 describe("createEventHandler - model fallback", () => {
   const createHandler = (args?: { hooks?: any; pluginConfig?: any }) => {
     const abortCalls: string[] = []
@@ -51,8 +55,14 @@ describe("createEventHandler - model fallback", () => {
     return { handler, abortCalls, promptCalls }
   }
 
+  beforeEach(() => {
+    _resetForTesting()
+    _resetModelFallbackForTesting()
+  })
+
   afterEach(() => {
     _resetForTesting()
+    _resetModelFallbackForTesting()
   })
 
   test("triggers retry prompt for assistant message.updated APIError payloads (headless resume)", async () => {
