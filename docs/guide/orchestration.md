@@ -79,7 +79,7 @@ Reviewer validates plans and implementations against clarity, verifiability, and
 
 ### DeepSearch
 
-DeepSearch is the dedicated research orchestrator. Use it when the task is comparative, documentation-heavy, or needs multiple research sub-questions investigated in parallel.
+DeepSearch is the dedicated research orchestrator. It decomposes broad topics into non-overlapping tracks, runs external and repo-local research in parallel, synthesizes results in the parent process, and uses Reviewer for a final quality pass on the generated report.
 
 ---
 

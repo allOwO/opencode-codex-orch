@@ -112,7 +112,7 @@ Read-only high-IQ consultant for architecture decisions and complex debugging. C
 
 ### Supporting Cast
 
-- **DeepSearch** — Research orchestrator for comparative analysis and structured reports.
+- **DeepSearch** — Research orchestrator for comparative analysis, external + local evidence gathering, parent-owned synthesis, and reviewer-checked final reports.
 - **Explore** — Fast codebase grep. Uses speed-focused models for pattern discovery.
 - **Librarian** — Documentation and OSS code search. Stays current on library APIs and best practices.
 
