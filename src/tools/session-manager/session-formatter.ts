@@ -1,6 +1,32 @@
 import type { SessionInfo, SessionMessage, SearchResult } from "./types"
 import { getSessionInfo, readSessionMessages } from "./storage"
 
+function extractToolResultTexts(part: SessionMessage["parts"][number]): string[] {
+  const texts: string[] = []
+
+  if (part.error) {
+    texts.push(`[error] ${part.error}`)
+  }
+
+  if (part.output && part.output !== part.error) {
+    texts.push(part.output)
+  }
+
+  if (typeof part.content === "string" && part.content.length > 0) {
+    texts.push(part.content)
+  }
+
+  if (Array.isArray(part.content)) {
+    for (const block of part.content) {
+      if ((block.type === "text" || block.type === "reasoning") && block.text) {
+        texts.push(block.text)
+      }
+    }
+  }
+
+  return texts
+}
+
 export async function formatSessionList(sessionIDs: string[]): Promise<string> {
   if (sessionIDs.length === 0) {
     return "No sessions found."
@@ -65,9 +91,14 @@ export function formatSessionMessages(
       } else if ((part.type === "tool_use" || part.type === "tool") && part.tool) {
         const input = part.input ? JSON.stringify(part.input).substring(0, 100) : ""
         lines.push(`[tool: ${part.tool}] ${input}`)
+
+        for (const toolText of extractToolResultTexts(part)) {
+          lines.push(`[tool result] ${toolText.substring(0, 200)}...`)
+        }
       } else if (part.type === "tool_result") {
-        const output = part.output ? part.output.substring(0, 200) : ""
-        lines.push(`[tool result] ${output}...`)
+        for (const toolText of extractToolResultTexts(part)) {
+          lines.push(`[tool result] ${toolText.substring(0, 200)}...`)
+        }
       }
     }
   }

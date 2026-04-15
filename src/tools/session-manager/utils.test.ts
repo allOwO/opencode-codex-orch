@@ -75,6 +75,57 @@ describe("session-manager utils", () => {
     expect(result).toContain("Task 2")
   })
 
+  test("formatSessionMessages includes tool errors from tool parts", () => {
+    //#given
+    const messages: SessionMessage[] = [
+      {
+        id: "msg_001",
+        role: "assistant",
+        time: { created: Date.now() },
+        parts: [
+          {
+            id: "prt_001",
+            type: "tool",
+            tool: "apply_patch",
+            input: { patchText: "*** Begin Patch" },
+            error: "Failed to find expected lines in file",
+          },
+        ],
+      },
+    ]
+
+    //#when
+    const result = formatSessionMessages(messages)
+
+    //#then
+    expect(result).toContain("[tool: apply_patch]")
+    expect(result).toContain("Failed to find expected lines in file")
+  })
+
+  test("formatSessionMessages includes tool_result content blocks", () => {
+    //#given
+    const messages: SessionMessage[] = [
+      {
+        id: "msg_001",
+        role: "assistant",
+        time: { created: Date.now() },
+        parts: [
+          {
+            id: "prt_001",
+            type: "tool_result",
+            content: [{ type: "text", text: "apply_patch failed with context mismatch" }],
+          },
+        ],
+      },
+    ]
+
+    //#when
+    const result = formatSessionMessages(messages)
+
+    //#then
+    expect(result).toContain("apply_patch failed with context mismatch")
+  })
+
   test("formatSessionInfo includes all metadata", () => {
     // given
     const info: SessionInfo = {

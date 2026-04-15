@@ -15,10 +15,13 @@ export interface MessagePart {
   text?: string
   thinking?: string
   tool?: string
+  name?: string
   callID?: string
   input?: Record<string, unknown>
   output?: string
   error?: string
+  status?: string
+  content?: string | Array<{ type?: string; text?: string }>
 }
 
 export interface SessionInfo {

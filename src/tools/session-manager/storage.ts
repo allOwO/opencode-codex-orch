@@ -151,16 +151,55 @@ export async function readSessionMessages(sessionID: string): Promise<SessionMes
           const parts = Array.isArray(message.parts)
             ? message.parts.map((part) => {
                 const record = isRecord(part) ? part : {}
+                const state = isRecord(record.state) ? record.state : undefined
+                const normalizedInput = isRecord(record.input)
+                  ? record.input
+                  : isRecord(state?.input)
+                    ? state.input
+                    : undefined
+                const normalizedOutput = typeof record.output === "string"
+                  ? record.output
+                  : typeof state?.output === "string"
+                    ? state.output
+                    : undefined
+                const normalizedStatus = typeof record.status === "string"
+                  ? record.status
+                  : typeof state?.status === "string"
+                    ? state.status
+                    : undefined
+                const normalizedContent = typeof record.content === "string"
+                  ? record.content
+                  : Array.isArray(record.content)
+                    ? record.content
+                        .filter((block): block is { type?: string; text?: string } => isRecord(block))
+                        .map((block) => ({
+                          type: typeof block.type === "string" ? block.type : undefined,
+                          text: typeof block.text === "string" ? block.text : undefined,
+                        }))
+                    : undefined
+                const normalizedError = typeof record.error === "string"
+                  ? record.error
+                  : normalizedStatus === "error"
+                    ? normalizedOutput
+                    : undefined
+
                 return {
                   id: typeof record.id === "string" ? record.id : "",
                   type: typeof record.type === "string" ? record.type : "text",
                   text: typeof record.text === "string" ? record.text : undefined,
                   thinking: typeof record.thinking === "string" ? record.thinking : undefined,
-                  tool: typeof record.tool === "string" ? record.tool : undefined,
+                  tool: typeof record.tool === "string"
+                    ? record.tool
+                    : typeof record.name === "string"
+                      ? record.name
+                      : undefined,
+                  name: typeof record.name === "string" ? record.name : undefined,
                   callID: typeof record.callID === "string" ? record.callID : undefined,
-                  input: isRecord(record.input) ? record.input : undefined,
-                  output: typeof record.output === "string" ? record.output : undefined,
-                  error: typeof record.error === "string" ? record.error : undefined,
+                  input: normalizedInput,
+                  output: normalizedOutput,
+                  error: normalizedError,
+                  status: normalizedStatus,
+                  content: normalizedContent,
                 }
               })
             : []

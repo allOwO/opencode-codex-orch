@@ -603,6 +603,58 @@ describe("session-manager storage - SDK path (beta mode)", () => {
 		});
 	});
 
+	test("readSessionMessages captures tool state output and errors from SDK tool parts", async () => {
+		//#given
+		const mockMessages = [
+			{
+				info: {
+					id: "msg_1",
+					role: "assistant",
+					time: { created: 1000 },
+				},
+				parts: [
+					{
+						id: "part_1",
+						type: "tool",
+						tool: "apply_patch",
+						state: {
+							status: "error",
+							input: { patchText: "*** Begin Patch" },
+							output: "Failed to find expected lines in file",
+						},
+					},
+				],
+			},
+		];
+		mockClient.session.messages.mockImplementation(() =>
+			Promise.resolve({ data: mockMessages }),
+		);
+
+		mock.module("../../shared/opencode-storage-detection", () => ({
+			isSqliteBackend: () => true,
+			resetSqliteBackendCache: () => {},
+		}));
+
+		const { setStorageClient, readSessionMessages } = await import("./storage");
+		setStorageClient(
+			mockClient as unknown as Parameters<typeof setStorageClient>[0],
+		);
+
+		//#when
+		const messages = await readSessionMessages("ses_test");
+
+		//#then
+		expect(messages).toHaveLength(1);
+		expect(messages[0].parts[0]).toMatchObject({
+			type: "tool",
+			tool: "apply_patch",
+			status: "error",
+			input: { patchText: "*** Begin Patch" },
+			output: "Failed to find expected lines in file",
+			error: "Failed to find expected lines in file",
+		});
+	});
+
 	test("readSessionTodos uses SDK when beta mode is enabled", async () => {
 		// given
 		const mockTodos = [
