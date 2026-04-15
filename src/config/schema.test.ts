@@ -594,6 +594,28 @@ describe("canonical agent override surface", () => {
       }
   })
 
+  test("schema rejects retired legacy agent override fields", () => {
+    const config = {
+      agents: {
+        orchestrator: {
+          ultrawork: {
+            model: "openai/gpt-5.4",
+          },
+          compaction: {
+            model: "openai/gpt-5.4",
+          },
+          permission: {
+            doom_loop: "allow",
+          },
+        },
+      },
+    }
+
+    const result = OpenCodeCodexOrchConfigSchema.safeParse(config)
+
+    expect(result.success).toBe(false)
+  })
+
   test("overridable agent name schema rejects retired agent names", () => {
     expect(OverridableAgentNameSchema.safeParse("metis").success).toBe(false)
     expect(OverridableAgentNameSchema.safeParse("atlas").success).toBe(false)

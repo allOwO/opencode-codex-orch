@@ -40,7 +40,7 @@ config/schema/
 
 `$schema`, `new_task_system_enabled`, `default_run_agent`, `disabled_mcps`, `disabled_agents`, `disabled_skills`, `disabled_hooks`, `disabled_commands`, `disabled_tools`, `hashline_edit`, `agents`, `categories`, `claude_code`, `orchestrator_agent`, `comment_checker`, `experimental`, `auto_update`, `skills`, `ralph_loop`, `background_task`, `notification`, `babysitting`, `browser_automation_engine`, `websearch`, `tmux`, `orchestrator`, `start_work`, `_migrations`
 
-## AGENT OVERRIDE FIELDS (21)
+## AGENT OVERRIDE FIELDS (19)
 
 `model`, `variant`, `category`, `skills`, `temperature`, `top_p`, `prompt`, `prompt_append`, `tools`, `disable`, `description`, `mode`, `color`, `permission`, `maxTokens`, `thinking`, `reasoningEffort`, `textVerbosity`, `providerOptions`
 
