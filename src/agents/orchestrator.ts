@@ -32,6 +32,7 @@ import {
 	buildGeminiVerificationOverride,
 } from "./orchestrator/gemini";
 import { buildGpt54OrchestratorPrompt } from "./orchestrator/gpt-5-4";
+import { applyRequiredPromptOverlay } from "./orchestrator/prompt-overlay";
 import {
 	type AgentMode,
 	type AgentPromptMetadata,
@@ -542,20 +543,28 @@ export function createOrchestratorAgent(
 
 	if (isGeminiModel(model)) {
 		// 1. Intent gate + tool mandate — early in prompt (after intent verbalization)
-		prompt = prompt.replace(
+		prompt = applyRequiredPromptOverlay(
+			prompt,
 			"</intent_verbalization>",
-			`</intent_verbalization>\n\n${buildGeminiIntentGateEnforcement()}\n\n${buildGeminiToolMandate()}`,
+			`\n\n${buildGeminiIntentGateEnforcement()}\n\n${buildGeminiToolMandate()}`,
+			"Gemini intent/tool mandate overlay",
 		);
 
 		// 2. Tool guide + examples — after tool_usage_rules (where tools are discussed)
-		prompt = prompt.replace(
+		prompt = applyRequiredPromptOverlay(
+			prompt,
 			"</tool_usage_rules>",
-			`</tool_usage_rules>\n\n${buildGeminiToolGuide()}\n\n${buildGeminiToolCallExamples()}`,
+			`\n\n${buildGeminiToolGuide()}\n\n${buildGeminiToolCallExamples()}`,
+			"Gemini tool guide overlay",
 		);
 
 		// 3. Delegation + verification overrides — before Constraints (NOT at prompt end)
 		//    Gemini suffers from lost-in-the-middle: content at prompt end gets weaker attention.
 		//    Placing these before <Constraints> ensures they're in a high-attention zone.
+		if (!prompt.includes("<Constraints>")) {
+			throw new Error("Missing orchestrator prompt anchor for Gemini constraints overlay: <Constraints>");
+		}
+
 		prompt = prompt.replace(
 			"<Constraints>",
 			`${buildGeminiDelegationOverride()}\n\n${buildGeminiVerificationOverride()}\n\n<Constraints>`,

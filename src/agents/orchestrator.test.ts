@@ -112,4 +112,16 @@ describe("createOrchestratorAgent fallback prompt", () => {
 		expect(prompt).toContain("User-installed skills get PRIORITY");
 		expect(prompt).toContain("`deep` — deep category");
 	});
+
+	it("injects Gemini overlays at the required anchors", () => {
+		const result = createOrchestratorAgent("google/gemini-3.1-pro");
+		const prompt = result.prompt ?? "";
+
+		expect(prompt).toContain("<GEMINI_INTENT_GATE_ENFORCEMENT>");
+		expect(prompt).toContain("<TOOL_CALL_MANDATE>");
+		expect(prompt).toContain("<GEMINI_TOOL_GUIDE>");
+		expect(prompt).toContain("<GEMINI_TOOL_CALL_EXAMPLES>");
+		expect(prompt).toContain("<GEMINI_DELEGATION_OVERRIDE>");
+		expect(prompt).toContain("<GEMINI_VERIFICATION_OVERRIDE>");
+	});
 });
