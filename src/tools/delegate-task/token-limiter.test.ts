@@ -192,4 +192,20 @@ describe("token-limiter", () => {
     expect(result).toContain("PLAN_PREPEND: available categories")
     expect(result).toContain("INHERITED_CONTEXT: use fff first")
   })
+
+  test("buildSystemContentWithTokenLimit does not duplicate planAgentPrepend when agentsContext is absent", () => {
+    // given
+    const input = {
+      skillContents: [],
+      categoryPromptAppend: undefined,
+      agentsContext: undefined,
+      planAgentPrepend: "PLAN_PREPEND: available categories",
+    }
+
+    // when
+    const result = buildSystemContentWithTokenLimit(input, undefined)
+
+    // then
+    expect(result).toBe("PLAN_PREPEND: available categories")
+  })
 })
