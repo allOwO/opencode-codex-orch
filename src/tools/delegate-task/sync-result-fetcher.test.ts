@@ -1,3 +1,5 @@
+export {}
+
 const { describe, test, expect } = require("bun:test")
 
 describe("fetchSyncResult", () => {
@@ -140,5 +142,43 @@ describe("fetchSyncResult", () => {
     //#then - should return error about no assistant response
     expect(result.ok).toBe(false)
     expect(result.error).toContain("No assistant response found")
+  })
+
+  test("returns nested assistant error details instead of empty output", async () => {
+    //#given
+    const { fetchSyncResult } = require("./sync-result-fetcher")
+
+    const mockClient = {
+      session: {
+        messages: async () => ({
+          data: [
+            { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
+            {
+              info: { id: "msg_002", role: "assistant", time: { created: 2000 } },
+              error: {
+                name: "APIError",
+                data: {
+                  message: JSON.stringify({
+                    error: {
+                      message: "Too many requests, the rate limit is 5000000 tokens per minute.",
+                      type: "TooManyRequests",
+                    },
+                  }),
+                },
+              },
+              parts: [],
+            },
+          ],
+        }),
+      },
+    }
+
+    //#when
+    const result = await fetchSyncResult(mockClient, "ses_test")
+
+    //#then
+    expect(result.ok).toBe(false)
+    expect(result.error).toContain("APIError: Too many requests, the rate limit is 5000000 tokens per minute.")
+    expect(result.error).toContain("ses_test")
   })
 })

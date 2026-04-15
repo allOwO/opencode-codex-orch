@@ -1,12 +1,14 @@
-import { describe, test, expect } from "bun:test"
-import {
+export {}
+
+const { describe, test, expect } = require("bun:test")
+const {
   isRecord,
   isAbortedSessionError,
   getErrorText,
   extractErrorName,
   extractErrorMessage,
   getSessionErrorMessage,
-} from "./error-classifier"
+} = require("./error-classifier")
 
 describe("isRecord", () => {
   describe("#given null or primitive values", () => {
@@ -268,6 +270,20 @@ describe("extractErrorMessage", () => {
       }
       expect(extractErrorMessage(error)).toBe("top level")
     })
+
+    test("unwraps structured JSON messages to nested provider message", () => {
+      const error = {
+        message: JSON.stringify({
+          error: {
+            message: "Too many requests, the rate limit is 5000000 tokens per minute.",
+            type: "TooManyRequests",
+          },
+          error_msg: "fallback text",
+        }),
+      }
+
+      expect(extractErrorMessage(error)).toBe("Too many requests, the rate limit is 5000000 tokens per minute.")
+    })
   })
 
   describe("#given invalid inputs", () => {
@@ -320,6 +336,20 @@ describe("getSessionErrorMessage", () => {
         },
       }
       expect(getSessionErrorMessage(properties)).toBe("nested")
+    })
+
+    test("unwraps JSON encoded session error messages", () => {
+      const properties = {
+        error: {
+          message: JSON.stringify({
+            error: {
+              message: "Too many requests, the rate limit is 5000000 tokens per minute.",
+            },
+          }),
+        },
+      }
+
+      expect(getSessionErrorMessage(properties)).toBe("Too many requests, the rate limit is 5000000 tokens per minute.")
     })
   })
 
