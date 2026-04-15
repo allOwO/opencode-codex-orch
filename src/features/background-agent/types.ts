@@ -24,6 +24,7 @@ export interface BackgroundTask {
   description: string
   prompt: string
   agent: string
+  displayAgent?: string
   status: BackgroundTaskStatus
   queuedAt?: Date
   startedAt?: Date
@@ -70,6 +71,7 @@ export interface LaunchInput {
   description: string
   prompt: string
   agent: string
+  displayAgent?: string
   parentSessionID: string
   parentMessageID: string
   parentModel?: { providerID: string; modelID: string }

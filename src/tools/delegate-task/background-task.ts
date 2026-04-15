@@ -7,6 +7,7 @@ import { storeToolMetadata } from "../../features/tool-metadata-store"
 import { formatDetailedError } from "./error-formatting"
 import { getSessionTools } from "../../shared/session-tools-store"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
+import { getDisplaySubagentType } from "./display-subagent-type"
 
 export async function executeBackgroundTask(
   args: DelegateTaskArgs,
@@ -22,10 +23,12 @@ export async function executeBackgroundTask(
 
   try {
     const effectivePrompt = buildTaskPrompt(args.prompt, agentToUse)
+    const displaySubagentType = getDisplaySubagentType(args)
     const task = await manager.launch({
       description: args.description,
       prompt: effectivePrompt,
       agent: agentToUse,
+      displayAgent: displaySubagentType,
       parentSessionID: parentContext.sessionID,
       parentMessageID: parentContext.messageID,
       parentModel: parentContext.model,
@@ -62,6 +65,7 @@ export async function executeBackgroundTask(
       prompt: args.prompt,
       agent: task.agent,
       category: args.category,
+      ...(displaySubagentType ? { subagent_type: displaySubagentType } : {}),
       load_skills: args.load_skills,
       description: args.description,
       run_in_background: args.run_in_background,

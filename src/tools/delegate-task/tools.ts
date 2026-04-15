@@ -7,6 +7,7 @@ import type {
 } from "./types"
 import { CATEGORY_DESCRIPTIONS } from "./constants"
 import { EXECUTOR_AGENT } from "./executor-agent"
+import { getDisplaySubagentType } from "./display-subagent-type"
 import { mergeCategories } from "../../shared/merge-categories"
 import { log } from "../../shared/logger"
 import { buildSystemContent } from "./prompt-builder"
@@ -121,10 +122,12 @@ export function createDelegateTask(options: DelegateTaskToolOptions): ToolDefini
             subagent_type: args.subagent_type,
           })
         }
-        args.subagent_type = EXECUTOR_AGENT
+        args.subagent_type = getDisplaySubagentType(args)
       }
+      const displaySubagentType = getDisplaySubagentType(args)
       await ctx.metadata?.({
         title: args.description,
+        metadata: displaySubagentType ? { subagent_type: displaySubagentType } : undefined,
       })
 
       if (args.run_in_background === undefined) {

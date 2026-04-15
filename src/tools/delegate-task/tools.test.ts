@@ -464,7 +464,7 @@ function createTestAvailableModels(): Set<string> {
   })
 
   describe("category delegation config validation", () => {
-    test("fills subagent_type as executor when category is provided without subagent_type", async () => {
+    test("fills subagent_type with category name when category is provided without subagent_type", async () => {
       // given
       const { createDelegateTask } = require("./tools")
 
@@ -524,10 +524,10 @@ function createTestAvailableModels(): Set<string> {
        await tool.execute(args, toolContext)
 
        // then
-       expect(args.subagent_type).toBe("Executor")
+       expect(args.subagent_type).toBe("quick")
     }, { timeout: 10000 })
 
-    test("category overrides subagent_type and still maps to executor", async () => {
+    test("category overrides subagent_type with category name for display metadata", async () => {
       //#given
       const { createDelegateTask } = require("./tools")
 
@@ -589,7 +589,7 @@ function createTestAvailableModels(): Set<string> {
       const result = await tool.execute(args, toolContext)
 
       //#then
-      expect(args.subagent_type).toBe("Executor")
+      expect(args.subagent_type).toBe("quick")
       expect(result).toContain("Background task launched")
     }, { timeout: 10000 })
 
@@ -3889,7 +3889,61 @@ function createTestAvailableModels(): Set<string> {
       )
 
       // then - title should follow OpenCode format
-      expect(createBody.title).toBe("Implement feature X (@Executor subagent)")
+      expect(createBody.title).toBe("Implement feature X (@quick subagent)")
+    }, { timeout: 10000 })
+
+    test("sync task metadata includes category display subagent_type", async () => {
+      // given
+      const { createDelegateTask } = require("./tools")
+      const metadataCalls: Array<{ title?: string; metadata?: Record<string, unknown> }> = []
+
+      const mockManager = { launch: async () => ({}) }
+      const mockClient = {
+        app: { agents: async () => ({ data: [] }) },
+        config: { get: async () => ({ data: { model: SYSTEM_DEFAULT_MODEL } }) },
+        model: { list: async () => [{ id: SYSTEM_DEFAULT_MODEL }] },
+        session: {
+          get: async () => ({ data: { directory: "/project" } }),
+          create: async () => ({ data: { id: "ses_sync_subagent_type" } }),
+          prompt: async () => ({ data: {} }),
+          promptAsync: async () => ({ data: {} }),
+          messages: async () => ({
+            data: [{ info: { role: "assistant" }, parts: [{ type: "text", text: "done" }] }]
+          }),
+          status: async () => ({ data: { "ses_sync_subagent_type": { type: "idle" } } }),
+        },
+      }
+
+      const tool = createDelegateTask({
+        manager: mockManager,
+        client: mockClient,
+      })
+
+      const toolContext = {
+        sessionID: "parent-session",
+        messageID: "parent-message",
+        agent: "orchestrator",
+        abort: new AbortController().signal,
+        metadata: (input: { title?: string; metadata?: Record<string, unknown> }) => {
+          metadataCalls.push(input)
+        },
+      }
+
+      // when
+      await tool.execute(
+        {
+          description: "Sync metadata test",
+          prompt: "Do something",
+          category: "designer",
+          run_in_background: false,
+          load_skills: [],
+        },
+        toolContext
+      )
+
+      // then
+      const subagentTypeCall = metadataCalls.find((c) => c.metadata?.subagent_type === "designer")
+      expect(subagentTypeCall).toBeDefined()
     }, { timeout: 10000 })
 
     test("sync task output includes <task_metadata> block with session_id", async () => {
@@ -3999,6 +4053,64 @@ function createTestAvailableModels(): Set<string> {
       expect(result).toContain("<task_metadata>")
       expect(result).toContain("session_id: ses_bg_metadata")
       expect(result).toContain("</task_metadata>")
+    }, { timeout: 10000 })
+
+    test("background category task passes category display subagent_type to metadata", async () => {
+      // given
+      const { createDelegateTask } = require("./tools")
+      const metadataCalls: Array<{ title?: string; metadata?: Record<string, unknown> }> = []
+
+      const mockManager = {
+        launch: async () => ({
+          id: "bg_display_subagent",
+          sessionID: "ses_bg_display_subagent",
+          description: "Background display test",
+          agent: "Executor",
+          status: "running",
+        }),
+      }
+      const mockClient = {
+        app: { agents: async () => ({ data: [] }) },
+        config: { get: async () => ({ data: { model: SYSTEM_DEFAULT_MODEL } }) },
+        model: { list: async () => [] },
+        session: {
+          create: async () => ({ data: { id: "test-session" } }),
+          prompt: async () => ({ data: {} }),
+          promptAsync: async () => ({ data: {} }),
+          messages: async () => ({ data: [] }),
+        },
+      }
+
+      const tool = createDelegateTask({
+        manager: mockManager,
+        client: mockClient,
+      })
+
+      const toolContext = {
+        sessionID: "parent-session",
+        messageID: "parent-message",
+        agent: "orchestrator",
+        abort: new AbortController().signal,
+        metadata: (input: { title?: string; metadata?: Record<string, unknown> }) => {
+          metadataCalls.push(input)
+        },
+      }
+
+      // when
+      await tool.execute(
+        {
+          description: "Background display test",
+          prompt: "Do something",
+          category: "quick",
+          run_in_background: true,
+          load_skills: [],
+        },
+        toolContext
+      )
+
+      // then
+      const subagentTypeCall = metadataCalls.find((c) => c.metadata?.subagent_type === "quick")
+      expect(subagentTypeCall).toBeDefined()
     }, { timeout: 10000 })
   })
 })

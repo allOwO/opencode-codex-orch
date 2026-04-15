@@ -1927,6 +1927,47 @@ describe("BackgroundManager - Non-blocking Queue Integration", () => {
       expect(createCalls[0]?.body?.permission).toBeUndefined()
     })
 
+    test("uses displayAgent for child session title when provided", async () => {
+      // given
+      const createCalls: any[] = []
+      const customClient = {
+        session: {
+          create: async (args?: any) => {
+            createCalls.push(args)
+            return { data: { id: `ses_${crypto.randomUUID()}` } }
+          },
+          get: async () => ({ data: { directory: "/test/dir" } }),
+          prompt: async () => ({}),
+          promptAsync: async () => ({}),
+          messages: async () => ({ data: [] }),
+          todo: async () => ({ data: [] }),
+          status: async () => ({ data: {} }),
+          abort: async () => ({}),
+        },
+      }
+      manager.shutdown()
+      manager = new BackgroundManager({ client: customClient, directory: tmpdir() } as unknown as PluginInput, {
+        defaultConcurrency: 5,
+      })
+
+      const input = {
+        description: "Test task",
+        prompt: "Do something",
+        agent: "Executor",
+        displayAgent: "quick",
+        parentSessionID: "parent-session",
+        parentMessageID: "parent-message",
+      }
+
+      // when
+      await manager.launch(input)
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      // then
+      expect(createCalls).toHaveLength(1)
+      expect(createCalls[0]?.body?.title).toBe("Test task (@quick subagent)")
+    })
+
     test("should transition first task to running immediately", async () => {
       // given
       const config = { defaultConcurrency: 5 }

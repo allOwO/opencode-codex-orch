@@ -162,6 +162,7 @@ export class BackgroundManager {
       description: input.description,
       prompt: input.prompt,
       agent: input.agent,
+      displayAgent: input.displayAgent,
       parentSessionID: input.parentSessionID,
       parentMessageID: input.parentMessageID,
       parentModel: input.parentModel,
@@ -271,7 +272,7 @@ export class BackgroundManager {
     const createResult = await this.client.session.create({
       body: {
         parentID: input.parentSessionID,
-        title: `${input.description} (@${input.agent} subagent)`,
+        title: `${input.description} (@${input.displayAgent ?? input.agent} subagent)`,
       } as Record<string, unknown>,
       query: {
         directory: parentDirectory,

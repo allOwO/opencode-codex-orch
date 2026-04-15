@@ -109,6 +109,7 @@ export function tryFallbackRetry(args: {
     description: task.description,
     prompt: task.prompt,
     agent: task.agent,
+    displayAgent: task.displayAgent,
     parentSessionID: task.parentSessionID,
     parentMessageID: task.parentMessageID,
     parentModel: task.parentModel,

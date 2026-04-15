@@ -2,7 +2,7 @@ import type { OpencodeClient } from "./types"
 
 export async function createSyncSession(
   client: OpencodeClient,
-  input: { parentSessionID: string; agentToUse: string; description: string; defaultDirectory: string }
+  input: { parentSessionID: string; agentToUse: string; displaySubagentType?: string; description: string; defaultDirectory: string }
 ): Promise<{ ok: true; sessionID: string; parentDirectory: string } | { ok: false; error: string }> {
   const parentSession = client.session.get
     ? await client.session.get({ path: { id: input.parentSessionID } }).catch(() => null)
@@ -12,7 +12,7 @@ export async function createSyncSession(
   const createResult = await client.session.create({
     body: {
       parentID: input.parentSessionID,
-      title: `${input.description} (@${input.agentToUse} subagent)`,
+      title: `${input.description} (@${input.displaySubagentType ?? input.agentToUse} subagent)`,
     } as Record<string, unknown>,
     query: {
       directory: parentDirectory,

@@ -10,6 +10,7 @@ import { formatDuration } from "./time-formatter"
 import { formatDetailedError } from "./error-formatting"
 import { syncTaskDeps, type SyncTaskDeps } from "./sync-task-deps"
 import { setSessionFallbackChain, clearSessionFallbackChain } from "../../hooks/model-fallback/hook"
+import { getDisplaySubagentType } from "./display-subagent-type"
 
 export async function executeSyncTask(
   args: DelegateTaskArgs,
@@ -29,9 +30,11 @@ export async function executeSyncTask(
   let syncSessionID: string | undefined
 
   try {
+    const displaySubagentType = getDisplaySubagentType(args)
     const createSessionResult = await deps.createSyncSession(client, {
       parentSessionID: parentContext.sessionID,
       agentToUse,
+      displaySubagentType,
       description: args.description,
       defaultDirectory: directory,
     })
@@ -84,6 +87,7 @@ export async function executeSyncTask(
       metadata: {
         prompt: args.prompt,
         agent: agentToUse,
+        ...(displaySubagentType ? { subagent_type: displaySubagentType } : {}),
         category: args.category,
         load_skills: args.load_skills,
         description: args.description,
