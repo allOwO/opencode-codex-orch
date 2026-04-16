@@ -63,7 +63,8 @@ export async function executeBackgroundTask(
 
     const metadata = {
       prompt: args.prompt,
-      agent: task.agent,
+      agent: displaySubagentType ?? task.agent,
+      execution_agent: task.agent,
       category: args.category,
       ...(displaySubagentType ? { subagent_type: displaySubagentType } : {}),
       load_skills: args.load_skills,

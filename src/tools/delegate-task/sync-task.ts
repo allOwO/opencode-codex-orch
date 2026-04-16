@@ -86,7 +86,8 @@ export async function executeSyncTask(
       title: args.description,
       metadata: {
         prompt: args.prompt,
-        agent: agentToUse,
+        agent: displaySubagentType ?? agentToUse,
+        execution_agent: agentToUse,
         ...(displaySubagentType ? { subagent_type: displaySubagentType } : {}),
         category: args.category,
         load_skills: args.load_skills,

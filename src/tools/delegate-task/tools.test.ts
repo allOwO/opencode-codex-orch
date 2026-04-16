@@ -3934,7 +3934,7 @@ function createTestAvailableModels(): Set<string> {
         {
           description: "Sync metadata test",
           prompt: "Do something",
-          category: "designer",
+          category: "quick",
           run_in_background: false,
           load_skills: [],
         },
@@ -3942,8 +3942,10 @@ function createTestAvailableModels(): Set<string> {
       )
 
       // then
-      const subagentTypeCall = metadataCalls.find((c) => c.metadata?.subagent_type === "designer")
+      const subagentTypeCall = metadataCalls.find((c) => c.metadata?.subagent_type === "quick" && c.metadata?.sessionId === "ses_sync_subagent_type")
       expect(subagentTypeCall).toBeDefined()
+      expect(subagentTypeCall?.metadata?.agent).toBe("quick")
+      expect(subagentTypeCall?.metadata?.execution_agent).toBe("Executor")
     }, { timeout: 10000 })
 
     test("sync task output includes <task_metadata> block with session_id", async () => {
@@ -4109,8 +4111,10 @@ function createTestAvailableModels(): Set<string> {
       )
 
       // then
-      const subagentTypeCall = metadataCalls.find((c) => c.metadata?.subagent_type === "quick")
+      const subagentTypeCall = metadataCalls.find((c) => c.metadata?.subagent_type === "quick" && c.metadata?.sessionId === "ses_bg_display_subagent")
       expect(subagentTypeCall).toBeDefined()
+      expect(subagentTypeCall?.metadata?.agent).toBe("quick")
+      expect(subagentTypeCall?.metadata?.execution_agent).toBe("Executor")
     }, { timeout: 10000 })
   })
 })
