@@ -19,10 +19,10 @@ Agent factories following `createXXXAgent(model) → AgentConfig` pattern. Each 
 | ------------- | ---------------- | ---- | -------- | ---------------------------------- | -------------------------------- |
 | **Orchestrator** | gpt-5.4 xhigh | 0.1  | all      | k2p5 → glm-5                       | Main orchestrator, plans + delegates |
 | **DeepSearch** | gpt-5.4 high | 0.2  | primary  | gpt-5.4 → gemini-3.1-pro → claude-opus-4-6 | Deep research orchestrator, picker-visible |
-| **Oracle**    | glm-5            | 0.1  | subagent | k2p5                               | Read-only consultation           |
+| **Oracle**    | glm-5            | 0.1  | subagent | k2p5                               | Read-only escalation consultant for architecture/debugging/risk |
 | **Librarian** | k2p5             | 0.1  | subagent | doubao-seed-2.0-code → gemini-3-flash | External docs/code search    |
 | **Explore**   | doubao-seed-2.0-code | 0.1 | subagent | doubao-seed-2.0-code → gemini-3-flash | Contextual grep              |
-| **Reviewer**  | k2p5             | 0.1  | subagent | glm-5                              | Plan reviewer                    |
+| **Reviewer**  | k2p5             | 0.1  | subagent | glm-5                              | Default quality gate for plans/code/conversations/reports |
 | **Executor**  | gpt-5.4 xhigh    | 0.1  | all      | user-configurable                  | Category-spawned executor        |
 
 ## TOOL RESTRICTIONS
@@ -42,10 +42,10 @@ agents/
 │   ├── gpt-5-4.ts
 │   ├── gemini.ts
 │   └── index.ts
-├── oracle.ts               # Read-only consultant
+├── oracle.ts               # Escalation-only architecture/debugging/risk consultant
 ├── librarian.ts            # External search
 ├── explore.ts              # Codebase grep
-├── reviewer.ts             # Plan review
+├── reviewer.ts             # Default quality gate review
 ├── executor/               # Category-spawned executor
 │   ├── default.ts
 │   ├── gpt-5-4.ts

@@ -24,6 +24,11 @@ opencode-codex-orch turns a single AI agent session into a coordinated developme
 - **Skill system** with embedded per-skill MCP servers
 - **13 lifecycle hooks** for error recovery, model fallback, context injection, etc.
 
+### Review and advisory roles
+
+- **Reviewer** — default quality gate for plans, completed implementations/code, multi-turn or final answers, and research reports
+- **Oracle** — escalation-only consultant for architecture tradeoffs, hard debugging, and security/performance/data-integrity risk analysis
+
 ### Built-in skills
 
 The plugin ships with these built-in skills:
@@ -83,12 +88,12 @@ The orchestrator explores, plans, implements, and verifies on its own.
 
 ## Documentation
 
-- [Overview](docs/guide/overview.md)
-- [Installation Guide](docs/guide/installation.md)
-- [Orchestration Guide](docs/guide/orchestration.md)
-- [Agent-Model Matching](docs/guide/agent-model-matching.md)
-- [Configuration Reference](docs/reference/configuration.md)
-- [Features Reference](docs/reference/features.md)
+- [Repository Guide](./AGENTS.md)
+- [Contributing & Local Development](./CONTRIBUTING.md)
+- [Agent Inventory & Routing Notes](src/agents/AGENTS.md)
+- [Configuration Schema Guide](src/config/AGENTS.md)
+- [Feature Module Guide](src/features/AGENTS.md)
+- [Plugin Wiring Guide](src/plugin/AGENTS.md)
 
 ## Credits
 
