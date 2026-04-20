@@ -1,6 +1,6 @@
 {
   "name": "opencode-codex-orch-darwin-arm64",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Platform-specific binary for opencode-codex-orch (darwin-arm64)",
   "license": "MIT",
   "repository": {
