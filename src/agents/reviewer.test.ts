@@ -38,16 +38,16 @@ describe("REVIEWER_SYSTEM_PROMPT policy requirements", () => {
     expect(prompt).not.toMatch(/Please review.*\.orchestrator/)
   })
 
-  test("should handle ambiguity (2+ paths) and 'no path found' rejection", () => {
+test("should handle ambiguity (2+ paths) and inline review when no path is found", () => {
     // given
     const prompt = REVIEWER_SYSTEM_PROMPT
 
     // when / #then
     // Should mention what happens when multiple paths are found
     expect(prompt.toLowerCase()).toMatch(/multiple|ambiguous|2\+|two/)
-    // Should mention rejection if no path found
-    expect(prompt.toLowerCase()).toMatch(/no.*path.*found|reject.*no.*path/)
-  })
+  // Should mention inline review mode if no markdown path is found
+  expect(prompt.toLowerCase()).toMatch(/no markdown path exists.*inline review packet|0 = inline review mode/)
+})
 
   test("should accept a markdown plan path under docs/superpowers/specs", () => {
     // given

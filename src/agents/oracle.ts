@@ -1,8 +1,8 @@
 import type { AgentConfig } from "@opencode-ai/sdk";
-import type { AgentMode, AgentPromptMetadata } from "./types";
-import { isGptModel } from "./types";
 import { createAgentToolRestrictions } from "../shared/permission-compat";
 import { maybePrependKimiPrompt } from "./kimi";
+import type { AgentMode, AgentPromptMetadata } from "./types";
+import { isGptModel } from "./types";
 
 const MODE: AgentMode = "subagent";
 
@@ -15,23 +15,24 @@ export const ORACLE_PROMPT_METADATA: AgentPromptMetadata = {
       domain: "Architecture decisions",
       trigger: "Multi-system tradeoffs, unfamiliar patterns",
     },
-    {
-      domain: "Self-review",
-      trigger: "After completing significant implementation",
-    },
     { domain: "Hard debugging", trigger: "After 2+ failed fix attempts" },
+    {
+      domain: "Risk consultation",
+      trigger: "Security, performance, or data-integrity risk analysis",
+    },
   ],
   useWhen: [
     "Complex architecture design",
-    "After completing significant work",
     "2+ failed fix attempts",
     "Unfamiliar code patterns",
-    "Security/performance concerns",
+    "Security/performance/data-integrity concerns",
     "Multi-system tradeoffs",
   ],
   avoidWhen: [
     "Simple file operations (use direct tools)",
     "First attempt at any fix (try yourself first)",
+    "Default completeness/correctness/executability review (use reviewer)",
+    "Routine final quality checks for plans/code/conversations/reports (use reviewer)",
     "Questions answerable from code you've read",
     "Trivial decisions (variable names, formatting)",
     "Things you can infer from existing code patterns",
@@ -47,6 +48,7 @@ const ORACLE_DEFAULT_PROMPT = `You are a strategic technical advisor with deep r
 <context>
 You function as an on-demand specialist invoked by a primary coding agent when complex analysis or architectural decisions require elevated reasoning.
 Each consultation is standalone, but follow-up questions via session continuation are supported—answer them efficiently without re-establishing context.
+You are escalation-only consultation, not the default completeness/executability reviewer.
 </context>
 
 <expertise>
@@ -143,8 +145,8 @@ Before finalizing answers on architecture, security, or performance:
 
 <guiding_principles>
 - Deliver actionable insight, not exhaustive analysis
-- For code reviews: surface critical issues, not every nitpick
-- For planning: map the minimal path to the goal
+- Focus on architecture, hard debugging, and risk consultation
+- You are NOT the default final checker for plan/code/conversation/report completeness
 - Support claims briefly; save deep exploration for when requested
 - Dense and useful beats long and thorough
 </guiding_principles>
@@ -167,6 +169,7 @@ const ORACLE_GPT_PROMPT = `You are a strategic technical advisor operating as an
 
 <context>
 You are invoked by a primary coding agent when complex analysis or architectural decisions require elevated reasoning. Each consultation is standalone, but follow-up questions via session continuation are supported — answer them efficiently without re-establishing context.
+You are escalation-only consultation, not the default completeness/executability reviewer.
 </context>
 
 <expertise>
@@ -229,6 +232,8 @@ For large inputs (multiple files, >5k tokens of code): mentally outline key sect
 
 <scope_discipline>
 Recommend ONLY what was asked. No extra features, no unsolicited improvements. If you notice other issues, list them separately as "Optional future considerations" at the end — max 2 items. Do NOT expand the problem surface area. If ambiguous, choose the simplest valid interpretation. NEVER suggest adding new dependencies or infrastructure unless explicitly asked.
+
+Do NOT present yourself as the default final checker for plan/code/conversation/report completeness. That role belongs to Reviewer.
 </scope_discipline>
 
 <tool_usage_rules>
@@ -259,7 +264,7 @@ export function createOracleAgent(model: string): AgentConfig {
 
   const base = {
     description:
-      "Read-only consultation agent. High-IQ reasoning specialist for debugging hard problems and high-difficulty architecture design. (Oracle - opencode-codex-orch)",
+      "Read-only escalation consultant for architecture tradeoffs, hard debugging, and security/performance/data-integrity risk analysis; not the default completeness reviewer. (Oracle - opencode-codex-orch)",
     mode: MODE,
     model,
     temperature: 0.1,
