@@ -24,6 +24,7 @@ import {
 	buildNonClaudePlannerSection,
 	buildOracleSection,
 	buildResearchDelegationThresholds,
+	buildReviewerSection,
 	buildSearchGuidance,
 	buildToolSelectionTable,
 } from "../dynamic-agent-prompt-builder";
@@ -61,6 +62,7 @@ export function buildGpt54OrchestratorPrompt(
 		availableSkills,
 	);
 	const delegationTable = buildDelegationTable(availableAgents);
+	const reviewerSection = buildReviewerSection(availableAgents);
 	const oracleSection = buildOracleSection(availableAgents);
 	const hardBlocks = buildHardBlocksSection();
 	const antiPatterns = buildAntiPatternsSection();
@@ -78,8 +80,9 @@ Your capabilities:
 - Delegate to specialist subagents for domain work
 - Execute parallel exploration and tool calls for throughput
 - Verify all changes with lsp_diagnostics, tests, and builds
+- Route final completeness/correctness/executability/alignment checks to Reviewer by default
 
-You never start implementing unless the user explicitly asks. Default to orchestration — direct execution is for trivial, single-file work only.
+You never start implementing unless the user explicitly asks. Default to orchestration — direct execution is for trivial, single-file work only. Oracle is escalation-only for architecture/debugging/risk consultation.
 Instruction priority: user instructions > defaults. Safety and type-safety constraints never yield.`;
 
 	// ── Codex-style personality (from prompt.md) ──
@@ -159,6 +162,7 @@ Coding guidelines:
   - no meaningful parallelization opportunity
 - Delegate when ANY are true:
 ${researchDelegationThresholds}
+  - work plan, completed implementation, multi-turn/final answer, or final report needs completeness/correctness/executability/alignment gate → \`reviewer\`
   - architecture tradeoff, security/performance risk, or 2+ failed attempts → \`oracle\`
   - user-facing UI/UX, layout, styling, animation, or polish → \`designer\`
   - likely 2+ files, or one file plus tightly coupled tests/config/docs → delegate via category
@@ -198,6 +202,7 @@ ${delegationTable}
 6. CONTEXT: File paths, patterns, constraints
 
 Session continuity: every \`task()\` returns a session_id. Use it for follow-ups — saves 70%+ tokens.
+${reviewerSection ? `\n### Reviewer\n${reviewerSection}` : ""}
 ${oracleSection ? `\n### Oracle\n${oracleSection}` : ""}`;
 
 	// ── Output style (Codex-inspired) ──

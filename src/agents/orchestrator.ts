@@ -19,6 +19,7 @@ import {
 	buildResearchAnswerRouting,
 	buildResearchDelegationThresholds,
 	buildResearchToolUsageRules,
+	buildReviewerSection,
 	buildToolSelectionTable,
 	categorizeTools,
 } from "./dynamic-agent-prompt-builder";
@@ -32,6 +33,7 @@ import {
 	buildGeminiVerificationOverride,
 } from "./orchestrator/gemini";
 import { buildGpt54OrchestratorPrompt } from "./orchestrator/gpt-5-4";
+import { buildKimiOrchestratorPrompt } from "./orchestrator/kimi";
 import { applyRequiredPromptOverlay } from "./orchestrator/prompt-overlay";
 import {
 	type AgentMode,
@@ -41,7 +43,6 @@ import {
 	isGptModel,
 	isKimiModel,
 } from "./types";
-import { buildKimiOrchestratorPrompt } from "./orchestrator/kimi";
 
 const MODE: AgentMode = "all";
 const ORCHESTRATOR_DESCRIPTION =
@@ -93,6 +94,7 @@ function buildDynamicOrchestratorPrompt(
 		availableSkills,
 	);
 	const delegationTable = buildDelegationTable(availableAgents);
+	const reviewerSection = buildReviewerSection(availableAgents);
 	const oracleSection = buildOracleSection(availableAgents);
 	const hardBlocks = buildHardBlocksSection();
 	const antiPatterns = buildAntiPatternsSection();
@@ -133,7 +135,7 @@ You are "Orchestrator" - Powerful AI Agent with orchestration capabilities from 
 - Follows user instructions. NEVER START IMPLEMENTING, UNLESS USER WANTS YOU TO IMPLEMENT SOMETHING EXPLICITLY.
   - KEEP IN MIND: ${todoHookNote}, BUT IF NOT USER REQUESTED YOU TO WORK, NEVER START WORK.
 
-**Operating Mode**: You NEVER work alone when specialists are available. Frontend work → delegate. Deep research → parallel background agents (async subagents). Complex architecture → consult Oracle.
+**Operating Mode**: You NEVER work alone when specialists are available. Frontend work → delegate. Deep research → parallel background agents (async subagents). Final completeness/executability checks → Reviewer by default. Complex architecture/debugging/risk escalation → Oracle.
 
 </Role>
 <Behavior_Instructions>
@@ -200,6 +202,7 @@ Work yourself only when ALL are true:
 
 Delegate when ANY are true:
 ${researchDelegationThresholds}
+- work plan, completed implementation, multi-turn/final answer, or final report needs completeness/correctness/executability/alignment gate → \`reviewer\`
 - architecture tradeoff, security/performance risk, or 2+ failed attempts → \`oracle\`
 - user-facing UI/UX, layout, styling, animation, or polish → \`designer\`
 - likely 2+ files, or one file plus tightly coupled tests/config/docs → delegate via category
@@ -427,6 +430,8 @@ If verification fails:
 - If Oracle is running: **end your response** and wait for the completion notification first.
 - Cancel disposable background tasks individually via \`background_cancel(taskId="...")\`.
 </Behavior_Instructions>
+
+${reviewerSection}
 
 ${oracleSection}
 

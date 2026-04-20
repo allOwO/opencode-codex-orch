@@ -94,13 +94,9 @@ const EXPLORE_AUTH_PATTERNS_EXAMPLE =
 const LIBRARIAN_JWT_GUIDANCE_EXAMPLE =
   'task(subagent_type="librarian", run_in_background=true, load_skills=[], description="Find JWT security guidance", prompt="[CONTEXT] Implementing JWT auth and choosing token storage plus expiration policy. [GOAL] Get current production security guidance. [DOWNSTREAM] Use findings to choose storage, lifetime, and refresh strategy. [REQUEST] Find OWASP guidance, token lifetime recommendations, refresh rotation strategies, and common JWT vulnerabilities. Skip tutorials, return concise production-focused recommendations.")'
 
-const REPO_NATIVE_FLOW = "**Default flow**: repo-native tools → oracle (if required)"
+const REPO_NATIVE_FLOW = "**Default flow**: repo-native tools → reviewer (default final checker) → oracle (escalation-only, if required)"
 const REPO_NATIVE_SYNTHESIZE_ANSWER = "repo-native tools → synthesize → answer"
 const REPO_NATIVE_REPORT_FINDINGS = "repo-native tools → report findings"
-const NO_RESEARCH_AGENT_RULE =
-  "- No research agents available. Use repo-native tools in parallel for discovery and avoid guessing from memory"
-const NO_RESEARCH_AGENT_EXAMPLE =
-  "**No research agents are available. Use repo-native tools directly and parallelize reads/searches aggressively.**"
 
 export function buildSearchGuidance(tools: AvailableTool[] = []): string {
   const searchTools = tools
@@ -119,11 +115,11 @@ export function buildSearchGuidance(tools: AvailableTool[] = []): string {
 export function buildDefaultResearchFlow(agents: AvailableAgent[]): string {
   switch (getResearchAgentMode(agents)) {
     case "both":
-      return "**Default flow**: explore/librarian (background) + tools → oracle (if required)"
+      return "**Default flow**: explore/librarian (background) + tools → reviewer (default final checker) → oracle (escalation-only, if required)"
     case "explore":
-      return "**Default flow**: explore (background) + repo-native tools → oracle (if required)"
+      return "**Default flow**: explore (background) + repo-native tools → reviewer (default final checker) → oracle (escalation-only, if required)"
     case "librarian":
-      return "**Default flow**: librarian (background) + repo-native tools → oracle (if required)"
+      return "**Default flow**: librarian (background) + repo-native tools → reviewer (default final checker) → oracle (escalation-only, if required)"
     case "none":
       return REPO_NATIVE_FLOW
   }
@@ -418,9 +414,11 @@ export function buildOracleSection(agents: AvailableAgent[]): string {
   return `<Oracle_Usage>
 ## Oracle — Read-Only High-IQ Consultant
 
-Oracle is a read-only, expensive, high-quality reasoning model for debugging and architecture. Consultation only.
+Oracle is a read-only, expensive, high-quality reasoning model for architecture/debugging/risk escalation. Consultation only.
 
-### WHEN to Consult (Oracle FIRST, then implement):
+Oracle is **NOT** the default completeness/executability/final-quality reviewer. Use Reviewer for plan/code/conversation/report final checks.
+
+### WHEN to Consult (Escalation-only):
 
 ${useWhen.map((w) => `- ${w}`).join("\n")}
 
@@ -441,6 +439,33 @@ Briefly announce "Consulting Oracle for [reason]" before invocation.
 - Do NOT poll \`background_output\` on a running Oracle. The notification will come.
 - Never cancel Oracle.
 </Oracle_Usage>`
+}
+
+export function buildReviewerSection(agents: AvailableAgent[]): string {
+  const reviewerAgent = agents.find((a) => a.name === "reviewer")
+  if (!reviewerAgent) return ""
+
+  const useWhen = reviewerAgent.metadata.useWhen || []
+  const avoidWhen = reviewerAgent.metadata.avoidWhen || []
+
+  return `<Reviewer_Usage>
+## Reviewer — Default Final Quality Gate
+
+Reviewer is the default completeness/correctness/executability/alignment checker.
+
+### WHEN to Consult (Default):
+
+${useWhen.map((w) => `- ${w}`).join("\n")}
+
+### WHEN NOT to Consult:
+
+${avoidWhen.map((w) => `- ${w}`).join("\n")}
+
+### Boundary Discipline:
+- Reviewer handles quality gates for plans, completed implementations, multi-turn/final answers, and reports.
+- Reviewer does NOT do architecture design, strategic tradeoff analysis, or deep debugging/root-cause work.
+- Use Oracle only when architecture, repeated failures, or security/performance/data-integrity risk requires escalation.
+</Reviewer_Usage>`
 }
 
 export function buildHardBlocksSection(): string {
@@ -568,7 +593,7 @@ export function buildUltraworkSection(
   }
 
   if (agents.length > 0) {
-    const consultationPriority = ["explore", "librarian", "plan", "oracle"]
+    const consultationPriority = ["explore", "librarian", "plan", "reviewer", "oracle"]
     const sortedAgents = [...agents].sort((a, b) => {
       const aIdx = consultationPriority.indexOf(a.name)
       const bIdx = consultationPriority.indexOf(b.name)
